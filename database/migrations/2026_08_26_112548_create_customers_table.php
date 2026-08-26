@@ -15,8 +15,7 @@ return new class extends Migration
             $table->id();
             $table->json('name')->nullable();
             $table->string('phone', 50)->nullable();
-            $table->string('type');
-            $table->string('subscription_type');
+            $table->string('subscription_type')->nullable();
             $table->timestamps();
         });
     }

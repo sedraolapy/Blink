@@ -21,6 +21,10 @@ return [
         'email' => 'البريد الإلكتروني',
         'password' => 'كلمة المرور',
         'password_confirmation' => 'تأكيد كلمة المرور',
+        'customer_name' => 'اسم الزبون',
+        'customer_name_ar' => 'اسم الزبون بالعربي',
+        'customer_name_en' => 'اسم الزبون بالإنجليزي',
+        'phone' => 'رقم الهاتف',
     ],
 
 ];

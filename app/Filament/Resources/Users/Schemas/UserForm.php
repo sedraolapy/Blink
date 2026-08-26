@@ -18,24 +18,24 @@ class UserForm
             ->components([
 
                 Tabs::make('name_translations')
-                    ->tabs([
-                        Tab::make('العربية')
-                            ->schema([
-                                TextInput::make('name.ar')
-                                    ->label(__('filament/admin/user_resource.name'))
-                                    ->required()
-                                    ->maxLength(255),
-                            ]),
+                ->tabs([
+                    Tab::make(__('filament/admin/user_resource.arabic'))
+                        ->schema([
+                            TextInput::make('name.ar')
+                                ->label(__('filament/admin/user_resource.name.ar'))
+                                ->required()
+                                ->maxLength(255),
+                        ]),
 
-                        Tab::make('English')
-                            ->schema([
-                                TextInput::make('name.en')
-                                    ->label(__('filament/admin/user_resource.name'))
-                                    ->required()
-                                    ->maxLength(255),
-                            ]),
-                    ])
-                    ->columnSpanFull(),
+                    Tab::make(__('filament/admin/user_resource.english'))
+                        ->schema([
+                            TextInput::make('name.en')
+                                ->label(__('filament/admin/user_resource.name.en'))
+                                ->required()
+                                ->maxLength(255),
+                        ]),
+                ])
+                ->columnSpanFull(),
 
                 TextInput::make('email')
                     ->label(__('filament/admin/user_resource.email'))

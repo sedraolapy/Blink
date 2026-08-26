@@ -14,4 +14,9 @@ return [
         'sales_manager' => 'Sales Manager',
     ],
 
+    'subscription_types' => [
+        'bronze' => 'Bronze',
+        'silver' => 'Silver',
+        'gold' => 'Gold',
+    ],
 ];

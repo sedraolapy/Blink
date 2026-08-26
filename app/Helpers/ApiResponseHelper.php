@@ -5,22 +5,21 @@ if (! function_exists('sendResponse')) {
         string $message,
         mixed $data = null,
         int $code = 200,
-        bool $withPagination = false
+        mixed $pagination = null
     ) {
         $response = [
             'success' => $code >= 200 && $code < 300,
             'message' => $message,
-            'data' => $withPagination ? $data->items() : $data,
+            'data' => $data,
         ];
 
-        if ($withPagination) {
-            $response['pagination'] = getPaginationData($data);
+        if ($pagination) {
+            $response['pagination'] = getPaginationData($pagination);
         }
 
         return response()->json($response, $code);
     }
 }
-
 
 if (! function_exists('sendError')) {
     function sendError(
@@ -36,7 +35,6 @@ if (! function_exists('sendError')) {
         ], $code);
     }
 }
-
 
 if (! function_exists('getPaginationData')) {
     function getPaginationData($collection): array

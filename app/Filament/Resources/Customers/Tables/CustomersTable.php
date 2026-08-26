@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\Users\Tables;
+namespace App\Filament\Resources\Customers\Tables;
 
-use App\Enums\RoleEnum;
+use App\Enums\SubscriptionTypeEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -11,38 +11,39 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class UsersTable
+class CustomersTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label(__('filament/admin/user_resource.name'))
+                    ->label(__('filament/admin/customer_resource.name'))
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('email')
-                    ->label(__('filament/admin/user_resource.email'))
-                    ->searchable()
-                    ->sortable(),
+                TextColumn::make('phone')
+                    ->label(__('filament/admin/customer_resource.phone'))
+                    ->searchable(),
 
-                TextColumn::make('roles.name')
-                    ->label(__('filament/admin/user_resource.roles.name'))
+                TextColumn::make('subscription_type')
+                    ->label(__('filament/admin/customer_resource.subscription_type'))
                     ->badge()
                     ->formatStateUsing(
-                        fn (string $state): string =>
-                            RoleEnum::tryFrom($state)?->label() ?? $state
+                        fn ($state): string =>
+                            $state instanceof SubscriptionTypeEnum
+                                ? $state->label()
+                                : (SubscriptionTypeEnum::tryFrom($state)?->label() ?? $state)
                     ),
 
                 TextColumn::make('created_at')
-                    ->label(__('filament/admin/user_resource.created_at'))
+                    ->label(__('filament/admin/customer_resource.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('updated_at')
-                    ->label(__('filament/admin/user_resource.updated_at'))
+                    ->label(__('filament/admin/customer_resource.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

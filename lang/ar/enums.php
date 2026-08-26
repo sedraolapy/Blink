@@ -14,4 +14,9 @@ return [
         'sales_manager' => 'مدير المبيعات',
     ],
 
+    'subscription_types' => [
+        'bronze' => 'برونزي',
+        'silver' => 'فضي',
+        'gold' => 'ذهبي',
+    ],
 ];

@@ -3,18 +3,20 @@
 return [
 
     'created_at' => 'Created',
-    'email' => 'Email',
-    'model_label' => 'User',
+    'model_label' => 'Customer',
+
     'name' => 'Name',
+
     'arabic' => 'Arabic',
     'english' => 'English',
+
     'name.ar' => 'Name in Arabic',
     'name.en' => 'Name in English',
-    'navigation_label' => 'Users',
-    'password' => 'Password',
-    'plural_model_label' => 'Users',
-    'roles' => 'Roles',
-    'roles.name' => 'Name',
+
+    'navigation_label' => 'Customers',
+    'phone' => 'Phone Number',
+    'plural_model_label' => 'Customers',
+    'subscription_type' => 'Subscription Type',
     'updated_at' => 'Updated',
 
 ];

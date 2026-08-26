@@ -10,9 +10,7 @@ use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
-    public function __construct(
-        private readonly AuthService $authService
-    ) {}
+    public function __construct(private readonly AuthService $authService) {}
 
     public function login(LoginRequest $request)
     {
@@ -42,6 +40,14 @@ class LoginController extends Controller
 
         return sendResponse(
             __('messages.logout_success')
+        );
+    }
+
+    public function me(Request $request)
+    {
+        return sendResponse(
+            __('messages.auth_user_retrieved'),
+            new UserResource($request->user())
         );
     }
 }
