@@ -2,7 +2,7 @@
 
 return [
 
-    'navigation_label' => 'List Governorates',
-    'title' => 'List Governorates',
+    'navigation_label' => 'قائمة المحافظات',
+    'title' => 'قائمة المحافظات',
 
 ];

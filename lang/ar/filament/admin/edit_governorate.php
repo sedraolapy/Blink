@@ -2,7 +2,7 @@
 
 return [
 
-    'navigation_label' => 'Edit Governorate',
-    'title' => 'Edit Governorate',
+    'navigation_label' => 'تعديل المحافظة',
+    'title' => 'تعديل المحافظة',
 
 ];

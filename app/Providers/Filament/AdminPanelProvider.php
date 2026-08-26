@@ -19,6 +19,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use CraftForge\FilamentLanguageSwitcher\FilamentLanguageSwitcherPlugin;
+use Filament\View\PanelsRenderHook;
 use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
 
 class AdminPanelProvider extends PanelProvider
@@ -73,9 +74,9 @@ class AdminPanelProvider extends PanelProvider
                             'name' => 'العربية',
                             'flag' => 'sa',
                         ],
-                    ]),
-                SpatieTranslatablePlugin::make()
-                    ->defaultLocales(['en', 'ar'])
+                    ])
+                    ->showFlags(false)
+                    ->renderHook(PanelsRenderHook::USER_MENU_BEFORE),
             ]);
     }
 }
