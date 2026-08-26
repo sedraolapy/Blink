@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('advertising_periods', function (Blueprint $table) {
             $table->id();
             $table->unsignedTinyInteger('number')->unique();
-            $table->json('name')->nullable();
             $table->timestamps();
         });
     }

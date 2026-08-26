@@ -2,7 +2,7 @@
 
 return [
 
-    'navigation_label' => 'View Advertising Period',
-    'title' => 'View Advertising Period',
+    'navigation_label' => 'عرض الفترة الإعلانية',
+    'title' => 'عرض الفترة الإعلانية',
 
 ];

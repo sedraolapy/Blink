@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             SuperAdminSeeder::class,
             GovernorateSeeder::class,
             AreaSeeder::class,
+            AdvertisingPeriodSeeder::class,
         ]);
 
         Customer::factory()->count(20)->create();

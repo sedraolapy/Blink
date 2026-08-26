@@ -2,7 +2,7 @@
 
 return [
 
-    'navigation_label' => 'Edit Advertising Period',
-    'title' => 'Edit Advertising Period',
+    'navigation_label' => 'تعديل الفترة الإعلانية',
+    'title' => 'تعديل الفترة الإعلانية',
 
 ];

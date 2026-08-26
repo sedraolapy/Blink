@@ -2,7 +2,7 @@
 
 return [
 
-    'navigation_label' => 'List Advertising Periods',
-    'title' => 'List Advertising Periods',
+    'navigation_label' => 'قائمة الفترات الإعلانية',
+    'title' => 'قائمة الفترات الإعلانية',
 
 ];
