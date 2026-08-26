@@ -2,7 +2,7 @@
 
 return [
 
-    'navigation_label' => 'List Areas',
-    'title' => 'List Areas',
+    'navigation_label' => 'قائمة المناطق',
+    'title' => 'قائمة المناطق',
 
 ];

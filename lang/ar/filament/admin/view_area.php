@@ -2,7 +2,7 @@
 
 return [
 
-    'navigation_label' => 'View Area',
-    'title' => 'View Area',
+    'navigation_label' => 'عرض المنطقة',
+    'title' => 'عرض المنطقة',
 
 ];

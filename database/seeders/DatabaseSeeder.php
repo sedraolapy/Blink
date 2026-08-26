@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             SuperAdminSeeder::class,
             GovernorateSeeder::class,
+            AreaSeeder::class,
         ]);
 
         Customer::factory()->count(20)->create();

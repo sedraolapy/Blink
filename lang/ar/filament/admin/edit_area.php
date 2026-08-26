@@ -2,7 +2,7 @@
 
 return [
 
-    'navigation_label' => 'Edit Area',
-    'title' => 'Edit Area',
+    'navigation_label' => 'تعديل المنطقة',
+    'title' => 'تعديل المنطقة',
 
 ];
