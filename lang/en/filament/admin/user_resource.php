@@ -2,12 +2,12 @@
 
 return [
 
+    'arabic' => 'Arabic',
     'created_at' => 'Created',
     'email' => 'Email',
+    'english' => 'English',
     'model_label' => 'User',
     'name' => 'Name',
-    'arabic' => 'Arabic',
-    'english' => 'English',
     'name.ar' => 'Name in Arabic',
     'name.en' => 'Name in English',
     'navigation_label' => 'Users',
