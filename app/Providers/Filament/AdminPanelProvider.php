@@ -18,6 +18,8 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use CraftForge\FilamentLanguageSwitcher\FilamentLanguageSwitcherPlugin;
+use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -26,10 +28,14 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('auth/admin/blink')
             ->login()
+            ->brandLogo(asset('images/blink-logo.svg'))
+            ->brandLogoHeight('5rem')
+            ->favicon(asset('images/blink-favicon.svg'))
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => '#2F1660',
+                'secondary' => '#8801FE',
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -39,7 +45,6 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
-                FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -54,6 +59,23 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+            ])
+            ->plugins([
+                FilamentLanguageSwitcherPlugin::make()
+                    ->locales([
+                        [
+                            'code' => 'en',
+                            'name' => 'English',
+                            'flag' => 'gb',
+                        ],
+                        [
+                            'code' => 'ar',
+                            'name' => 'العربية',
+                            'flag' => 'sa',
+                        ],
+                    ]),
+                SpatieTranslatablePlugin::make()
+                    ->defaultLocales(['en', 'ar'])
             ]);
     }
 }

@@ -13,4 +13,20 @@ enum RoleEnum : String
 
     case SALES_COORDINATOR = 'sales_coordinator';
     case SALES_MANAGER = 'sales_manager';
+
+
+    public function label(): string
+    {
+        return __("enums.roles.{$this->value}");
+    }
+
+    public static function options(): array
+    {
+        return collect(self::cases())
+            ->mapWithKeys(fn (self $role) => [
+                $role->value => $role->label(),
+            ])
+            ->toArray();
+    }
 }
+

@@ -21,7 +21,6 @@ return new class extends Migration
             $table->unsignedTinyInteger('start_day');
             $table->unsignedTinyInteger('end_month');
             $table->unsignedTinyInteger('end_day');
-            $table->timestamps();
 
             $table->unique(['advertising_period_id', 'display_group'],'period_display_group_unique');
             $table->timestamps();
