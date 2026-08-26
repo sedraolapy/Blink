@@ -1,0 +1,38 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('advertising_period_ranges', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('advertising_period_id')
+                ->constrained('advertising_periods')
+                ->cascadeOnDelete();
+            $table->string('display_group');
+            $table->unsignedTinyInteger('start_month');
+            $table->unsignedTinyInteger('start_day');
+            $table->unsignedTinyInteger('end_month');
+            $table->unsignedTinyInteger('end_day');
+            $table->timestamps();
+
+            $table->unique(['advertising_period_id', 'display_group'],'period_display_group_unique');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('advertising_period_ranges');
+    }
+};
