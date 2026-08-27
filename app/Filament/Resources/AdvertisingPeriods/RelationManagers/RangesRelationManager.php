@@ -28,7 +28,7 @@ class RangesRelationManager extends RelationManager
         return $schema
             ->components([
                 Select::make('display_group')
-                    ->label(__('filament/admin/advertising_period_resource.display_group'))
+                    ->label(__('filament/admin/ranges_relation_manager.display_group'))
                     ->options(DisplayGroupEnum::options())
                     ->required()
                     ->rule(function (?object $record) {
@@ -44,28 +44,28 @@ class RangesRelationManager extends RelationManager
                     }),
 
                 TextInput::make('start_month')
-                    ->label(__('filament/admin/advertising_period_resource.start_month'))
+                    ->label(__('filament/admin/ranges_relation_manager.start_month'))
                     ->numeric()
                     ->required()
                     ->minValue(1)
                     ->maxValue(12),
 
                 TextInput::make('start_day')
-                    ->label(__('filament/admin/advertising_period_resource.start_day'))
+                    ->label(__('filament/admin/ranges_relation_manager.start_day'))
                     ->numeric()
                     ->required()
                     ->minValue(1)
                     ->maxValue(31),
 
                 TextInput::make('end_month')
-                    ->label(__('filament/admin/advertising_period_resource.end_month'))
+                    ->label(__('filament/admin/ranges_relation_manager.end_month'))
                     ->numeric()
                     ->required()
                     ->minValue(1)
                     ->maxValue(12),
 
                 TextInput::make('end_day')
-                    ->label(__('filament/admin/advertising_period_resource.end_day'))
+                    ->label(__('filament/admin/ranges_relation_manager.end_day'))
                     ->numeric()
                     ->required()
                     ->minValue(1)
@@ -78,7 +78,7 @@ class RangesRelationManager extends RelationManager
         return $table
             ->columns([
                 TextColumn::make('display_group')
-                    ->label(__('filament/admin/advertising_period_resource.display_group'))
+                    ->label(__('filament/admin/ranges_relation_manager.display_group'))
                     ->badge()
                     ->formatStateUsing(
                         fn ($state): string =>
@@ -88,7 +88,7 @@ class RangesRelationManager extends RelationManager
                     ),
 
                 TextColumn::make('start_date')
-                    ->label(__('filament/admin/advertising_period_resource.start_date'))
+                    ->label(__('filament/admin/ranges_relation_manager.start_date'))
                     ->state(
                         fn ($record): string => sprintf(
                             '%02d/%02d',
@@ -98,7 +98,7 @@ class RangesRelationManager extends RelationManager
                     ),
 
                 TextColumn::make('end_date')
-                    ->label(__('filament/admin/advertising_period_resource.end_date'))
+                    ->label(__('filament/admin/ranges_relation_manager.end_date'))
                     ->state(
                         fn ($record): string => sprintf(
                             '%02d/%02d',
