@@ -2,7 +2,7 @@
 
 return [
 
-    'navigation_label' => 'Edit Flex Billboard',
-    'title' => 'Edit Flex Billboard',
+    'navigation_label' => 'تعديل لوحة الفليكس',
+    'title' => 'تعديل لوحة الفليكس',
 
 ];

@@ -2,7 +2,7 @@
 
 return [
 
-    'navigation_label' => 'List Flex Billboards',
-    'title' => 'List Flex Billboards',
+    'navigation_label' => 'قائمة لوحات الفليكس',
+    'title' => 'قائمة لوحات الفليكس',
 
 ];

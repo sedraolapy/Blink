@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             GovernorateSeeder::class,
             AreaSeeder::class,
             AdvertisingPeriodSeeder::class,
+            FlexBillboardSeeder::class,
         ]);
 
         Customer::factory()->count(20)->create();
