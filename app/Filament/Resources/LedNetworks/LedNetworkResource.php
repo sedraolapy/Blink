@@ -18,6 +18,12 @@ class LedNetworkResource extends Resource
 {
     protected static ?string $model = LedNetwork::class;
 
+    protected static ?string $navigationLabel = null;
+
+    protected static ?string $modelLabel = null;
+
+    protected static ?string $pluralModelLabel = null;
+
     protected static ?string $recordTitleAttribute = 'location_name';
 
     protected static bool $shouldRegisterNavigation = false;
@@ -61,4 +67,9 @@ class LedNetworkResource extends Resource
             'edit' => EditLedNetwork::route('/{record}/edit'),
         ];
     }
+    public static function getNavigationLabel(): string
+    {
+        return __('filament/admin/led_network_resource.navigation_label');
+    }
+
 }

@@ -20,6 +20,12 @@ class LedScreenResource extends Resource
 {
     protected static ?string $model = LedScreen::class;
 
+    protected static ?string $navigationLabel = null;
+
+    protected static ?string $modelLabel = null;
+
+    protected static ?string $pluralModelLabel = null;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTv;
 
     protected static ?string $recordTitleAttribute = 'code';

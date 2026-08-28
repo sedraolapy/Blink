@@ -16,7 +16,7 @@ class ListLedScreens extends ListRecords
     {
         return [
             Action::make('manage_networks')
-                ->label(__('filament/admin/led_screen_resource.manage_networks'))
+                ->label(__('filament/admin/list_led_screens.manage_networks'))
                 ->icon('heroicon-o-rectangle-group')
                 ->url(LedNetworkResource::getUrl('index')),
 

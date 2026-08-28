@@ -28,4 +28,12 @@ return [
         'friday' => 'Friday',
         'saturday' => 'Saturday',
     ],
+
+    'external_asset_types' => [
+        'unipole' => 'Unipole',
+        'bridge' => 'Bridge',
+        'tunnel' => 'Tunnel',
+        'mural' => 'Mural',
+        'rooftop' => 'Rooftop',
+    ],
 ];

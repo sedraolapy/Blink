@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Filament\Resources\LedNetworks\Pages;
+namespace App\Filament\Resources\ExternalAssets\Pages;
 
-use App\Filament\Resources\LedNetworks\LedNetworkResource;
+use App\Filament\Resources\ExternalAssets\ExternalAssetResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 
-class EditLedNetwork extends EditRecord
+class EditExternalAsset extends EditRecord
 {
-    protected static string $resource = LedNetworkResource::class;
+    protected static string $resource = ExternalAssetResource::class;
 
     protected function getHeaderActions(): array
     {
@@ -20,12 +20,12 @@ class EditLedNetwork extends EditRecord
     }
     public function getTitle(): string
     {
-        return __('filament/admin/edit_led_network.title');
+        return __('filament/admin/edit_external_asset.title');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('filament/admin/edit_led_network.title');
+        return __('filament/admin/edit_external_asset.title');
     }
 
 }

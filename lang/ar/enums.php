@@ -28,4 +28,12 @@ return [
         'friday' => 'الجمعة',
         'saturday' => 'السبت',
     ],
+
+    'external_asset_types' => [
+        'unipole' => 'يوني بول',
+        'bridge' => 'جسر',
+        'tunnel' => 'نفق',
+        'mural' => 'جدارية',
+        'rooftop' => 'سطحية',
+    ],
 ];

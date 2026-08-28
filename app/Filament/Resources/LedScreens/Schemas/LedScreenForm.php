@@ -43,14 +43,14 @@ class LedScreenForm
                     ->columnSpanFull(),
 
                 Select::make('area_id')
-                    ->label(__('filament/admin/led_screen_resource.area'))
+                    ->label(__('filament/admin/led_screen_resource.area_id'))
                     ->relationship('area', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
 
                     Select::make('network_id')
-                    ->label(__('filament/admin/led_screen_resource.network'))
+                    ->label(__('filament/admin/led_screen_resource.network_id'))
                     ->relationship('network', 'location_name')
                     ->searchable()
                     ->preload()

@@ -16,4 +16,14 @@ class ViewLedNetwork extends ViewRecord
             EditAction::make(),
         ];
     }
+    public function getTitle(): string
+    {
+        return __('filament/admin/view_led_network.title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('filament/admin/view_led_network.title');
+    }
+
 }
