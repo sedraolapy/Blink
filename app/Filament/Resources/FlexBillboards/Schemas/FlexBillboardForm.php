@@ -49,13 +49,17 @@ class FlexBillboardForm
 
                 TextInput::make('latitude')
                     ->label(__('filament/admin/flex_billboard_resource.latitude'))
+                    ->numeric()
                     ->required()
-                    ->numeric(),
+                    ->minValue(-90)
+                    ->maxValue(90),
 
                 TextInput::make('longitude')
                     ->label(__('filament/admin/flex_billboard_resource.longitude'))
+                    ->numeric()
                     ->required()
-                    ->numeric(),
+                    ->minValue(-180)
+                    ->maxValue(180),
 
                 TextInput::make('width')
                     ->label(__('filament/admin/flex_billboard_resource.width'))
@@ -83,7 +87,6 @@ class FlexBillboardForm
 
                 SpatieMediaLibraryFileUpload::make('flex_billboard_video')
                     ->label(__('filament/admin/flex_billboard_resource.video'))
-                    ->required()
                     ->collection('flex_billboard_video')
                     ->acceptedFileTypes([
                         'video/mp4',

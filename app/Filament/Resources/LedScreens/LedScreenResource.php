@@ -20,9 +20,24 @@ class LedScreenResource extends Resource
 {
     protected static ?string $model = LedScreen::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTv;
 
     protected static ?string $recordTitleAttribute = 'code';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('filament/admin/led_screen_resource.navigation_label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('filament/admin/led_screen_resource.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('filament/admin/led_screen_resource.plural_model_label');
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -41,9 +56,7 @@ class LedScreenResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array

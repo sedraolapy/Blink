@@ -2,7 +2,7 @@
 
 return [
 
-    'navigation_label' => 'Edit Led Screen',
-    'title' => 'Edit Led Screen',
+    'navigation_label' => 'تعديل الشاشة الإلكترونية',
+    'title' => 'تعديل الشاشة الإلكترونية',
 
 ];

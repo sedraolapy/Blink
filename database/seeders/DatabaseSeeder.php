@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             AreaSeeder::class,
             AdvertisingPeriodSeeder::class,
             FlexBillboardSeeder::class,
+            LedScreenSeeder::class,
         ]);
 
         Customer::factory()->count(20)->create();

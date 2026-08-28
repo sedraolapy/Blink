@@ -2,7 +2,7 @@
 
 return [
 
-    'navigation_label' => 'List Led Screens',
-    'title' => 'List Led Screens',
+    'navigation_label' => 'قائمة الشاشات الإلكترونية',
+    'title' => 'قائمة الشاشات الإلكترونية',
 
 ];

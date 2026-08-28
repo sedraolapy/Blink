@@ -12,7 +12,8 @@ class FlexBillboardInfolist
         return $schema
             ->components([
                 TextEntry::make('code')
-                    ->label(__('filament/admin/flex_billboard_resource.code')),
+                    ->label(__('filament/admin/flex_billboard_resource.code'))
+                    ->badge(),
 
                 TextEntry::make('location_name')
                     ->label(__('filament/admin/flex_billboard_resource.location_name')),
@@ -35,14 +36,29 @@ class FlexBillboardInfolist
                 TextEntry::make('height')
                     ->label(__('filament/admin/flex_billboard_resource.height')),
 
-                TextEntry::make('local_price')
-                    ->label(__('filament/admin/flex_billboard_resource.local_price'))
-                    ->numeric(),
+                    TextEntry::make('display_local_price')
+                    ->label(__('filament/admin/led_screen_resource.local_price'))
+                    ->state(function ($record) {
+                        if ($record->network_id && $record->network) {
+                            return $record->network->local_price;
+                        }
 
-                TextEntry::make('foreign_price')
-                    ->label(__('filament/admin/flex_billboard_resource.foreign_price'))
-                    ->numeric(),
+                        return $record->local_price;
+                    })
+                    ->numeric()
+                    ->placeholder('-'),
 
+                TextEntry::make('display_foreign_price')
+                    ->label(__('filament/admin/led_screen_resource.foreign_price'))
+                    ->state(function ($record) {
+                        if ($record->network_id && $record->network) {
+                            return $record->network->foreign_price;
+                        }
+
+                        return $record->foreign_price;
+                    })
+                    ->numeric()
+                    ->placeholder('-'),
                 TextEntry::make('created_at')
                     ->label(__('filament/admin/flex_billboard_resource.created_at'))
                     ->dateTime(),
@@ -51,7 +67,7 @@ class FlexBillboardInfolist
                     ->label(__('filament/admin/flex_billboard_resource.updated_at'))
                     ->dateTime(),
 
-                    Action::make('view_video')
+                Action::make('view_video')
                     ->label(__('filament/admin/flex_billboard_resource.view_video'))
                     ->icon('heroicon-o-play-circle')
                     ->color('primary')
