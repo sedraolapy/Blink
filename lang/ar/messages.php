@@ -10,4 +10,8 @@ return [
     'customer_created' => 'تمت إضافة الزبون بنجاح.',
     'customer_updated' => 'تم تعديل بيانات الزبون بنجاح.',
     'auth_user_retrieved' => 'تم جلب بيانات المستخدم الحالي بنجاح.',
+    'flex_billboards_retrieved' => 'تم جلب لوحات الفليكس بنجاح.',
+    'flex_billboard_retrieved' => 'تم جلب تفاصيل لوحة الفليكس بنجاح.',
+    'advertising_periods_retrieved' => 'تم جلب الفترات الإعلانية بنجاح.',
+    'governorates_retrieved' => 'تم جلب المحافظات بنجاح.',
 ];

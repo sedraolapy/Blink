@@ -20,4 +20,10 @@ class AdvertisingPeriod extends Model
     {
         return $this->hasMany(AdvertisingPeriodRange::class);
     }
+
+    public function flexBookingPeriods()
+    {
+        return $this->hasMany(FlexBookingPeriod::class);
+    }
+
 }

@@ -27,4 +27,9 @@ class Customer extends Model
             'subscription_type' => SubscriptionTypeEnum::class,
         ];
     }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
 }

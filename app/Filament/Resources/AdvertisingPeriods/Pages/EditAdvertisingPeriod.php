@@ -15,7 +15,6 @@ class EditAdvertisingPeriod extends EditRecord
     {
         return [
             ViewAction::make(),
-            DeleteAction::make(),
         ];
     }
     public function getTitle(): string

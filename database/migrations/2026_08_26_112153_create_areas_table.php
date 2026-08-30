@@ -18,6 +18,8 @@ return new class extends Migration
                 ->restrictOnDelete();
             $table->json('name')->nullable();
             $table->timestamps();
+
+            $table->index('governorate_id');
         });
     }
 

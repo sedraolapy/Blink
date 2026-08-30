@@ -36,4 +36,27 @@ return [
         'mural' => 'Mural',
         'rooftop' => 'Rooftop',
     ],
+
+    'booking_types' => [
+        'internal' => 'Internal',
+        'external' => 'External',
+    ],
+
+    'contract_statuses' => [
+        'pending' => 'Pending',
+        'waiting_start' => 'Waiting for Contract Start',
+        'in_progress' => 'In Progress',
+        'finished' => 'Finished',
+    ],
+
+    'flex_statuses' => [
+        'available' => 'Available',
+        'unconfirmed' => 'Unconfirmed',
+        'booked' => 'Booked',
+    ],
+
+    'flex_booking_item_statuses' => [
+        'unconfirmed' => 'Unconfirmed',
+        'booked' => 'Booked',
+    ],
 ];

@@ -41,6 +41,9 @@ return new class extends Migration
             $table->decimal('foreign_price', 12, 2)->nullable();
 
             $table->timestamps();
+
+            $table->index('area_id');
+            $table->index('network_id');
         });
     }
 

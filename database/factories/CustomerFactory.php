@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\SubscriptionTypeEnum;
 use App\Models\Customer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -25,7 +26,7 @@ class CustomerFactory extends Factory
 
             'phone' => fake()->phoneNumber(),
 
-            'subscription_type' => null,
+            'subscription_type' => SubscriptionTypeEnum::BRONZE->value,
         ];
     }
 }

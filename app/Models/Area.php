@@ -24,4 +24,19 @@ class Area extends Model
     {
         return $this->belongsTo(Governorate::class);
     }
+
+    public function flexBillboards()
+    {
+        return $this->hasMany(FlexBillboard::class);
+    }
+
+    public function ledScreens()
+    {
+        return $this->hasMany(LedScreen::class);
+    }
+
+    public function externalAssets()
+    {
+        return $this->hasMany(ExternalAsset::class);
+    }
 }

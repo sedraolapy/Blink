@@ -13,5 +13,10 @@ return [
         'customer_name_ar' => 'customer name in Arabic',
         'customer_name_en' => 'customer name in English',
         'phone' => 'phone number',
+        'search' => 'search',
+        'status' => 'status',
+        'governorate_id' => 'governorate',
+        'period_id' => 'advertising period',
+        'page' => 'page',
     ],
 ];

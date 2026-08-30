@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\SubscriptionTypeEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->json('name')->nullable();
             $table->string('phone', 50)->nullable();
-            $table->string('subscription_type')->nullable();
+            $table->string('subscription_type')->default(SubscriptionTypeEnum::BRONZE->value);
             $table->timestamps();
         });
     }

@@ -13,7 +13,7 @@ class ListAdvertisingPeriods extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+           //
         ];
     }
     public function getTitle(): string

@@ -29,4 +29,9 @@ class Governorate extends Model
             'installation_day' => InstallationDayEnum::class,
         ];
     }
+
+    public function areas()
+    {
+        return $this->hasMany(Area::class);
+    }
 }

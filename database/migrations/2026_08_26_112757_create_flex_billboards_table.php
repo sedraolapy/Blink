@@ -31,6 +31,8 @@ return new class extends Migration
             $table->decimal('foreign_price', 12, 2);
 
             $table->timestamps();
+
+            $table->index('area_id');
         });
     }
 

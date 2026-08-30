@@ -25,6 +25,11 @@ return [
         'customer_name_ar' => 'اسم الزبون بالعربي',
         'customer_name_en' => 'اسم الزبون بالإنجليزي',
         'phone' => 'رقم الهاتف',
+        'search' => 'البحث',
+        'status' => 'الحالة',
+        'governorate_id' => 'المحافظة',
+        'period_id' => 'الفترة الإعلانية',
+        'page' => 'رقم الصفحة',
     ],
 
 ];

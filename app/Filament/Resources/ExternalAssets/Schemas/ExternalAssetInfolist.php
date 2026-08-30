@@ -55,6 +55,14 @@ class ExternalAssetInfolist
                     ->label(__('filament/admin/external_asset_resource.foreign_price'))
                     ->numeric(),
 
+                TextEntry::make('created_at')
+                    ->label(__('filament/admin/external_asset_resource.created_at'))
+                    ->dateTime(),
+
+                TextEntry::make('updated_at')
+                    ->label(__('filament/admin/external_asset_resource.updated_at'))
+                    ->dateTime(),
+                    
                 Action::make('view_video')
                     ->label(__('filament/admin/external_asset_resource.view_video'))
                     ->icon('heroicon-o-play-circle')
@@ -66,14 +74,6 @@ class ExternalAssetInfolist
                     ->visible(
                         fn ($record) => $record->hasMedia('external_asset_video')
                     ),
-
-                TextEntry::make('created_at')
-                    ->label(__('filament/admin/external_asset_resource.created_at'))
-                    ->dateTime(),
-
-                TextEntry::make('updated_at')
-                    ->label(__('filament/admin/external_asset_resource.updated_at'))
-                    ->dateTime(),
             ]);
     }
 }

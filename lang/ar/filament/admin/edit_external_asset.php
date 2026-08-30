@@ -2,7 +2,7 @@
 
 return [
 
-    'navigation_label' => 'Edit External Asset',
-    'title' => 'Edit External Asset',
+    'navigation_label' => 'تعديل الأصل الإعلاني الخارجي',
+    'title' => 'تعديل الأصل الإعلاني الخارجي',
 
 ];

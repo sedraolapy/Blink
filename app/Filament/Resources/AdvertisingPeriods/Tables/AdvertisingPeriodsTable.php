@@ -106,7 +106,6 @@ class AdvertisingPeriodsTable
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
             ]);
     }
 }

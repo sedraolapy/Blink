@@ -36,4 +36,28 @@ return [
         'mural' => 'جدارية',
         'rooftop' => 'سطحية',
     ],
+
+    'booking_types' => [
+        'internal' => 'داخلي',
+        'external' => 'خارجي',
+    ],
+
+    'contract_statuses' => [
+        'pending' => 'قيد الانتظار',
+        'waiting_start' => 'بانتظار بداية العقد',
+        'in_progress' => 'قيد التنفيذ',
+        'finished' => 'منتهي',
+    ],
+
+    'flex_statuses' => [
+        'available' => 'متاحة',
+        'unconfirmed' => 'غير مؤكدة',
+        'booked' => 'محجوزة',
+    ],
+
+    'flex_booking_item_statuses' => [
+        'unconfirmed' => 'غير مؤكدة',
+        'booked' => 'محجوزة',
+    ],
+
 ];

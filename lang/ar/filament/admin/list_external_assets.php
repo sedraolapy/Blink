@@ -2,7 +2,7 @@
 
 return [
 
-    'navigation_label' => 'List External Assets',
-    'title' => 'List External Assets',
+    'navigation_label' => 'قائمة الأصول الإعلانية الخارجية',
+    'title' => 'قائمة الأصول الإعلانية الخارجية',
 
 ];

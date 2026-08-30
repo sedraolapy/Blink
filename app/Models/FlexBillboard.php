@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Enums\FlexBookingItemStatusEnum;
+use App\Enums\FlexStatusEnum;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Builder;
 
 class FlexBillboard extends Model implements HasMedia
 {
@@ -38,5 +41,84 @@ class FlexBillboard extends Model implements HasMedia
         $this
             ->addMediaCollection('flex_billboard_video')
             ->singleFile();
+    }
+
+    public function bookingItems()
+    {
+        return $this->hasMany(FlexBookingItem::class);
+    }
+
+    public function scopeSearch(Builder $query, ?string $search): Builder
+    {
+        if (blank($search)) {
+            return $query;
+        }
+
+        $locale = app()->getLocale();
+
+        return $query->where(function (Builder $query) use ($search, $locale) {
+            $query
+                ->where('code', 'like', "%{$search}%")
+                ->orWhere(
+                    "location_name->{$locale}",
+                    'like',
+                    "%{$search}%"
+                );
+        });
+    }
+
+    public function scopeGovernorate(Builder $query,?int $governorateId): Builder
+    {
+        if (! $governorateId) {
+            return $query;
+        }
+
+        return $query->whereHas('area',fn (Builder $query) =>$query->where('governorate_id', $governorateId));
+    }
+
+    public function scopeAvailableForPeriod(Builder $query,int $periodId,int $year): Builder
+    {
+        return $query->whereDoesntHave('bookingItems',fn (Builder $query) =>$query
+                        ->whereHas('period',fn (Builder $query) =>$query
+                            ->where('advertising_period_id', $periodId)
+                            ->where('year', $year)
+                )
+        );
+    }
+
+    public function scopeBookedForPeriod(Builder $query,int $periodId,int $year): Builder
+    {
+        return $query->whereHas('bookingItems',fn (Builder $query) =>$query
+                ->where('status',FlexBookingItemStatusEnum::BOOKED->value)
+                    ->whereHas('period',fn (Builder $query) =>$query
+                                ->where('advertising_period_id', $periodId)
+                                ->where('year', $year)
+                    )
+        );
+    }
+
+    public function scopeUnconfirmedForPeriod(Builder $query,int $periodId,int $year): Builder
+    {
+        return $query
+            ->whereHas('bookingItems',fn (Builder $query) =>$query
+                        ->where('status',FlexBookingItemStatusEnum::UNCONFIRMED->value)
+                        ->whereHas('period',fn (Builder $query) =>$query
+                                    ->where('advertising_period_id', $periodId)
+                                    ->where('year', $year)
+                        )
+            );
+    }
+
+    public function scopeStatus(Builder $query,?string $status,int $periodId,int $year): Builder
+    {
+        if (blank($status)) {
+            return $query;
+        }
+
+        return match (FlexStatusEnum::from($status)) {
+            FlexStatusEnum::AVAILABLE =>$query->availableForPeriod($periodId, $year),
+            FlexStatusEnum::UNCONFIRMED =>$query->unconfirmedForPeriod($periodId, $year),
+            FlexStatusEnum::BOOKED =>$query->bookedForPeriod($periodId, $year),
+        };
     }
 }

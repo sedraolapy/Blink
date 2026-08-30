@@ -42,7 +42,8 @@ class CustomerForm
 
                 Select::make('subscription_type')
                     ->label(__('filament/admin/customer_resource.subscription_type'))
-                    ->options(SubscriptionTypeEnum::options()),
+                    ->options(SubscriptionTypeEnum::options())
+                    ->default(SubscriptionTypeEnum::BRONZE),
             ]);
     }
 }

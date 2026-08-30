@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('external_assets', function (Blueprint $table) {
             $table->id();
             $table->string('code', 100)->unique();
-            
+
             $table->string('type');
 
             $table->foreignId('area_id')
@@ -33,6 +33,9 @@ return new class extends Migration
             $table->decimal('foreign_price', 12, 2);
 
             $table->timestamps();
+
+            $table->index('area_id');
+            $table->index('type');
         });
     }
 

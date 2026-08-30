@@ -116,24 +116,6 @@ class RangesRelationManager extends RelationManager
                     ->modalHeading(
                         __('filament/admin/advertising_period_resource.create_range')
                     ),
-            ])
-
-            ->recordActions([
-                EditAction::make()
-                    ->label(
-                        __('filament/admin/advertising_period_resource.edit_range')
-                    )
-                    ->modalHeading(
-                        __('filament/admin/advertising_period_resource.edit_range')
-                    ),
-
-                DeleteAction::make()
-                    ->label(
-                        __('filament/admin/advertising_period_resource.delete_range')
-                    )
-                    ->modalHeading(
-                        __('filament/admin/advertising_period_resource.delete_range')
-                    ),
-            ]);
+                ]);
     }
 }

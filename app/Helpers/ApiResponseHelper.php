@@ -41,13 +41,8 @@ if (! function_exists('getPaginationData')) {
     {
         return [
             'current_page' => $collection->currentPage(),
-            'last_page' => $collection->lastPage(),
-            'per_page' => $collection->perPage(),
             'total' => $collection->total(),
-            'from' => $collection->firstItem(),
-            'to' => $collection->lastItem(),
-            'next_page_url' => $collection->nextPageUrl(),
-            'prev_page_url' => $collection->previousPageUrl(),
+            'has_more' => $collection->hasMorePages(),
         ];
     }
 }

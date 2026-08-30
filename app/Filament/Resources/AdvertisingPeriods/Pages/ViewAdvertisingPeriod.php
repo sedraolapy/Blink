@@ -13,7 +13,7 @@ class ViewAdvertisingPeriod extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            //
         ];
     }
     public function getTitle(): string
