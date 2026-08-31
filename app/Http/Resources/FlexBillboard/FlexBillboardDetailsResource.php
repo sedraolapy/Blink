@@ -18,6 +18,7 @@ class FlexBillboardDetailsResource extends JsonResource
 
         return [
             'id' => $billboard->id,
+            'code' => $billboard->code,
             'name' => $billboard->location_name,
             'governorate' => [
                 'id' => $billboard->area?->governorate?->id,
