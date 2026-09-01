@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\FlexBillboard;
+namespace App\Http\Requests\Outdoor;
 
 use App\Enums\AssetAvailabilityStatusEnum;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class FlexIndexRequest extends FormRequest
+class OutdoorIndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -42,17 +42,37 @@ class FlexIndexRequest extends FormRequest
                 'exists:governorates,id',
             ],
 
-            'period_id' => [
-                'nullable',
-                'integer',
-                'exists:advertising_periods,id',
-            ],
-
             'page' => [
                 'nullable',
                 'integer',
                 'min:1',
             ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'search.string' =>
+                __('validation.outdoor.search.string'),
+
+            'search.max' =>
+                __('validation.outdoor.search.max'),
+
+            'status.enum' =>
+                __('validation.outdoor.status.enum'),
+
+            'governorate_id.integer' =>
+                __('validation.outdoor.governorate_id.integer'),
+
+            'governorate_id.exists' =>
+                __('validation.outdoor.governorate_id.exists'),
+
+            'page.integer' =>
+                __('validation.outdoor.page.integer'),
+
+            'page.min' =>
+                __('validation.outdoor.page.min'),
         ];
     }
 
@@ -62,27 +82,8 @@ class FlexIndexRequest extends FormRequest
             'search' => __('validation.attributes.search'),
             'status' => __('validation.attributes.status'),
             'governorate_id' => __('validation.attributes.governorate_id'),
-            'period_id' => __('validation.attributes.period_id'),
             'page' => __('validation.attributes.page'),
         ];
     }
 
-    public function messages(): array
-    {
-        return [
-            'search.string' => __('validation.string'),
-            'search.max' => __('validation.max.string'),
-
-            'status.enum' => __('validation.enum'),
-
-            'governorate_id.integer' => __('validation.integer'),
-            'governorate_id.exists' => __('validation.exists'),
-
-            'period_id.integer' => __('validation.integer'),
-            'period_id.exists' => __('validation.exists'),
-
-            'page.integer' => __('validation.integer'),
-            'page.min' => __('validation.min.numeric'),
-        ];
-    }
 }

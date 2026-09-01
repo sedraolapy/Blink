@@ -48,4 +48,25 @@ return [
         'governorate_id' => 'governorate',
         'page' => 'page',
     ],
+
+    'outdoor' => [
+        'search' => [
+            'string' => 'The search value must be a string.',
+            'max' => 'The search value must not exceed 255 characters.',
+        ],
+
+        'status' => [
+            'enum' => 'The selected outdoor asset status is invalid.',
+        ],
+
+        'governorate_id' => [
+            'integer' => 'The selected governorate must be valid.',
+            'exists' => 'The selected governorate does not exist.',
+        ],
+
+        'page' => [
+            'integer' => 'The page number must be an integer.',
+            'min' => 'The page number must be at least 1.',
+        ],
+    ],
 ];

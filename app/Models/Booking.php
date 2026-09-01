@@ -41,4 +41,9 @@ class Booking extends Model
     {
         return $this->hasOne(LedBooking::class);
     }
+
+    public function externalBooking()
+    {
+        return $this->hasOne(ExternalBooking::class);
+    }
 }

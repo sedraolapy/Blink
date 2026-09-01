@@ -19,4 +19,8 @@ return [
         'screen_retrieved' => 'Electronic screen details retrieved successfully.',
         'network_retrieved' => 'Electronic screen network details retrieved successfully.',
     ],
+    'outdoor' => [
+        'index_success' => 'Outdoor assets retrieved successfully.',
+        'show_success' => 'Outdoor asset details retrieved successfully.',
+    ],
 ];

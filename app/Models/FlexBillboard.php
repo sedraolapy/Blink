@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\FlexBookingItemStatusEnum;
-use App\Enums\FlexStatusEnum;
+use App\Enums\AssetAvailabilityStatusEnum;
+use App\Enums\BookingItemStatusEnum;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -89,7 +89,7 @@ class FlexBillboard extends Model implements HasMedia
     public function scopeBookedForPeriod(Builder $query,int $periodId,int $year): Builder
     {
         return $query->whereHas('bookingItems',fn (Builder $query) =>$query
-                ->where('status',FlexBookingItemStatusEnum::BOOKED->value)
+                ->where('status',BookingItemStatusEnum::BOOKED->value)
                     ->whereHas('period',fn (Builder $query) =>$query
                                 ->where('advertising_period_id', $periodId)
                                 ->where('year', $year)
@@ -101,7 +101,7 @@ class FlexBillboard extends Model implements HasMedia
     {
         return $query
             ->whereHas('bookingItems',fn (Builder $query) =>$query
-                        ->where('status',FlexBookingItemStatusEnum::UNCONFIRMED->value)
+                        ->where('status',BookingItemStatusEnum::UNCONFIRMED->value)
                         ->whereHas('period',fn (Builder $query) =>$query
                                     ->where('advertising_period_id', $periodId)
                                     ->where('year', $year)
@@ -115,10 +115,10 @@ class FlexBillboard extends Model implements HasMedia
             return $query;
         }
 
-        return match (FlexStatusEnum::from($status)) {
-            FlexStatusEnum::AVAILABLE =>$query->availableForPeriod($periodId, $year),
-            FlexStatusEnum::UNCONFIRMED =>$query->unconfirmedForPeriod($periodId, $year),
-            FlexStatusEnum::BOOKED =>$query->bookedForPeriod($periodId, $year),
+        return match (AssetAvailabilityStatusEnum::from($status)) {
+            AssetAvailabilityStatusEnum::AVAILABLE =>$query->availableForPeriod($periodId, $year),
+            AssetAvailabilityStatusEnum::UNCONFIRMED =>$query->unconfirmedForPeriod($periodId, $year),
+            AssetAvailabilityStatusEnum::BOOKED =>$query->bookedForPeriod($periodId, $year),
         };
     }
 }

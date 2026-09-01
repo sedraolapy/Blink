@@ -2,8 +2,8 @@
 
 namespace App\Services\FlexBillboard;
 
+use App\Enums\AssetAvailabilityStatusEnum;
 use App\Enums\BookingItemStatusEnum;
-use App\Enums\FlexStatusEnum;
 use App\Models\AdvertisingPeriod;
 use App\Models\FlexBillboard;
 use App\Models\FlexBookingItem;
@@ -71,9 +71,9 @@ class FlexAvailabilityService
         $billboards->getCollection()->transform(
             function (FlexBillboard $billboard) {
                 $billboard->flex_status = match (true) {
-                    (bool) $billboard->has_booked_item =>FlexStatusEnum::BOOKED->value,
-                    (bool) $billboard->has_unconfirmed_item =>FlexStatusEnum::UNCONFIRMED->value,
-                    default =>FlexStatusEnum::AVAILABLE->value,
+                    (bool) $billboard->has_booked_item =>AssetAvailabilityStatusEnum::BOOKED->value,
+                    (bool) $billboard->has_unconfirmed_item =>AssetAvailabilityStatusEnum::UNCONFIRMED->value,
+                    default =>AssetAvailabilityStatusEnum::AVAILABLE->value,
                 };
                 return $billboard;
             }
@@ -150,9 +150,9 @@ class FlexAvailabilityService
         $currentPeriodItem = $billboard->bookingItems->first(fn ($item) =>(int) $item->period->advertising_period_id === $currentPeriodId);
 
         $billboard->flex_status = match ($currentPeriodItem?->status) {
-            BookingItemStatusEnum::BOOKED =>FlexStatusEnum::BOOKED->value,
-            BookingItemStatusEnum::UNCONFIRMED =>FlexStatusEnum::UNCONFIRMED->value,
-            default =>FlexStatusEnum::AVAILABLE->value,
+            BookingItemStatusEnum::BOOKED =>AssetAvailabilityStatusEnum::BOOKED->value,
+            BookingItemStatusEnum::UNCONFIRMED =>AssetAvailabilityStatusEnum::UNCONFIRMED->value,
+            default =>AssetAvailabilityStatusEnum::AVAILABLE->value,
         };
 
         $bookedItems = $billboard->bookingItems

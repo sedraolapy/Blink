@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum FlexStatusEnum: string
+enum AssetAvailabilityStatusEnum: string
 {
     case AVAILABLE = 'available';
     case UNCONFIRMED = 'unconfirmed';

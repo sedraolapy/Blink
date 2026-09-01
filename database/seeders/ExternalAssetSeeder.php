@@ -6,107 +6,95 @@ use App\Enums\ExternalAssetTypeEnum;
 use App\Models\Area;
 use App\Models\ExternalAsset;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class ExternalAssetSeeder extends Seeder
 {
     public function run(): void
     {
-        $area = Area::query()->first();
+        $areas = Area::query()
+            ->with('governorate')
+            ->get();
 
-        if (! $area) {
-            $this->command?->error('No areas found. Run AreaSeeder first.');
-
+        if ($areas->isEmpty()) {
             return;
         }
 
-        $assets = [
+        $types = [
             [
-                'code' => 'EXT-UNI-001',
-                'type' => ExternalAssetTypeEnum::UNIPOLE,
-                'location_name' => [
-                    'ar' => 'يوني بول عند المدخل الرئيسي',
-                    'en' => 'Unipole at Main Entrance',
-                ],
-                'latitude' => 33.5138,
-                'longitude' => 36.2765,
-                'width' => 14,
-                'height' => 4,
-                'local_price' => 5000000,
-                'foreign_price' => 400,
-            ],
-            [
-                'code' => 'EXT-BRG-001',
-                'type' => ExternalAssetTypeEnum::BRIDGE,
-                'location_name' => [
-                    'ar' => 'إعلان على الجسر الرئيسي',
-                    'en' => 'Main Bridge Advertisement',
-                ],
-                'latitude' => 33.5162,
-                'longitude' => 36.2810,
-                'width' => 12,
-                'height' => 3,
-                'local_price' => 4500000,
-                'foreign_price' => 350,
-            ],
-            [
-                'code' => 'EXT-TUN-001',
-                'type' => ExternalAssetTypeEnum::TUNNEL,
-                'location_name' => [
-                    'ar' => 'إعلان مدخل النفق',
-                    'en' => 'Tunnel Entrance Advertisement',
-                ],
-                'latitude' => 33.5105,
-                'longitude' => 36.2702,
-                'width' => 10,
-                'height' => 3,
-                'local_price' => 4000000,
-                'foreign_price' => 320,
-            ],
-            [
-                'code' => 'EXT-MUR-001',
                 'type' => ExternalAssetTypeEnum::MURAL,
-                'location_name' => [
-                    'ar' => 'جدارية على الشارع الرئيسي',
-                    'en' => 'Main Street Mural',
-                ],
-                'latitude' => 33.5190,
-                'longitude' => 36.2850,
-                'width' => 15,
-                'height' => 8,
-                'local_price' => 6000000,
-                'foreign_price' => 500,
+                'code' => 'MUR',
+                'ar' => 'جدارية إعلانية',
+                'en' => 'Advertising Mural',
             ],
             [
-                'code' => 'EXT-ROO-001',
                 'type' => ExternalAssetTypeEnum::ROOFTOP,
-                'location_name' => [
-                    'ar' => 'سطحية على المبنى الرئيسي',
-                    'en' => 'Main Building Rooftop',
-                ],
-                'latitude' => 33.5210,
-                'longitude' => 36.2890,
-                'width' => 10,
-                'height' => 5,
-                'local_price' => 5500000,
-                'foreign_price' => 450,
+                'code' => 'ROO',
+                'ar' => 'سطحية إعلانية',
+                'en' => 'Advertising Rooftop',
+            ],
+            [
+                'type' => ExternalAssetTypeEnum::TUNNEL,
+                'code' => 'TUN',
+                'ar' => 'إعلان نفق',
+                'en' => 'Tunnel Advertisement',
+            ],
+            [
+                'type' => ExternalAssetTypeEnum::BRIDGE,
+                'code' => 'BRG',
+                'ar' => 'إعلان جسر',
+                'en' => 'Bridge Advertisement',
+            ],
+            [
+                'type' => ExternalAssetTypeEnum::UNIPOLE,
+                'code' => 'UNI',
+                'ar' => 'يوني بول',
+                'en' => 'Unipole',
             ],
         ];
 
-        foreach ($assets as $asset) {
-            ExternalAsset::updateOrCreate(
-                ['code' => $asset['code']],
-                [
-                    'type' => $asset['type'],
-                    'area_id' => $area->id,
-                    'location_name' => $asset['location_name'],
-                    'latitude' => $asset['latitude'],
-                    'longitude' => $asset['longitude'],
-                    'width' => $asset['width'],
-                    'height' => $asset['height'],
-                    'local_price' => $asset['local_price'],
-                    'foreign_price' => $asset['foreign_price'],
-                ]
-            );
+        foreach ($types as $data) {
+            for ($i = 1; $i <= 30; $i++) {
+                $area = $areas[
+                    ($i - 1) % $areas->count()
+                ];
+
+                $governorateName = $area
+                    ->governorate
+                    ->getTranslation('name', 'en');
+
+                $governorateCode = Str::upper(
+                    Str::substr($governorateName, 0, 3)
+                );
+
+                $code = sprintf(
+                    '%s-%s-%03d',
+                    $data['code'],
+                    $governorateCode,
+                    $i
+                );
+
+                ExternalAsset::updateOrCreate(
+                    [
+                        'code' => $code,
+                    ],
+                    [
+                        'type' => $data['type'],
+                        'area_id' => $area->id,
+                        'location_name' => [
+                            'ar' => "{$data['ar']} {$i}",
+                            'en' => "{$data['en']} {$i}",
+                        ],
+                        'latitude' =>33.4000000 + ($i * 0.001),
+                        'longitude' =>36.2000000 + ($i * 0.001),
+                        'width' =>8 + ($i % 8),
+                        'height' =>3 + ($i % 4),
+                        'local_price' =>3000000 + ($i * 100000),
+                        'foreign_price' =>250 + ($i * 10),
+                    ]
+                );
+            }
         }
+
     }
 }
