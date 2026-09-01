@@ -14,4 +14,9 @@ return [
     'flex_billboard_retrieved' => 'Flex billboard details retrieved successfully.',
     'advertising_periods_retrieved' => 'Advertising periods retrieved successfully.',
     'governorates_retrieved' => 'Governorates retrieved successfully.',
+    'electronic' => [
+        'index_success' => 'Electronic screens and networks retrieved successfully.',
+        'screen_retrieved' => 'Electronic screen details retrieved successfully.',
+        'network_retrieved' => 'Electronic screen network details retrieved successfully.',
+    ],
 ];

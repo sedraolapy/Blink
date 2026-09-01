@@ -9,7 +9,8 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
-
+use App\Models\LedScreen;
+use Closure;
 class LedScreenForm
 {
     public static function configure(Schema $schema): Schema
@@ -47,7 +48,8 @@ class LedScreenForm
                     ->relationship('area', 'name')
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->required()
+                    ->live(),
 
                     Select::make('network_id')
                     ->label(__('filament/admin/led_screen_resource.network_id'))
@@ -57,6 +59,36 @@ class LedScreenForm
                     ->nullable()
                     ->live()
 
+                    ->rule(
+                        function (Get $get, ?LedScreen $record) {
+                            return function (string $attribute,mixed $value,Closure $fail)
+                            use ($get, $record) {
+
+                                $areaId = $get('area_id');
+                                if (blank($value) || blank($areaId)) {
+                                    return;
+                                }
+
+                                $hasDifferentArea = LedScreen::query()
+                                    ->where('network_id', $value)
+                                    
+                                    ->when(
+                                        $record?->exists,
+                                        fn ($query) =>
+                                            $query->where('id', '!=', $record->id)
+                                    )
+
+                                    ->where('area_id', '!=', $areaId)
+                                    ->exists();
+
+                                if ($hasDifferentArea) {
+                                    $fail(
+                                        __('validation.custom.network_id.same_area')
+                                    );
+                                }
+                            };
+                        }
+                    )
                     ->createOptionForm([
                         Tabs::make('network_location_name_translations')
                             ->tabs([

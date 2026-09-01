@@ -11,108 +11,128 @@ class LedScreenSeeder extends Seeder
 {
     public function run(): void
     {
-        $area = Area::query()->first();
+        $areas = Area::query()
+            ->with('governorate')
+            ->get();
 
-        if (! $area) {
-            $this->command?->error('No areas found. Run AreaSeeder first.');
+        if ($areas->isEmpty()) {
+            $this->command?->error(
+                'No areas found. Run AreaSeeder first.'
+            );
+
             return;
         }
 
+        for ($i = 1; $i <= 30; $i++) {
 
-        LedScreen::updateOrCreate(
-            [
-                'code' => 'LED-001',
-            ],
-            [
-                'area_id' => $area->id,
-                'network_id' => null,
+            $area = $areas[($i - 1) % $areas->count()];
 
-                'location_name' => [
-                    'ar' => 'شاشة إلكترونية مستقلة',
-                    'en' => 'Independent LED Screen',
+            LedScreen::updateOrCreate(
+                [
+                    'code' => sprintf('LED-IND-%03d', $i),
                 ],
+                [
+                    'area_id' => $area->id,
+                    'network_id' => null,
 
-                'latitude' => 33.5138000,
-                'longitude' => 36.2765000,
+                    'location_name' => [
+                        'ar' => "شاشة إلكترونية مستقلة {$i}",
+                        'en' => "Independent LED Screen {$i}",
+                    ],
 
-                'width' => 4,
-                'height' => 3,
+                    'latitude' => 33.5000000 + ($i * 0.001),
+                    'longitude' => 36.2000000 + ($i * 0.001),
 
-                'width_px' => 1920,
-                'height_px' => 1080,
+                    'width' => 4 + ($i % 3),
+                    'height' => 3,
 
-                'local_price' => 1500,
-                'foreign_price' => 2000,
-            ]
-        );
+                    'width_px' => 1920,
+                    'height_px' => 1080,
 
-        $network = LedNetwork::updateOrCreate(
-            [
-                'location_name->en' => 'Central LED Network',
-            ],
-            [
-                'location_name' => [
-                    'ar' => 'شبكة الشاشات المركزية',
-                    'en' => 'Central LED Network',
+                    'local_price' => 1500 + ($i * 50),
+                    'foreign_price' => 2000 + ($i * 50),
+                ]
+            );
+        }
+
+        for ($i = 1; $i <= 8; $i++) {
+
+            $area = $areas[($i - 1) % $areas->count()];
+
+            $network = LedNetwork::updateOrCreate(
+                [
+                    'location_name->en' => "Test LED Network {$i}",
                 ],
+                [
+                    'location_name' => [
+                        'ar' => "شبكة شاشات تجريبية {$i}",
+                        'en' => "Test LED Network {$i}",
+                    ],
 
-                'local_price' => 3000,
-                'foreign_price' => 4000,
-            ]
-        );
+                    'local_price' => 3000 + ($i * 100),
+                    'foreign_price' => 4000 + ($i * 100),
+                ]
+            );
 
-        LedScreen::updateOrCreate(
-            [
-                'code' => 'LED-NET-001',
-            ],
-            [
-                'area_id' => $area->id,
-                'network_id' => $network->id,
-
-                'location_name' => [
-                    'ar' => 'الشاشة الأولى ضمن الشبكة',
-                    'en' => 'Network Screen 1',
+            LedScreen::updateOrCreate(
+                [
+                    'code' => sprintf(
+                        'LED-NET-%02d-01',
+                        $i
+                    ),
                 ],
+                [
+                    'area_id' => $area->id,
+                    'network_id' => $network->id,
 
-                'latitude' => 33.5145000,
-                'longitude' => 36.2773000,
+                    'location_name' => [
+                        'ar' => "الشاشة الأولى ضمن الشبكة {$i}",
+                        'en' => "Network {$i} Screen 1",
+                    ],
 
-                'width' => 5,
-                'height' => 3,
+                    'latitude' => 33.6000000 + ($i * 0.001),
+                    'longitude' => 36.3000000 + ($i * 0.001),
 
-                'width_px' => 1920,
-                'height_px' => 1080,
+                    'width' => 5,
+                    'height' => 3,
 
-                'local_price' => null,
-                'foreign_price' => null,
-            ]
-        );
+                    'width_px' => 1920,
+                    'height_px' => 1080,
 
-        LedScreen::updateOrCreate(
-            [
-                'code' => 'LED-NET-002',
-            ],
-            [
-                'area_id' => $area->id,
-                'network_id' => $network->id,
+                    'local_price' => null,
+                    'foreign_price' => null,
+                ]
+            );
 
-                'location_name' => [
-                    'ar' => 'الشاشة الثانية ضمن الشبكة',
-                    'en' => 'Network Screen 2',
+            LedScreen::updateOrCreate(
+                [
+                    'code' => sprintf(
+                        'LED-NET-%02d-02',
+                        $i
+                    ),
                 ],
+                [
+                    'area_id' => $area->id,
+                    'network_id' => $network->id,
 
-                'latitude' => 33.5152000,
-                'longitude' => 36.2781000,
+                    'location_name' => [
+                        'ar' => "الشاشة الثانية ضمن الشبكة {$i}",
+                        'en' => "Network {$i} Screen 2",
+                    ],
 
-                'width' => 5,
-                'height' => 3,
+                    'latitude' => 33.7000000 + ($i * 0.001),
+                    'longitude' => 36.4000000 + ($i * 0.001),
 
-                'width_px' => 1920,
-                'height_px' => 1080,
+                    'width' => 5,
+                    'height' => 3,
 
-                'local_price' => null,
-                'foreign_price' => null,
-            ]
-        );
+                    'width_px' => 1920,
+                    'height_px' => 1080,
+
+                    'local_price' => null,
+                    'foreign_price' => null,
+                ]
+            );
+        }
     }
 }

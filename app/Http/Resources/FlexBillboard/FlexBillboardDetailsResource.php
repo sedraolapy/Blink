@@ -27,11 +27,10 @@ class FlexBillboardDetailsResource extends JsonResource
             'area' => $billboard->area?->name,
             'width' => (float) $billboard->width,
             'height' => (float) $billboard->height,
+            'status' => $billboard->flex_status,
 
             'confirmed_bookings' =>$this->resource['confirmed_bookings'],
-
             'unconfirmed_bookings' =>$this->resource['unconfirmed_bookings'],
-
             'available_periods' =>
                 $this->resource['available_periods']
                     ->map(fn ($period) => [

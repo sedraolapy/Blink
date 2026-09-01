@@ -14,4 +14,9 @@ return [
     'flex_billboard_retrieved' => 'تم جلب تفاصيل لوحة الفليكس بنجاح.',
     'advertising_periods_retrieved' => 'تم جلب الفترات الإعلانية بنجاح.',
     'governorates_retrieved' => 'تم جلب المحافظات بنجاح.',
+    'electronic' => [
+        'index_success' => 'تم جلب الشاشات والشبكات الإلكترونية بنجاح.',
+        'screen_retrieved' => 'تم جلب تفاصيل الشاشة الإلكترونية بنجاح.',
+        'network_retrieved' => 'تم جلب تفاصيل شبكة الشاشات الإلكترونية بنجاح.',
+    ],
 ];

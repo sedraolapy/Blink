@@ -36,4 +36,9 @@ class Booking extends Model
     {
         return $this->hasOne(FlexBooking::class);
     }
+
+    public function ledBooking()
+    {
+        return $this->hasOne(LedBooking::class);
+    }
 }

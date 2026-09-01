@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum FlexBookingItemStatusEnum: string
+enum BookingItemStatusEnum: string
 {
     case UNCONFIRMED = 'unconfirmed';
     case BOOKED = 'booked';

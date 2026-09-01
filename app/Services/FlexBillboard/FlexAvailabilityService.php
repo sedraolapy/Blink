@@ -2,7 +2,7 @@
 
 namespace App\Services\FlexBillboard;
 
-use App\Enums\FlexBookingItemStatusEnum;
+use App\Enums\BookingItemStatusEnum;
 use App\Enums\FlexStatusEnum;
 use App\Models\AdvertisingPeriod;
 use App\Models\FlexBillboard;
@@ -43,7 +43,7 @@ class FlexAvailabilityService
                 'bookingItems as has_booked_item' =>
                     fn (Builder $query) =>
                         $query
-                            ->where('status',FlexBookingItemStatusEnum::BOOKED->value)
+                            ->where('status',BookingItemStatusEnum::BOOKED->value)
                             ->whereHas(
                                 'period',
                                 fn (Builder $query) =>
@@ -55,7 +55,7 @@ class FlexAvailabilityService
                 'bookingItems as has_unconfirmed_item' =>
                     fn (Builder $query) =>
                         $query
-                            ->where('status',FlexBookingItemStatusEnum::UNCONFIRMED->value)
+                            ->where('status',BookingItemStatusEnum::UNCONFIRMED->value)
                             ->whereHas('period',
                                 fn (Builder $query) =>
                                     $query
@@ -99,18 +99,18 @@ class FlexAvailabilityService
                         ->where('year', $year)
             )
             ->whereIn('status', [
-                FlexBookingItemStatusEnum::BOOKED->value,
-                FlexBookingItemStatusEnum::UNCONFIRMED->value,
+                BookingItemStatusEnum::BOOKED->value,
+                BookingItemStatusEnum::UNCONFIRMED->value,
             ])
             ->groupBy('status')
             ->pluck('total', 'status');
 
         $booked = (int) (
-            $statusCounts[FlexBookingItemStatusEnum::BOOKED->value] ?? 0
+            $statusCounts[BookingItemStatusEnum::BOOKED->value] ?? 0
         );
 
         $unconfirmed = (int) (
-            $statusCounts[FlexBookingItemStatusEnum::UNCONFIRMED->value] ?? 0
+            $statusCounts[BookingItemStatusEnum::UNCONFIRMED->value] ?? 0
         );
 
         return [
@@ -125,6 +125,8 @@ class FlexAvailabilityService
     public function show(int $id): array
     {
         $year = now()->year;
+
+        $currentPeriodId = $this->advertisingPeriodService->getCurrentPeriodId();
 
         $billboard = FlexBillboard::query()
             ->with([
@@ -145,11 +147,19 @@ class FlexAvailabilityService
             ])
             ->findOrFail($id);
 
+        $currentPeriodItem = $billboard->bookingItems->first(fn ($item) =>(int) $item->period->advertising_period_id === $currentPeriodId);
+
+        $billboard->flex_status = match ($currentPeriodItem?->status) {
+            BookingItemStatusEnum::BOOKED =>FlexStatusEnum::BOOKED->value,
+            BookingItemStatusEnum::UNCONFIRMED =>FlexStatusEnum::UNCONFIRMED->value,
+            default =>FlexStatusEnum::AVAILABLE->value,
+        };
+
         $bookedItems = $billboard->bookingItems
-            ->filter(fn ($item) =>$item->status === FlexBookingItemStatusEnum::BOOKED);
+            ->filter(fn ($item) =>$item->status === BookingItemStatusEnum::BOOKED);
 
         $unconfirmedItems = $billboard->bookingItems
-            ->filter(fn ($item) =>$item->status === FlexBookingItemStatusEnum::UNCONFIRMED);
+            ->filter(fn ($item) =>$item->status === BookingItemStatusEnum::UNCONFIRMED);
 
         $reservedPeriodIds = $billboard->bookingItems
             ->pluck('period.advertising_period_id')

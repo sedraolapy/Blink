@@ -5,27 +5,24 @@ namespace App\Models;
 use App\Enums\BookingItemStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class FlexBookingItem extends Model
+
+class LedBookingItem extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'flex_booking_period_id',
-        'flex_billboard_id',
-        'design_id',
+        'led_booking_period_id',
+        'led_screen_id',
+        'led_network_id',
         'unit_price_at_booking',
-        'has_dykat',
         'is_gift',
-        'status',
     ];
 
     protected function casts(): array
     {
         return [
             'unit_price_at_booking' => 'decimal:2',
-            'has_dykat' => 'boolean',
             'is_gift' => 'boolean',
             'status' => BookingItemStatusEnum::class,
         ];
@@ -33,16 +30,21 @@ class FlexBookingItem extends Model
 
     public function period()
     {
-        return $this->belongsTo(FlexBookingPeriod::class,'flex_booking_period_id');
+        return $this->belongsTo(LedBookingPeriod::class,'led_booking_period_id');
     }
 
-    public function billboard()
+    public function screen()
     {
-        return $this->belongsTo(FlexBillboard::class,'flex_billboard_id');
+        return $this->belongsTo(LedScreen::class,'led_screen_id');
     }
 
-    public function design()
+    public function network()
     {
-        return $this->belongsTo(FlexDesign::class,'design_id');
+        return $this->belongsTo(LedNetwork::class,'led_network_id');
+    }
+
+    public function slides()
+    {
+        return $this->hasMany(LedBookingSlide::class);
     }
 }

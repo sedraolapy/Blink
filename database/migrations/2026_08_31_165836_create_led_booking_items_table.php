@@ -12,34 +12,33 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('flex_booking_items', function (Blueprint $table) {
+        Schema::create('led_booking_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('flex_booking_period_id')
-            ->constrained('flex_booking_periods')
+
+            $table->foreignId('led_booking_period_id')
+            ->constrained('led_booking_periods')
             ->cascadeOnDelete();
 
-            $table->foreignId('flex_billboard_id')
-                ->constrained('flex_billboards')
+            $table->foreignId('led_screen_id')
+                ->nullable()
+                ->constrained('led_screens')
                 ->restrictOnDelete();
 
-            $table->foreignId('design_id')
+            $table->foreignId('led_network_id')
                 ->nullable()
-                ->constrained('flex_designs')
-                ->nullOnDelete();
+                ->constrained('led_networks')
+                ->restrictOnDelete();
 
             $table->decimal('unit_price_at_booking', 12, 2);
-
-            $table->boolean('has_dykat')
-                ->default(false);
 
             $table->boolean('is_gift')
                 ->default(false);
 
             $table->string('status')->default(BookingItemStatusEnum::UNCONFIRMED->value);
-
             $table->timestamps();
 
-            $table->unique(['flex_booking_period_id', 'flex_billboard_id'],'flex_period_billboard_unique');
+            $table->unique(['led_booking_period_id', 'led_screen_id'],'led_period_screen_unique');
+            $table->unique(['led_booking_period_id', 'led_network_id'],'led_period_network_unique');
         });
     }
 
@@ -48,6 +47,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('flex_booking_items');
+        Schema::dropIfExists('led_booking_items');
     }
 };
