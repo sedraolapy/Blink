@@ -18,6 +18,10 @@ return [
         'governorate_id' => 'governorate',
         'period_id' => 'advertising period',
         'page' => 'page',
+        'contract_status' => 'contract status',
+        'subscription_type' => 'subscription type',
+        'from_date' => 'from date',
+        'to_date' => 'to date',
     ],
 
     'custom' => [
@@ -67,6 +71,42 @@ return [
         'page' => [
             'integer' => 'The page number must be an integer.',
             'min' => 'The page number must be at least 1.',
+        ],
+    ],
+
+    'customer' => [
+        'page' => [
+            'integer' => 'The page number must be an integer.',
+            'min' => 'The page number must be at least 1.',
+        ],
+
+        'search' => [
+            'string' => 'The search value must be a string.',
+            'max' => 'The search value must not exceed 255 characters.',
+        ],
+
+        'contract_status' => [
+            'enum' => 'The selected contract status is invalid.',
+        ],
+
+        'subscription_type' => [
+            'enum' => 'The selected subscription type is invalid.',
+        ],
+    ],
+
+    'customer_bookings' => [
+        'page' => [
+            'integer' => 'The page number must be an integer.',
+            'min' => 'The page number must be at least 1.',
+        ],
+
+        'from_date' => [
+            'date' => 'The from date must be a valid date.',
+        ],
+
+        'to_date' => [
+            'date' => 'The to date must be a valid date.',
+            'after_or_equal' => 'The to date must be after or equal to the from date.',
         ],
     ],
 ];

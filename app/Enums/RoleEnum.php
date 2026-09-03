@@ -9,7 +9,7 @@ enum RoleEnum : String
 
     case FLEX_BOOKING_OFFICER = 'flex_booking_officer';
     case SCREEN_BOOKING_OFFICER = 'screen_booking_officer';
-    case UNIPOLE_BOOKING_OFFICER = 'unipole_booking_officer';
+    case EXTERNAL_BOOKING_OFFICER = 'external_booking_officer';
 
     case SALES_COORDINATOR = 'sales_coordinator';
     case SALES_MANAGER = 'sales_manager';

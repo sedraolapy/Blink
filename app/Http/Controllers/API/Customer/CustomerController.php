@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\API\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Customer\CustomerBookingsRequest;
+use App\Http\Requests\Customer\CustomerIndexRequest;
 use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Http\Requests\Customer\UpdateCustomerRequest;
+use App\Http\Resources\Customer\CustomerBookingResource;
+use App\Http\Resources\Customer\CustomerDetailsResource;
 use App\Http\Resources\Customer\CustomerResource;
 use App\Models\Customer;
 use App\Services\Customer\CustomerService;
@@ -14,16 +18,21 @@ class CustomerController extends Controller
 {
     public function __construct(private readonly CustomerService $customerService) {}
 
-    public function index(Request $request)
+    public function index(CustomerIndexRequest $request)
     {
-        $perPage = $request->integer('per_page', 15);
-        $customers = $this->customerService->getAll($perPage);
+        $data =    $request->validated();
+        $result = $this->customerService->index($data);
 
         return sendResponse(
             __('messages.customers_retrieved'),
-            CustomerResource::collection($customers->items())->resolve($request),
+            [
+                'summary' => $result['summary'],
+                'items' => CustomerResource::collection(
+                    $result['customers']->getCollection()
+                ),
+            ],
             200,
-            $customers
+            $result['customers']
         );
     }
 
@@ -39,12 +48,13 @@ class CustomerController extends Controller
         );
     }
 
-    public function show(Customer $customer)
+    public function show(int $id)
     {
-        $customer = $this->customerService->show($customer);
+        $customer = $this->customerService->show($id);
+
         return sendResponse(
             __('messages.customer_retrieved'),
-            new CustomerResource($customer)
+            new CustomerDetailsResource($customer)
         );
     }
 
@@ -56,6 +66,23 @@ class CustomerController extends Controller
         return sendResponse(
             __('messages.customer_updated'),
             new CustomerResource($customer)
+        );
+    }
+
+    public function bookings(int $id,CustomerBookingsRequest $request)
+    {
+        $data = $request->validated();
+        $bookings = $this->customerService->bookings($id,$data);
+
+        return sendResponse(
+            __('messages.bookings_success'),
+            [
+                'items' => CustomerBookingResource::collection(
+                    $bookings->getCollection()
+                ),
+            ],
+            200,
+            $bookings
         );
     }
 }

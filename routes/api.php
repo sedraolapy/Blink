@@ -23,6 +23,7 @@ Route::middleware('localization')->group(function () {
         Route::post('/logout', [LoginController::class, 'logout']);
 
         Route::apiResource('customers', CustomerController::class)->only(['index', 'store', 'show', 'update']);
+        Route::get('/customers/{id}/bookings',[CustomerController::class, 'bookings']);
 
         Route::get('/periods', [AdvertisingPeriodController::class, 'index']);
         Route::get('/governorates', [GovernorateController::class, 'index']);

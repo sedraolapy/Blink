@@ -23,4 +23,5 @@ return [
         'index_success' => 'Outdoor assets retrieved successfully.',
         'show_success' => 'Outdoor asset details retrieved successfully.',
     ],
+    'bookings_success' => 'Customer bookings retrieved successfully.',
 ];

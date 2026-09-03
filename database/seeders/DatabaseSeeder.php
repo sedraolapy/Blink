@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             FlexBillboardSeeder::class,
             LedScreenSeeder::class,
             ExternalAssetSeeder::class,
+            BookingApiTestSeeder::class,
         ]);
 
         Customer::factory()->count(20)->create();
