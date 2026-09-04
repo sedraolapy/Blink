@@ -22,13 +22,14 @@ return [
         'subscription_type' => 'subscription type',
         'from_date' => 'from date',
         'to_date' => 'to date',
+        'type' => 'asset type',
     ],
 
     'custom' => [
         'network_id' => [
             'same_area' => 'All screens within the network must belong to the same area.',
-        ],
-],
+            ],
+    ],
 
     'electronic' => [
         'search' => [
@@ -109,4 +110,16 @@ return [
             'after_or_equal' => 'The to date must be after or equal to the from date.',
         ],
     ],
+
+    'map' => [
+        'search' => [
+            'string' => 'The search value must be a string.',
+            'max' => 'The search value must not exceed 255 characters.',
+        ],
+
+        'type' => [
+            'in' => 'The selected asset type is invalid.',
+        ],
+    ],
+
 ];

@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Enums\RoleEnum;
+use App\Enums\PermissionEnum;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -60,9 +59,8 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasAnyRole([
-            RoleEnum::SUPER_ADMIN->value,
-            RoleEnum::ADMIN->value,
-        ]);
+        return $this->can(
+            PermissionEnum::ACCESS_DASHBOARD->value
+        );
     }
 }

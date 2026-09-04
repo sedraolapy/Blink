@@ -6,6 +6,7 @@ use App\Http\Controllers\API\Customer\CustomerController;
 use App\Http\Controllers\API\Electronic\ElectronicController;
 use App\Http\Controllers\API\FlexBillboard\FlexController;
 use App\Http\Controllers\Api\Governorate\GovernorateController;
+use App\Http\Controllers\Api\Map\MapController;
 use App\Http\Controllers\API\Outdoor\OutdoorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,7 @@ Route::middleware('localization')->group(function () {
 
         Route::get('/periods', [AdvertisingPeriodController::class, 'index']);
         Route::get('/governorates', [GovernorateController::class, 'index']);
+        Route::get('/map', [MapController::class, 'index']);
 
         Route::get('/flex', [FlexController::class, 'index']);
         Route::get('/flex/{id}', [FlexController::class, 'show']);
@@ -44,6 +46,8 @@ Route::middleware('localization')->group(function () {
 
             Route::get('/{id}', [OutdoorController::class, 'show']);
         });
+
+
     });
 
 });
