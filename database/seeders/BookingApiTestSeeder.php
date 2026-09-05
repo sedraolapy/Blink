@@ -14,6 +14,14 @@ class BookingApiTestSeeder extends Seeder
     {
         /*
          * ========================================
+         * Cleanup previous test data
+         * ========================================
+         */
+
+        $this->cleanupPreviousTestData();
+
+        /*
+         * ========================================
          * Test Customers
          * ========================================
          */
@@ -62,7 +70,7 @@ class BookingApiTestSeeder extends Seeder
             ]
         );
 
-        $emptyCustomer = Customer::query()->updateOrCreate(
+        Customer::query()->updateOrCreate(
             ['phone' => '0999000005'],
             [
                 'name' => [
@@ -75,27 +83,30 @@ class BookingApiTestSeeder extends Seeder
 
         /*
          * ========================================
-         * Pagination test
+         * Pagination Test
          *
-         * 25 historical bookings.
-         * آخر عقد للزبون رح نعمله بعدهم حتى
-         * يضل latest status = pending.
+         * 25 historical bookings
          * ========================================
          */
 
         for ($i = 25; $i >= 1; $i--) {
-            $start = now()
+            $startDate = now()
                 ->subMonths($i + 2)
                 ->startOfMonth();
+
+            $endDate = $startDate
+                ->copy()
+                ->addDays(20);
 
             Booking::factory()
                 ->for($fullCustomer)
                 ->state([
                     'booking_type' => 'internal',
-                    'start_date' => $start->toDateString(),
-                    'end_date' => $start
-                        ->copy()
-                        ->addDays(20)
+
+                    'start_date' => $startDate
+                        ->toDateString(),
+
+                    'end_date' => $endDate
                         ->toDateString(),
                 ])
                 ->withContract(
@@ -117,13 +128,15 @@ class BookingApiTestSeeder extends Seeder
          * ========================================
          */
 
-        $fullBooking = Booking::factory()
+        Booking::factory()
             ->for($fullCustomer)
             ->state([
                 'booking_type' => 'internal',
+
                 'start_date' => now()
                     ->subDays(5)
                     ->toDateString(),
+
                 'end_date' => now()
                     ->addDays(30)
                     ->toDateString(),
@@ -161,19 +174,21 @@ class BookingApiTestSeeder extends Seeder
          * contract = false
          * installation = true
          * extension = false
-         * operation مش لازم يظهر
+         * operation لا يظهر
          *
          * Asset = UNCONFIRMED
          * ========================================
          */
 
-        $flexBooking = Booking::factory()
+        Booking::factory()
             ->for($flexCustomer)
             ->state([
                 'booking_type' => 'internal',
+
                 'start_date' => now()
                     ->subDays(2)
                     ->toDateString(),
+
                 'end_date' => now()
                     ->addDays(20)
                     ->toDateString(),
@@ -202,18 +217,19 @@ class BookingApiTestSeeder extends Seeder
          * contract = false
          * operation = false
          *
-         * installation / extension
-         * ما لازم يظهروا.
+         * installation / extension لا يظهروا
          * ========================================
          */
 
-        $electronicBooking = Booking::factory()
+        Booking::factory()
             ->for($electronicCustomer)
             ->state([
                 'booking_type' => 'internal',
+
                 'start_date' => now()
                     ->subDays(10)
                     ->toDateString(),
+
                 'end_date' => now()
                     ->addDays(10)
                     ->toDateString(),
@@ -245,17 +261,19 @@ class BookingApiTestSeeder extends Seeder
          * contract = true
          * installation = false
          * extension = true
-         * operation ما لازم يظهر
+         * operation لا يظهر
          * ========================================
          */
 
-        $externalBooking = Booking::factory()
+        Booking::factory()
             ->for($externalCustomer)
             ->state([
                 'booking_type' => 'external',
+
                 'start_date' => now()
                     ->subDays(3)
                     ->toDateString(),
+
                 'end_date' => now()
                     ->addDays(25)
                     ->toDateString(),
@@ -275,6 +293,35 @@ class BookingApiTestSeeder extends Seeder
                 1
             )
             ->create();
+    }
 
+    private function cleanupPreviousTestData(): void
+    {
+        $phones = [
+            '0999000001',
+            '0999000002',
+            '0999000003',
+            '0999000004',
+            '0999000005',
+        ];
+
+        $customers = Customer::query()
+            ->whereIn('phone', $phones)
+            ->get();
+
+        foreach ($customers as $customer) {
+            $bookings = Booking::query()
+                ->where('customer_id', $customer->id)
+                ->with('contract')
+                ->get();
+
+            foreach ($bookings as $booking) {
+                $booking->contract?->clearMediaCollection(
+                    'contract_images'
+                );
+
+                $booking->delete();
+            }
+        }
     }
 }

@@ -31,7 +31,7 @@ class MapAssetResource extends JsonResource
 
             'width' => (float) $this->width,
             'height' => (float) $this->height,
-
+            
             'latitude' => (float) $this->latitude,
             'longitude' => (float) $this->longitude,
 
@@ -76,21 +76,15 @@ class MapAssetResource extends JsonResource
     private function getVideoUrl(): ?string
     {
         if ($this->resource instanceof FlexBillboard) {
-            return $this->getFirstMediaUrl(
-                'flex_billboard_video'
-            ) ?: null;
+            return $this->getFirstMediaUrl('flex_billboard_video') ?: null;
         }
 
         if ($this->resource instanceof LedScreen) {
-            return $this->getFirstMediaUrl(
-                'led_screen_video'
-            ) ?: null;
+            return $this->getFirstMediaUrl('led_screen_video') ?: null;
         }
 
         if ($this->resource instanceof ExternalAsset) {
-            return $this->getFirstMediaUrl(
-                'external_asset_video'
-            ) ?: null;
+            return $this->getFirstMediaUrl('external_asset_video') ?: null;
         }
 
         return null;
