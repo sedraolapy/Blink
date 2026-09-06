@@ -15,8 +15,12 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('led_booking_item_id')
-            ->constrained('led_booking_items')
-            ->cascadeOnDelete();
+                ->constrained('led_booking_items')
+                ->cascadeOnDelete();
+
+            $table->foreignId('led_screen_id')
+                ->constrained('led_screens')
+                ->cascadeOnDelete();
 
             $table->foreignId('design_id')
                 ->nullable()
@@ -27,7 +31,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->unique(['led_booking_item_id', 'slide_number'],'led_item_slide_number_unique');
+            $table->unique(['led_booking_item_id','led_screen_id','slide_number'],'led_slide_item_screen_num_unique');
         });
     }
 

@@ -140,6 +140,7 @@ class FlexAvailabilityService
                                 $query->where('year', $year)
                         )
                         ->with([
+                            'design',
                             'period.advertisingPeriod',
                             'period.flexBooking.booking.customer',
                         ]);
@@ -209,6 +210,10 @@ class FlexAvailabilityService
                                 ->period
                                 ->advertisingPeriod
                                 ->number,
+
+                            'design_name' => $item
+                            ->design
+                            ?->name,
                         ])
                         ->unique('id')
                         ->sortBy('number')

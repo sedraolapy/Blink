@@ -106,6 +106,7 @@ class OutdoorService
 
                 'bookingItems' => function ($query) {
                     $query->with([
+                        'design',
                         'period.externalBookingType.externalBooking.booking.customer',
                     ]);
                 },
@@ -129,8 +130,19 @@ class OutdoorService
     private function formatBookings($items): array
     {
         return $items
-            ->map(function ($item) {
-                $booking = $item
+            ->groupBy(
+                fn ($item) =>
+                    $item
+                        ->period
+                        ->externalBookingType
+                        ->externalBooking
+                        ->booking_id
+            )
+            ->map(function ($items) {
+
+                $firstItem = $items->first();
+
+                $booking = $firstItem
                     ->period
                     ->externalBookingType
                     ->externalBooking
@@ -138,9 +150,28 @@ class OutdoorService
 
                 return [
                     'id' => $booking->id,
-                    'client_name' =>$booking->customer?->name,
-                    'start_date' =>$item->period->start_date?->format('Y-m-d'),
-                    'end_date' =>$item->period->end_date?->format('Y-m-d'),
+
+                    'client_name' =>
+                        $booking->customer?->name,
+
+                    'periods' => $items
+                        ->map(fn ($item) => [
+                            'start_date' =>
+                                $item->period
+                                    ->start_date
+                                    ?->format('Y-m-d'),
+
+                            'end_date' =>
+                                $item->period
+                                    ->end_date
+                                    ?->format('Y-m-d'),
+
+                            'design_name' =>
+                                $item->design?->name,
+                        ])
+                        ->sortBy('start_date')
+                        ->values()
+                        ->toArray(),
                 ];
             })
             ->values()

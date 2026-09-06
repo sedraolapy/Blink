@@ -4,8 +4,11 @@ namespace App\Services\Electronic;
 
 use App\Enums\BookingItemStatusEnum;
 use App\Models\LedBooking;
+use App\Models\LedBookingItem;
+use App\Models\LedBookingSlide;
 use App\Models\LedNetwork;
 use App\Models\LedScreen;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ElectronicService
@@ -66,9 +69,7 @@ class ElectronicService
         $items->setCollection(
             $pageItems
                 ->map(function ($item) use ($screens, $networks) {
-
                     if ($item->type === 'screen') {
-
                         $screen = $screens->get($item->id);
 
                         if ($screen) {
@@ -98,10 +99,51 @@ class ElectronicService
 
     private function getSummary(): array
     {
+        $confirmedBookings = LedBooking::query()
+            ->join(
+                'led_booking_periods as periods',
+                'periods.led_booking_id',
+                '=',
+                'led_bookings.id'
+            )
+            ->join(
+                'led_booking_items as items',
+                'items.led_booking_period_id',
+                '=',
+                'periods.id'
+            )
+            ->where(
+                'items.status',
+                BookingItemStatusEnum::BOOKED->value
+            )
+            ->distinct()
+            ->count('led_bookings.id');
+
+        $unconfirmedBookings = LedBooking::query()
+            ->join(
+                'led_booking_periods as periods',
+                'periods.led_booking_id',
+                '=',
+                'led_bookings.id'
+            )
+            ->join(
+                'led_booking_items as items',
+                'items.led_booking_period_id',
+                '=',
+                'periods.id'
+            )
+            ->where(
+                'items.status',
+                BookingItemStatusEnum::UNCONFIRMED->value
+            )
+            ->distinct()
+            ->count('led_bookings.id');
+
         return [
             'total_screens' => LedScreen::query()->whereNull('network_id')->count(),
             'networks_count' => LedNetwork::query()->count(),
-            'linked_bookings' => LedBooking::query()->count(),
+            'confirmed_bookings' => $confirmedBookings,
+            'unconfirmed_bookings' => $unconfirmedBookings,
         ];
     }
 
@@ -110,53 +152,83 @@ class ElectronicService
         $screen = LedScreen::query()
             ->with([
                 'area.governorate',
+
                 'bookingItems' => function ($query) {
                     $query->with([
+                        'slides.design',
                         'period.ledBooking.booking.customer',
                     ]);
                 },
             ])
             ->findOrFail($id);
 
-        $confirmedItems = $screen->bookingItems
+        $confirmedItems = $screen
+            ->bookingItems
             ->filter(
-                fn ($item) =>
+                fn (LedBookingItem $item) =>
                     $item->status === BookingItemStatusEnum::BOOKED
             );
 
-        $unconfirmedItems = $screen->bookingItems
-            ->filter(
-                fn ($item) =>
-                    $item->status === BookingItemStatusEnum::UNCONFIRMED
-            );
+        $unconfirmedItems = $screen
+            ->bookingItems
+            ->filter(fn (LedBookingItem $item) => $item->status === BookingItemStatusEnum::UNCONFIRMED);
 
         return [
             'screen' => $screen,
-            'confirmed_bookings' =>$this->formatLedBookings($confirmedItems),
-            'unconfirmed_bookings' =>$this->formatLedBookings($unconfirmedItems),
+            'confirmed_bookings' => $this->formatScreenBookings($confirmedItems,$screen),
+            'unconfirmed_bookings' => $this->formatScreenBookings($unconfirmedItems,$screen),
         ];
     }
 
-    private function formatLedBookings($items): array
+    private function formatScreenBookings( Collection $items, LedScreen $screen): array
     {
         return $items
-            ->map(function ($item) {
-                $booking = $item
+            ->groupBy(
+                fn (LedBookingItem $item) => $item->period->ledBooking->booking_id
+            )
+            ->map(function (Collection $items) use ($screen) {
+
+                $firstItem = $items->first();
+
+                $booking = $firstItem
                     ->period
                     ->ledBooking
                     ->booking;
 
                 return [
                     'id' => $booking->id,
-                    'client_name' =>$booking->customer?->name,
-                    'start_date' =>$item->period->start_date?->format('Y-m-d'),
-                    'end_date' =>$item->period->end_date?->format('Y-m-d'),
+                    'client_name' => $booking->customer?->name,
+
+                    'periods' => $items
+                        ->map(
+                            fn (LedBookingItem $item) => [
+                                'start_date' =>
+                                    $item
+                                        ->period
+                                        ->start_date
+                                        ?->format('Y-m-d'),
+
+                                'end_date' =>
+                                    $item
+                                        ->period
+                                        ->end_date
+                                        ?->format('Y-m-d'),
+
+                                'slides' =>
+                                    $this->formatSlides(
+                                        $item,
+                                        $screen->id
+                                    ),
+                            ]
+                        )
+                        ->sortBy('start_date')
+                        ->values()
+                        ->toArray(),
                 ];
             })
             ->values()
             ->toArray();
     }
-
 
     public function showNetwork(int $id): array
     {
@@ -166,6 +238,7 @@ class ElectronicService
 
                 'bookingItems' => function ($query) {
                     $query->with([
+                        'slides.design',
                         'period.ledBooking.booking.customer',
                     ]);
                 },
@@ -173,17 +246,93 @@ class ElectronicService
             ->withCount('screens')
             ->findOrFail($id);
 
-        $confirmedItems = $network->bookingItems
-            ->filter(
-                fn ($item) =>$item->status === BookingItemStatusEnum::BOOKED);
+        $confirmedItems = $network
+            ->bookingItems
+            ->filter(fn (LedBookingItem $item) => $item->status === BookingItemStatusEnum::BOOKED);
 
-        $unconfirmedItems = $network->bookingItems
-            ->filter(fn ($item) =>$item->status === BookingItemStatusEnum::UNCONFIRMED);
+        $unconfirmedItems = $network
+            ->bookingItems
+            ->filter(fn (LedBookingItem $item) => $item->status === BookingItemStatusEnum::UNCONFIRMED);
 
         return [
             'network' => $network,
-            'confirmed_bookings' =>$this->formatLedBookings($confirmedItems),
-            'unconfirmed_bookings' =>$this->formatLedBookings($unconfirmedItems),
+            'confirmed_bookings' => $this->formatNetworkBookings($confirmedItems),
+            'unconfirmed_bookings' => $this->formatNetworkBookings($unconfirmedItems),
         ];
+    }
+
+
+    private function formatNetworkBookings(Collection $items): array
+    {
+        return $items
+            ->groupBy(
+                fn (LedBookingItem $item) =>
+                    $item->period->ledBooking->booking_id
+            )
+            ->map(function (Collection $items) {
+
+                $firstItem = $items->first();
+
+                $booking = $firstItem
+                    ->period
+                    ->ledBooking
+                    ->booking;
+
+                return [
+                    'id' => $booking->id,
+                    'client_name' => $booking->customer?->name,
+
+                    'periods' => $items
+                        ->map(
+                            fn (LedBookingItem $item) => [
+                                'start_date' =>
+                                    $item
+                                        ->period
+                                        ->start_date
+                                        ?->format('Y-m-d'),
+
+                                'end_date' =>
+                                    $item
+                                        ->period
+                                        ->end_date
+                                        ?->format('Y-m-d'),
+
+                                'slides' =>
+                                    $this->formatSlides($item),
+                            ]
+                        )
+                        ->sortBy('start_date')
+                        ->values()
+                        ->toArray(),
+                ];
+            })
+            ->values()
+            ->toArray();
+    }
+
+    private function formatSlides(LedBookingItem $item, ?int $screenId = null): array
+    {
+        $slides = $item->slides;
+
+        if ($screenId !== null) {
+            $slides = $slides->where(
+                'led_screen_id',
+                $screenId
+            );
+        }
+
+        return $slides
+            ->sortBy('slide_number')
+            ->map(
+                fn (LedBookingSlide $slide) => [
+                    'slide_number' =>
+                        (int) $slide->slide_number,
+
+                    'design_name' =>
+                        $slide->design?->name,
+                ]
+            )
+            ->values()
+            ->toArray();
     }
 }

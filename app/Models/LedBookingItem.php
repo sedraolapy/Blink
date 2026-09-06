@@ -45,6 +45,6 @@ class LedBookingItem extends Model
 
     public function slides()
     {
-        return $this->hasMany(LedBookingSlide::class);
+        return $this->hasMany(LedBookingSlide::class,'led_booking_item_id');
     }
 }

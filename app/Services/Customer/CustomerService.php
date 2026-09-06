@@ -2,6 +2,7 @@
 
 namespace App\Services\Customer;
 
+use App\Enums\SubscriptionTypeEnum;
 use App\Models\Booking;
 use App\Models\Contract;
 use App\Models\Customer;
@@ -51,6 +52,8 @@ class CustomerService
 
     public function create(array $data): Customer
     {
+        $data['subscription_type'] = SubscriptionTypeEnum::BRONZE->value;
+
         return Customer::create($data);
     }
 
