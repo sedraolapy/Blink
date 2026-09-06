@@ -27,6 +27,8 @@ class DatabaseSeeder extends Seeder
             LedScreenSeeder::class,
             ExternalAssetSeeder::class,
             BookingApiTestSeeder::class,
+            ElectronicSlidesTestSeeder::class,
+            OutdoorMultiplePeriodsTestSeeder::class,
         ]);
 
         Customer::factory()->count(20)->create();

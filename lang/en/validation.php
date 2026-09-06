@@ -48,12 +48,6 @@ return [
         ],
     ],
 
-    'attributes' => [
-        'search' => 'search',
-        'governorate_id' => 'governorate',
-        'page' => 'page',
-    ],
-
     'outdoor' => [
         'search' => [
             'string' => 'The search value must be a string.',
@@ -121,5 +115,7 @@ return [
             'in' => 'The selected asset type is invalid.',
         ],
     ],
+
+    'booking_id' => 'booking ID',
 
 ];
