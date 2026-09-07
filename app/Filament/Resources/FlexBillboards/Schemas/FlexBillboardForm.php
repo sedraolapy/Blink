@@ -94,7 +94,7 @@ class FlexBillboardForm
                         'video/x-msvideo',
                     ])
                     ->maxFiles(1)
-                    ->maxSize(204800),
+                    ->maxSize(102400),
             ]);
     }
 }

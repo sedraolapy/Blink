@@ -59,4 +59,9 @@ return [
         'unconfirmed' => 'Unconfirmed',
         'booked' => 'Booked',
     ],
+
+    'booking_statuses' => [
+        'confirmed' => 'Confirmed',
+        'unconfirmed' => 'Unconfirmed',
+    ],
 ];

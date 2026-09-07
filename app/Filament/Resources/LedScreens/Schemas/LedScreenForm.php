@@ -71,7 +71,7 @@ class LedScreenForm
 
                                 $hasDifferentArea = LedScreen::query()
                                     ->where('network_id', $value)
-                                    
+
                                     ->when(
                                         $record?->exists,
                                         fn ($query) =>

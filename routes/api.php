@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AdvertisingPeriod\AdvertisingPeriodController;
 use App\Http\Controllers\API\Auth\LoginController;
+use App\Http\Controllers\Api\Booking\FlexBooking\BookingOptions\FlexBookingOptionsController;
 use App\Http\Controllers\API\Customer\CustomerController;
 use App\Http\Controllers\API\Electronic\ElectronicController;
 use App\Http\Controllers\API\FlexBillboard\FlexController;
@@ -48,6 +49,8 @@ Route::middleware('localization')->group(function () {
         });
 
 
+        //flex bookings
+        Route::get('/booking-options/flex/periods',[FlexBookingOptionsController::class, 'periods']);
     });
 
 });

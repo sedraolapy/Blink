@@ -31,11 +31,12 @@ class FlexBillboardDetailsResource extends JsonResource
 
             'confirmed_bookings' =>$this->resource['confirmed_bookings'],
             'unconfirmed_bookings' =>$this->resource['unconfirmed_bookings'],
-            'available_periods' =>
-                $this->resource['available_periods']
+            'periods' =>
+                $this->resource['periods']
                     ->map(fn ($period) => [
                         'id' => $period->id,
                         'number' => $period->number,
+                        'available' => (bool) $period->available,
                     ])
                     ->values()
                     ->toArray(),

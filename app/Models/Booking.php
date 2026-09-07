@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BookingStatusEnum;
 use App\Enums\BookingTypeEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +26,7 @@ class Booking extends Model
     {
         return [
             'booking_type' => BookingTypeEnum::class,
+            'status' => BookingStatusEnum::class,
 
             'start_date' => 'date',
             'end_date' => 'date',

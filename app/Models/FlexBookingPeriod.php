@@ -25,8 +25,8 @@ class FlexBookingPeriod extends Model
         return $this->belongsTo(AdvertisingPeriod::class);
     }
 
-    public function items()
+    public function bookingItems()
     {
-        return $this->hasMany(FlexBookingItem::class);
+        return $this->hasMany(FlexBookingItem::class,'flex_booking_period_id');
     }
 }

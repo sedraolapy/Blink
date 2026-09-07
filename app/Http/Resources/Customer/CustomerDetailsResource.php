@@ -16,7 +16,10 @@ class CustomerDetailsResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'name' => [
+                'ar' => $this->getTranslation('name', 'ar'),
+                'en' => $this->getTranslation('name', 'en'),
+            ],
             'phone' => $this->phone,
 
             'subscription_type' => $this->subscription_type->label(),

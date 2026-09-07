@@ -60,4 +60,9 @@ return [
         'booked' => 'محجوزة',
     ],
 
+    'booking_statuses' => [
+        'confirmed' => 'مؤكد',
+        'unconfirmed' => 'غير مؤكد',
+    ],
+
 ];

@@ -2,78 +2,185 @@
 
 namespace App\Services\Booking\FlexBooking\BookingOptions;
 
+use App\Enums\BookingItemStatusEnum;
 use App\Models\AdvertisingPeriod;
+use App\Models\FlexBillboard;
+use App\Models\FlexBooking;
+use App\Models\FlexBookingItem;
+use App\Models\FlexBookingPeriod;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 
 class FlexBookingOptionsService
 {
     public function getPeriods(?int $bookingId = null): Collection
     {
-        $query = AdvertisingPeriod::query()
-            ->leftJoin(
-                'advertising_period_ranges as damascus_ranges',
-                function ($join) {
-                    $join
-                        ->on(
-                            'damascus_ranges.advertising_period_id',
-                            '=',
-                            'advertising_periods.id'
-                        )
-                        ->where(
-                            'damascus_ranges.display_group',
-                            'damascus_daraa_sweida'
-                        );
-                }
-            )
-            ->leftJoin(
-                'advertising_period_ranges as other_ranges',
-                function ($join) {
-                    $join
-                        ->on(
-                            'other_ranges.advertising_period_id',
-                            '=',
-                            'advertising_periods.id'
-                        )
-                        ->where(
-                            'other_ranges.display_group',
-                            'others'
-                        );
-                }
-            )
+        $periods = AdvertisingPeriod::query()
             ->select([
-                'advertising_periods.id',
-                'advertising_periods.number',
+                'id',
+                'number',
+            ])
+            ->with([
+                'ranges' => fn ($query) => $query->select([
+                    'id',
+                    'advertising_period_id',
+                    'display_group',
+                    'start_month',
+                    'start_day',
+                ]),
+            ])
+            ->orderBy('number')
+            ->get();
 
-                'damascus_ranges.start_day as damascus_daraa_sweida_start_day',
+        $selectedPeriodIds = $bookingId !== null
+            ? $this->getSelectedPeriodIds($bookingId)
+            : collect();
 
-                'other_ranges.start_day as other_governorates_start_day',
-            ]);
+        $totalBillboards = FlexBillboard::query()->count();
 
-        if ($bookingId === null) {
-            $query->selectRaw('1 as is_available');
-        } else {
-            $query->selectRaw(
-                '
-                NOT EXISTS (
-                    SELECT 1
-                    FROM flex_booking_periods AS fbp
-                    INNER JOIN flex_bookings AS fb
-                        ON fb.id = fbp.flex_booking_id
-                    WHERE
-                        fbp.advertising_period_id = advertising_periods.id
-                        AND fbp.year = ?
-                        AND fb.booking_id = ?
-                ) AS is_available
-                ',
-                [
-                    now()->year,
-                    $bookingId,
-                ]
-            );
+        $occupiedCounts = $this->getOccupiedCounts(
+            $periods->pluck('id'),
+            $bookingId
+        );
+
+        $periods->each(
+            function (AdvertisingPeriod $period) use (
+                $bookingId,
+                $selectedPeriodIds,
+                $occupiedCounts,
+                $totalBillboards
+            ) {
+                $damascusRange = $period
+                    ->ranges
+                    ->firstWhere(
+                        'display_group',
+                        'damascus_daraa_sweida'
+                    );
+
+                $otherRange = $period
+                    ->ranges
+                    ->firstWhere(
+                        'display_group',
+                        'others'
+                    );
+
+                $period->setAttribute(
+                    'damascus_daraa_sweida_start_day',
+                    $this->formatMonthDay(
+                        $damascusRange?->start_month,
+                        $damascusRange?->start_day
+                    )
+                );
+
+                $period->setAttribute(
+                    'other_governorates_start_day',
+                    $this->formatMonthDay(
+                        $otherRange?->start_month,
+                        $otherRange?->start_day
+                    )
+                );
+
+                $occupiedCount = $occupiedCounts->get(
+                    $period->id,
+                    0
+                );
+
+                $period->setAttribute(
+                    'is_available',
+                    $occupiedCount < $totalBillboards
+                );
+
+                if ($bookingId !== null) {
+
+                    $period->setAttribute(
+                        'was_selected',
+                        $selectedPeriodIds->contains($period->id)
+                    );
+                }
+            }
+        );
+
+        return $periods;
+    }
+
+    private function getSelectedPeriodIds(int $bookingId)
+    {
+        $flexBookingId = FlexBooking::query()
+            ->where('booking_id', $bookingId)
+            ->value('id');
+
+        if ($flexBookingId === null) {
+            return collect();
         }
 
-        return $query
-            ->orderBy('advertising_periods.number')
-            ->get();
+        return FlexBookingPeriod::query()
+            ->where('flex_booking_id', $flexBookingId)
+            ->where('year', now()->year)
+            ->pluck('advertising_period_id');
+    }
+
+    private function getOccupiedCounts(SupportCollection $periodIds, ?int $bookingId): SupportCollection
+    {
+        return FlexBookingItem::query()
+            ->whereIn(
+                'status',
+                [
+                    BookingItemStatusEnum::BOOKED->value,
+                    BookingItemStatusEnum::UNCONFIRMED->value,
+                ]
+            )
+            ->whereHas(
+                'period',
+                function ($query) use (
+                    $periodIds,
+                    $bookingId
+                ) {
+                    $query
+                        ->where('year', now()->year)
+                        ->whereIn(
+                            'advertising_period_id',
+                            $periodIds
+                        )
+                        ->when(
+                            $bookingId !== null,
+                            fn ($query) => $query->whereHas(
+                                'flexBooking',
+                                fn ($query) => $query->where(
+                                    'booking_id',
+                                    '!=',
+                                    $bookingId
+                                )
+                            )
+                        );
+                }
+            )
+            ->with([
+                'period:id,advertising_period_id',
+            ])
+            ->get([
+                'id',
+                'flex_booking_period_id',
+                'flex_billboard_id',
+            ])
+            ->groupBy(
+                fn (FlexBookingItem $item) =>
+                    $item->period->advertising_period_id
+            )
+            ->map(
+                fn (SupportCollection $items) =>
+                    $items
+                        ->pluck('flex_billboard_id')
+                        ->unique()
+                        ->count()
+            );
+    }
+
+    private function formatMonthDay(?int $month, ?int $day)
+    {
+        if ($month === null || $day === null) {
+            return null;
+        }
+
+        return sprintf('%02d-%02d',$month,$day);
     }
 }

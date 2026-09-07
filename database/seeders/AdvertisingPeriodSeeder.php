@@ -11,7 +11,6 @@ class AdvertisingPeriodSeeder extends Seeder
 {
     public function run(): void
     {
-        // Non-leap reference year because we only store month/day.
         $referenceYear = 2025;
 
         $groups = [
@@ -38,7 +37,7 @@ class AdvertisingPeriodSeeder extends Seeder
 
                 $startDate = $firstStartDate
                     ->copy()
-                    ->addDays(($number - 1) * 15);
+                    ->addDays(($number - 1) * 14);
 
                 $endDate = $startDate
                     ->copy()

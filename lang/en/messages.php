@@ -27,4 +27,5 @@ return [
     'map' => [
         'index_success' => 'Map data retrieved successfully.',
     ],
+    'periods_retrieved' => 'Flex booking periods retrieved successfully.',
 ];

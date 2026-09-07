@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\BookingItemStatusEnum;
+use App\Enums\BookingStatusEnum;
 use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\ExternalAsset;
@@ -74,6 +75,9 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                 'customer_id' => $customer->id,
                 'booking_type' => 'external',
 
+                'status' =>
+                    BookingStatusEnum::CONFIRMED->value,
+
                 'start_date' => '2026-09-10',
                 'end_date' => '2026-12-15',
 
@@ -99,26 +103,29 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
              * Designs
              */
 
-            $confirmedDesign1 = ExternalDesign::query()->create([
-                'external_booking_id' =>
-                    $confirmedExternalBooking->id,
+            $confirmedDesign1 =
+                ExternalDesign::query()->create([
+                    'external_booking_id' =>
+                        $confirmedExternalBooking->id,
 
-                'name' => 'تصميم الحملة الأولى',
-            ]);
+                    'name' => 'تصميم الحملة الأولى',
+                ]);
 
-            $confirmedDesign2 = ExternalDesign::query()->create([
-                'external_booking_id' =>
-                    $confirmedExternalBooking->id,
+            $confirmedDesign2 =
+                ExternalDesign::query()->create([
+                    'external_booking_id' =>
+                        $confirmedExternalBooking->id,
 
-                'name' => 'تصميم الحملة الثانية',
-            ]);
+                    'name' => 'تصميم الحملة الثانية',
+                ]);
 
-            $confirmedDesign3 = ExternalDesign::query()->create([
-                'external_booking_id' =>
-                    $confirmedExternalBooking->id,
+            $confirmedDesign3 =
+                ExternalDesign::query()->create([
+                    'external_booking_id' =>
+                        $confirmedExternalBooking->id,
 
-                'name' => 'تصميم الحملة الثالثة',
-            ]);
+                    'name' => 'تصميم الحملة الثالثة',
+                ]);
 
             /*
              * Period 1
@@ -137,9 +144,11 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                 'external_booking_period_id' =>
                     $confirmedPeriod1->id,
 
-                'external_asset_id' => $asset->id,
+                'external_asset_id' =>
+                    $asset->id,
 
-                'design_id' => $confirmedDesign1->id,
+                'design_id' =>
+                    $confirmedDesign1->id,
 
                 'unit_price_at_booking' =>
                     $asset->local_price,
@@ -165,9 +174,11 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                 'external_booking_period_id' =>
                     $confirmedPeriod2->id,
 
-                'external_asset_id' => $asset->id,
+                'external_asset_id' =>
+                    $asset->id,
 
-                'design_id' => $confirmedDesign2->id,
+                'design_id' =>
+                    $confirmedDesign2->id,
 
                 'unit_price_at_booking' =>
                     $asset->local_price,
@@ -193,9 +204,11 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                 'external_booking_period_id' =>
                     $confirmedPeriod3->id,
 
-                'external_asset_id' => $asset->id,
+                'external_asset_id' =>
+                    $asset->id,
 
-                'design_id' => $confirmedDesign3->id,
+                'design_id' =>
+                    $confirmedDesign3->id,
 
                 'unit_price_at_booking' =>
                     $asset->local_price,
@@ -213,21 +226,26 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
              * ========================================
              */
 
-            $unconfirmedBooking = Booking::query()->create([
-                'customer_id' => $customer->id,
-                'booking_type' => 'external',
+            $unconfirmedBooking =
+                Booking::query()->create([
+                    'customer_id' => $customer->id,
+                    'booking_type' => 'external',
 
-                'start_date' => '2027-01-05',
-                'end_date' => '2027-02-20',
+                    'status' =>
+                        BookingStatusEnum::UNCONFIRMED->value,
 
-                'installation_order' => false,
-                'extension_order' => false,
-                'operation_order' => false,
-            ]);
+                    'start_date' => '2027-01-05',
+                    'end_date' => '2027-02-20',
+
+                    'installation_order' => false,
+                    'extension_order' => false,
+                    'operation_order' => false,
+                ]);
 
             $unconfirmedExternalBooking =
                 ExternalBooking::query()->create([
-                    'booking_id' => $unconfirmedBooking->id,
+                    'booking_id' =>
+                        $unconfirmedBooking->id,
                 ]);
 
             $unconfirmedType =
@@ -243,7 +261,8 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                     'external_booking_id' =>
                         $unconfirmedExternalBooking->id,
 
-                    'name' => 'تصميم غير مؤكد الأول',
+                    'name' =>
+                        'تصميم غير مؤكد الأول',
                 ]);
 
             $unconfirmedDesign2 =
@@ -251,7 +270,8 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                     'external_booking_id' =>
                         $unconfirmedExternalBooking->id,
 
-                    'name' => 'تصميم غير مؤكد الثاني',
+                    'name' =>
+                        'تصميم غير مؤكد الثاني',
                 ]);
 
             /*
@@ -271,9 +291,11 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                 'external_booking_period_id' =>
                     $unconfirmedPeriod1->id,
 
-                'external_asset_id' => $asset->id,
+                'external_asset_id' =>
+                    $asset->id,
 
-                'design_id' => $unconfirmedDesign1->id,
+                'design_id' =>
+                    $unconfirmedDesign1->id,
 
                 'unit_price_at_booking' =>
                     $asset->local_price,
@@ -299,9 +321,11 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                 'external_booking_period_id' =>
                     $unconfirmedPeriod2->id,
 
-                'external_asset_id' => $asset->id,
+                'external_asset_id' =>
+                    $asset->id,
 
-                'design_id' => $unconfirmedDesign2->id,
+                'design_id' =>
+                    $unconfirmedDesign2->id,
 
                 'unit_price_at_booking' =>
                     $asset->local_price,

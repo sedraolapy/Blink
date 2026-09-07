@@ -15,6 +15,7 @@ class FlexPeriodOptionResource extends JsonResource
             'damascus_daraa_sweida_start_day' => $this->damascus_daraa_sweida_start_day,
             'other_governorates_start_day' => $this->other_governorates_start_day,
             'is_available' => (bool) $this->is_available,
+            'was_selected' => $this->when($this->offsetExists('was_selected'),fn () => (bool) $this->was_selected),
         ];
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Services\Outdoor;
 
 use App\Enums\AssetAvailabilityStatusEnum;
-use App\Enums\BookingItemStatusEnum;
+use App\Enums\BookingStatusEnum;
 use App\Enums\ExternalAssetTypeEnum;
 use App\Models\ExternalAsset;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,34 +23,37 @@ class OutdoorService
                     : null
             );
 
-        $summary = $this->getSummary($baseQuery);
+        $summary = $this->getSummary(
+            $baseQuery,
+            $today
+        );
 
         $query = (clone $baseQuery)
-            ->with('area.governorate')
-            ->statusToday(
-                $filters['status'] ?? null
-            )
-            ->withExists([
-                'bookingItems as has_booked_item' =>
-                    fn (Builder $query) =>
-                        $query
-                            ->where('status',BookingItemStatusEnum::BOOKED->value)
-                            ->whereHas('period',fn (Builder $query) =>
-                                    $query
-                                        ->whereDate('start_date','<=',$today)
-                                        ->whereDate('end_date','>=',$today)
-                            ),
+            ->with('area.governorate');
 
-                'bookingItems as has_unconfirmed_item' =>
-                    fn (Builder $query) =>
-                        $query
-                            ->where('status',BookingItemStatusEnum::UNCONFIRMED->value)
-                            ->whereHas('period',fn (Builder $query) =>
-                                    $query
-                                        ->whereDate('start_date','<=',$today)
-                                        ->whereDate('end_date','>=',$today)
-                            ),
-            ]);
+        $this->applyStatusFilter(
+            $query,
+            $filters['status'] ?? null,
+            $today
+        );
+
+        $query->withExists([
+            'bookingItems as has_booked_item' =>
+                fn (Builder $query) =>
+                    $this->applyItemBookingStatusConstraint(
+                        $query,
+                        $today,
+                        BookingStatusEnum::CONFIRMED
+                    ),
+
+            'bookingItems as has_unconfirmed_item' =>
+                fn (Builder $query) =>
+                    $this->applyItemBookingStatusConstraint(
+                        $query,
+                        $today,
+                        BookingStatusEnum::UNCONFIRMED
+                    ),
+        ]);
 
         $assets = $query
             ->orderBy('id')
@@ -74,31 +77,179 @@ class OutdoorService
         ];
     }
 
-    private function getSummary(Builder $baseQuery): array
+    private function getSummary(Builder $baseQuery,string $today)
     {
         $total = (clone $baseQuery)->count();
 
-        $booked = (clone $baseQuery)
-            ->bookedToday()
-            ->count();
+        $bookedQuery = clone $baseQuery;
 
-        $unconfirmed = (clone $baseQuery)
-            ->unconfirmedToday()
-            ->count();
+        $this->applyBookingStatusFilter(
+            $bookedQuery,
+            $today,
+            BookingStatusEnum::CONFIRMED
+        );
 
-        $available = (clone $baseQuery)
-            ->availableToday()
-            ->count();
+        $booked = $bookedQuery->count();
+
+        $unconfirmedQuery = clone $baseQuery;
+
+        $this->applyBookingStatusFilter(
+            $unconfirmedQuery,
+            $today,
+            BookingStatusEnum::UNCONFIRMED
+        );
+
+        $this->excludeBookingStatus(
+            $unconfirmedQuery,
+            $today,
+            BookingStatusEnum::CONFIRMED
+        );
+
+        $unconfirmed = $unconfirmedQuery->count();
 
         return [
             'total' => $total,
             'booked' => $booked,
-            'available' => $available,
+            'available' => $total - $booked - $unconfirmed,
             'unconfirmed' => $unconfirmed,
         ];
     }
 
-    public function show(int $id): array
+    private function applyStatusFilter(Builder $query,?string $status,string $today)
+    {
+        match ($status) {
+            AssetAvailabilityStatusEnum::BOOKED->value =>
+                $this->applyBookingStatusFilter(
+                    $query,
+                    $today,
+                    BookingStatusEnum::CONFIRMED
+                ),
+
+            AssetAvailabilityStatusEnum::UNCONFIRMED->value =>
+                $this->applyUnconfirmedFilter(
+                    $query,
+                    $today
+                ),
+
+            AssetAvailabilityStatusEnum::AVAILABLE->value =>
+                $this->applyAvailableFilter(
+                    $query,
+                    $today
+                ),
+
+            default => null,
+        };
+    }
+
+    private function applyBookingStatusFilter(Builder $query,string $today,BookingStatusEnum $status)
+    {
+        return $query->whereHas(
+            'bookingItems',
+            fn (Builder $query) =>
+                $this->applyItemBookingStatusConstraint(
+                    $query,
+                    $today,
+                    $status
+                )
+        );
+    }
+
+    private function applyUnconfirmedFilter(Builder $query,string $today)
+    {
+        $this->applyBookingStatusFilter(
+            $query,
+            $today,
+            BookingStatusEnum::UNCONFIRMED
+        );
+
+        $this->excludeBookingStatus(
+            $query,
+            $today,
+            BookingStatusEnum::CONFIRMED
+        );
+    }
+
+    private function applyAvailableFilter(Builder $query,string $today)
+    {
+        $query->whereDoesntHave(
+            'bookingItems',
+            function (Builder $query) use ($today) {
+                $query->whereHas(
+                    'period',
+                    function (Builder $query) use ($today) {
+                        $query
+                            ->whereDate(
+                                'start_date',
+                                '<=',
+                                $today
+                            )
+                            ->whereDate(
+                                'end_date',
+                                '>=',
+                                $today
+                            )
+                            ->whereHas(
+                                'externalBookingType.externalBooking.booking',
+                                fn (Builder $query) =>
+                                    $query->whereIn(
+                                        'status',
+                                        [
+                                            BookingStatusEnum::CONFIRMED->value,
+                                            BookingStatusEnum::UNCONFIRMED->value,
+                                        ]
+                                    )
+                            );
+                    }
+                );
+            }
+        );
+    }
+
+    private function excludeBookingStatus(Builder $query,string $today,BookingStatusEnum $status)
+    {
+        return $query->whereDoesntHave(
+            'bookingItems',
+            fn (Builder $query) =>
+                $this->applyItemBookingStatusConstraint(
+                    $query,
+                    $today,
+                    $status
+                )
+        );
+    }
+
+    private function applyItemBookingStatusConstraint(Builder $query,string $today,BookingStatusEnum $status)
+    {
+        return $query->whereHas(
+            'period',
+            function (Builder $query) use (
+                $today,
+                $status
+            ) {
+                $query
+                    ->whereDate(
+                        'start_date',
+                        '<=',
+                        $today
+                    )
+                    ->whereDate(
+                        'end_date',
+                        '>=',
+                        $today
+                    )
+                    ->whereHas(
+                        'externalBookingType.externalBooking.booking',
+                        fn (Builder $query) =>
+                            $query->where(
+                                'status',
+                                $status->value
+                            )
+                    );
+            }
+        );
+    }
+
+    public function show(int $id)
     {
         $asset = ExternalAsset::query()
             ->with([
@@ -113,17 +264,49 @@ class OutdoorService
             ])
             ->findOrFail($id);
 
-        $confirmedItems = $asset->bookingItems
-            ->filter(fn ($item) =>$item->status === BookingItemStatusEnum::BOOKED);
+        $confirmedItems = $asset
+            ->bookingItems
+            ->filter(
+                fn ($item) =>
+                    $item
+                        ->period
+                        ->externalBookingType
+                        ->externalBooking
+                        ->booking
+                        ->status
+                    === BookingStatusEnum::CONFIRMED
+            );
 
-        $unconfirmedItems = $asset->bookingItems
-            ->filter(fn ($item) =>$item->status === BookingItemStatusEnum::UNCONFIRMED);
+        $unconfirmedItems = $asset
+            ->bookingItems
+            ->filter(
+                fn ($item) =>
+                    $item
+                        ->period
+                        ->externalBookingType
+                        ->externalBooking
+                        ->booking
+                        ->status
+                    === BookingStatusEnum::UNCONFIRMED
+            );
 
         return [
             'asset' => $asset,
-            'confirmed_bookings' => $this->formatBookings($confirmedItems),
-            'unconfirmed_bookings' => $this->formatBookings($unconfirmedItems),
-            'unavailable_ranges' => $this->formatUnavailableRanges($confirmedItems),
+
+            'confirmed_bookings' =>
+                $this->formatBookings(
+                    $confirmedItems
+                ),
+
+            'unconfirmed_bookings' =>
+                $this->formatBookings(
+                    $unconfirmedItems
+                ),
+
+            'unavailable_ranges' =>
+                $this->formatUnavailableRanges(
+                    $confirmedItems
+                ),
         ];
     }
 
@@ -139,7 +322,6 @@ class OutdoorService
                         ->booking_id
             )
             ->map(function ($items) {
-
                 $firstItem = $items->first();
 
                 $booking = $firstItem
@@ -155,20 +337,26 @@ class OutdoorService
                         $booking->customer?->name,
 
                     'periods' => $items
-                        ->map(fn ($item) => [
-                            'start_date' =>
-                                $item->period
-                                    ->start_date
-                                    ?->format('Y-m-d'),
+                        ->map(
+                            fn ($item) => [
+                                'start_date' =>
+                                    $item
+                                        ->period
+                                        ->start_date
+                                        ?->format('Y-m-d'),
 
-                            'end_date' =>
-                                $item->period
-                                    ->end_date
-                                    ?->format('Y-m-d'),
+                                'end_date' =>
+                                    $item
+                                        ->period
+                                        ->end_date
+                                        ?->format('Y-m-d'),
 
-                            'design_name' =>
-                                $item->design?->name,
-                        ])
+                                'design_name' =>
+                                    $item
+                                        ->design
+                                        ?->name,
+                            ]
+                        )
                         ->sortBy('start_date')
                         ->values()
                         ->toArray(),
@@ -178,14 +366,30 @@ class OutdoorService
             ->toArray();
     }
 
-    private function formatUnavailableRanges($items): array
+    private function formatUnavailableRanges($items)
     {
         return $items
-            ->map(fn ($item) => [
-                'start_date' =>$item->period->start_date?->format('Y-m-d'),
-                'end_date' =>$item->period->end_date?->format('Y-m-d'),
-            ])
-            ->unique(fn ($range) =>$range['start_date'] . '-' . $range['end_date'])
+            ->map(
+                fn ($item) => [
+                    'start_date' =>
+                        $item
+                            ->period
+                            ->start_date
+                            ?->format('Y-m-d'),
+
+                    'end_date' =>
+                        $item
+                            ->period
+                            ->end_date
+                            ?->format('Y-m-d'),
+                ]
+            )
+            ->unique(
+                fn ($range) =>
+                    $range['start_date']
+                    . '-'
+                    . $range['end_date']
+            )
             ->sortBy('start_date')
             ->values()
             ->toArray();
