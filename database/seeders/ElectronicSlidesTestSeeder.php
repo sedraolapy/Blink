@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\BookingItemStatusEnum;
 use App\Enums\BookingStatusEnum;
+use App\Enums\BookingTypeEnum;
 use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\LedBooking;
@@ -22,12 +23,6 @@ class ElectronicSlidesTestSeeder extends Seeder
     {
         DB::transaction(function () {
 
-            /*
-             * ========================================
-             * Test Customer
-             * ========================================
-             */
-
             $customer = Customer::query()->updateOrCreate(
                 [
                     'phone' => '0999222222',
@@ -41,21 +36,10 @@ class ElectronicSlidesTestSeeder extends Seeder
                 ]
             );
 
-            /*
-             * ========================================
-             * Cleanup previous test bookings
-             * ========================================
-             */
-
             Booking::query()
                 ->where('customer_id', $customer->id)
                 ->delete();
 
-            /*
-             * ========================================
-             * Assets
-             * ========================================
-             */
 
             $standaloneScreen = LedScreen::query()
                 ->whereNull('network_id')
@@ -80,19 +64,10 @@ class ElectronicSlidesTestSeeder extends Seeder
                 ->values()
                 ->get(1);
 
-            /*
-             * ========================================
-             * CONFIRMED BOOKING
-             * ========================================
-             */
-
             $confirmedBooking = Booking::query()->create([
                 'customer_id' => $customer->id,
-                'booking_type' => 'internal',
+                'booking_type' => BookingTypeEnum::LOCAL->value,
                 'status' => BookingStatusEnum::CONFIRMED->value,
-
-                'start_date' => '2026-09-01',
-                'end_date' => '2026-10-31',
 
                 'installation_order' => false,
                 'extension_order' => false,
@@ -103,11 +78,6 @@ class ElectronicSlidesTestSeeder extends Seeder
                 'booking_id' => $confirmedBooking->id,
             ]);
 
-            /*
-             * ========================================
-             * Confirmed Designs
-             * ========================================
-             */
 
             $confirmedDesigns = [];
 
@@ -132,12 +102,6 @@ class ElectronicSlidesTestSeeder extends Seeder
                     ]);
             }
 
-            /*
-             * ========================================
-             * CONFIRMED PERIOD 1
-             * Standalone Screen
-             * ========================================
-             */
 
             $standalonePeriod =
                 LedBookingPeriod::query()->create([
@@ -194,12 +158,6 @@ class ElectronicSlidesTestSeeder extends Seeder
                 3
             );
 
-            /*
-             * ========================================
-             * CONFIRMED PERIOD 2
-             * Network
-             * ========================================
-             */
 
             $networkPeriod =
                 LedBookingPeriod::query()->create([
@@ -272,21 +230,14 @@ class ElectronicSlidesTestSeeder extends Seeder
                 3
             );
 
-            /*
-             * ========================================
-             * UNCONFIRMED BOOKING
-             * ========================================
-             */
 
             $unconfirmedBooking =
                 Booking::query()->create([
                     'customer_id' => $customer->id,
-                    'booking_type' => 'internal',
+                    'booking_type' => BookingTypeEnum::LOCAL->value,
+
                     'status' =>
                         BookingStatusEnum::UNCONFIRMED->value,
-
-                    'start_date' => '2026-11-01',
-                    'end_date' => '2026-12-31',
 
                     'installation_order' => false,
                     'extension_order' => false,
@@ -298,12 +249,6 @@ class ElectronicSlidesTestSeeder extends Seeder
                     'booking_id' =>
                         $unconfirmedBooking->id,
                 ]);
-
-            /*
-             * ========================================
-             * Unconfirmed Designs
-             * ========================================
-             */
 
             $unconfirmedDesigns = [];
 
@@ -320,13 +265,6 @@ class ElectronicSlidesTestSeeder extends Seeder
                         'name' => $name,
                     ]);
             }
-
-            /*
-             * ========================================
-             * UNCONFIRMED PERIOD 1
-             * Standalone Screen
-             * ========================================
-             */
 
             $unconfirmedStandalonePeriod =
                 LedBookingPeriod::query()->create([
@@ -364,13 +302,6 @@ class ElectronicSlidesTestSeeder extends Seeder
                 ]->id,
                 1
             );
-
-            /*
-             * ========================================
-             * UNCONFIRMED PERIOD 2
-             * Network
-             * ========================================
-             */
 
             $unconfirmedNetworkPeriod =
                 LedBookingPeriod::query()->create([

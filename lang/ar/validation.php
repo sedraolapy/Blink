@@ -35,7 +35,18 @@ return [
         'from_date' => 'تاريخ البداية',
         'to_date' => 'تاريخ النهاية',
         'type' => 'نوع الأصل',
-
+        'booking_id' => 'رقم الحجز',
+        'period_ids' => 'الفترات',
+        'customer_id' => 'الزبون',
+        'advertiser_type' => 'نوع المعلن',
+        'designs' => 'التصاميم',
+        'design_name' => 'اسم التصميم',
+        'periods' => 'الفترات',
+        'period_id' => 'الفترة',
+        'items' => 'اللوحات',
+        'flex_id' => 'لوحة الفليكس',
+        'is_gift' => 'هدية',
+        'has_dykes' => 'وجود ديكات',
     ],
 
         'custom' => [

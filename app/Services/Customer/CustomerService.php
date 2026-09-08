@@ -4,10 +4,7 @@ namespace App\Services\Customer;
 
 use App\Enums\SubscriptionTypeEnum;
 use App\Models\Booking;
-use App\Models\Contract;
 use App\Models\Customer;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class CustomerService
 {
@@ -15,30 +12,18 @@ class CustomerService
     {
         $query = Customer::query()
             ->search($filters['search'] ?? null)
-            ->subscriptionType($filters['subscription_type'] ?? null)
-            ->latestContractStatus($filters['contract_status'] ?? null);
+            ->subscriptionType(
+                $filters['subscription_type'] ?? null
+            )
+            ->latestContractStatus(
+                $filters['contract_status'] ?? null
+            );
 
         $totalCustomers = (clone $query)->count();
 
         $customers = $query
-            ->addSelect([
-                'latest_contract_status' => Contract::query()
-                    ->select('contracts.status')
-                    ->join(
-                        'bookings',
-                        'bookings.id',
-                        '=',
-                        'contracts.booking_id'
-                    )
-                    ->whereColumn(
-                        'bookings.customer_id',
-                        'customers.id'
-                    )
-                    ->orderByDesc('contracts.created_at')
-                    ->orderByDesc('contracts.id')
-                    ->limit(1),
-            ])
-            ->orderBy('id')
+            ->with('latestContract')
+            ->orderByDesc('id')
             ->paginate(24);
 
         return [
@@ -50,46 +35,29 @@ class CustomerService
         ];
     }
 
-    public function create(array $data): Customer
+    public function create(array $data)
     {
         $data['subscription_type'] = SubscriptionTypeEnum::BRONZE->value;
 
-        return Customer::create($data);
+        return Customer::query()->create($data);
     }
 
-    public function show(int $id): Customer
+    public function show(int $id)
     {
         return Customer::query()
+            ->with('latestContract')
             ->withCount('bookings')
-            ->addSelect([
-                'latest_contract_status' => Contract::query()
-                    ->select('contracts.status')
-                    ->join(
-                        'bookings',
-                        'bookings.id',
-                        '=',
-                        'contracts.booking_id'
-                    )
-                    ->whereColumn(
-                        'bookings.customer_id',
-                        'customers.id'
-                    )
-                    ->orderByDesc('contracts.created_at')
-                    ->orderByDesc('contracts.id')
-                    ->limit(1),
-            ])
             ->findOrFail($id);
     }
 
-    public function update(Customer $customer, array $data): Customer
+    public function update(Customer $customer,array $data)
     {
         $customer->update($data);
 
         return $customer->refresh();
     }
 
-
-    public function bookings(int $customerId, array $filters)
+    public function bookings(int $customerId,array $filters)
     {
         Customer::query()->findOrFail($customerId);
 
@@ -106,7 +74,7 @@ class CustomerService
                 'ledBooking',
                 'externalBooking',
             ])
-            ->orderByDesc('start_date')
+            ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate(24);
     }

@@ -23,6 +23,18 @@ return [
         'from_date' => 'from date',
         'to_date' => 'to date',
         'type' => 'asset type',
+        'booking_id' => 'booking ID',
+        'period_ids' => 'periods',
+        'customer_id' => 'customer',
+        'advertiser_type' => 'advertiser type',
+        'designs' => 'designs',
+        'design_name' => 'design name',
+        'periods' => 'periods',
+        'period_id' => 'period',
+        'items' => 'billboards',
+        'flex_id' => 'flex billboard',
+        'is_gift' => 'gift',
+        'has_dykes' => 'dykes',
     ],
 
     'custom' => [

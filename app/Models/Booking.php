@@ -15,8 +15,6 @@ class Booking extends Model
     protected $fillable = [
         'customer_id',
         'booking_type',
-        'start_date',
-        'end_date',
         'installation_order',
         'extension_order',
         'operation_order',
@@ -27,9 +25,6 @@ class Booking extends Model
         return [
             'booking_type' => BookingTypeEnum::class,
             'status' => BookingStatusEnum::class,
-
-            'start_date' => 'date',
-            'end_date' => 'date',
 
             'installation_order' => 'boolean',
             'extension_order' => 'boolean',
@@ -87,24 +82,26 @@ class Booking extends Model
             : $this->ledBooking()->exists();
     }
 
-    public function scopeDateRange(Builder $query,?string $fromDate,?string $toDate): Builder
+    public function scopeDateRange(Builder $query,?string $fromDate,?string $toDate)
     {
-        if ($fromDate && $toDate) {
-            return $query
-                ->whereDate('start_date', '<=', $toDate)
-                ->whereDate('end_date', '>=', $fromDate);
-        }
-
-        if ($fromDate) {
-            return $query
-                ->whereDate('end_date', '>=', $fromDate);
-        }
-
-        if ($toDate) {
-            return $query
-                ->whereDate('start_date', '<=', $toDate);
-        }
-
-        return $query;
+        return $query
+            ->when(
+                $fromDate,
+                fn (Builder $query) =>
+                    $query->whereDate(
+                        'created_at',
+                        '>=',
+                        $fromDate
+                    )
+            )
+            ->when(
+                $toDate,
+                fn (Builder $query) =>
+                    $query->whereDate(
+                        'created_at',
+                        '<=',
+                        $toDate
+                    )
+            );
     }
 }

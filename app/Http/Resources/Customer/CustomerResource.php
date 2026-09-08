@@ -19,7 +19,7 @@ class CustomerResource extends JsonResource
             'name' => $this->name,
             'phone' => $this->phone,
 
-            'subscription_type' => $this->subscription_type->label(),
+            'subscription_type' => $this->subscription_type,
             'contract_status' => $this->latest_contract_status,
         ];
     }

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\BookingItemStatusEnum;
 use App\Enums\BookingStatusEnum;
+use App\Enums\BookingTypeEnum;
 use App\Enums\ContractStatusEnum;
 use App\Models\Booking;
 use App\Models\Customer;
@@ -84,20 +85,17 @@ class BookingApiTestSeeder extends Seeder
 
         /*
          * ========================================
-         * Pagination Test
+         * Pagination + Date Filter Test
          *
-         * 25 historical confirmed bookings
+         * 25 historical bookings
+         * Mixed confirmed / unconfirmed
          * ========================================
          */
 
-         for ($i = 25; $i >= 1; $i--) {
-            $startDate = now()
+        for ($i = 25; $i >= 1; $i--) {
+            $createdAt = now()
                 ->subMonths($i + 2)
                 ->startOfMonth();
-
-            $endDate = $startDate
-                ->copy()
-                ->addDays(20);
 
             $status = $i % 2 === 0
                 ? BookingStatusEnum::CONFIRMED
@@ -106,15 +104,11 @@ class BookingApiTestSeeder extends Seeder
             Booking::factory()
                 ->for($fullCustomer)
                 ->state([
-                    'booking_type' => 'internal',
-
+                    'booking_type' => BookingTypeEnum::LOCAL->value,
                     'status' => $status->value,
 
-                    'start_date' =>
-                        $startDate->toDateString(),
-
-                    'end_date' =>
-                        $endDate->toDateString(),
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
                 ])
                 ->withContract(
                     ContractStatusEnum::FINISHED,
@@ -131,25 +125,19 @@ class BookingApiTestSeeder extends Seeder
          *
          * كل requirements = true
          * Booking = CONFIRMED
-         * Latest customer contract = PENDING
          * ========================================
          */
 
         Booking::factory()
             ->for($fullCustomer)
             ->state([
-                'booking_type' => 'internal',
+                'booking_type' => BookingTypeEnum::LOCAL->value,
 
                 'status' =>
                     BookingStatusEnum::CONFIRMED->value,
 
-                'start_date' => now()
-                    ->subDays(5)
-                    ->toDateString(),
-
-                'end_date' => now()
-                    ->addDays(30)
-                    ->toDateString(),
+                'created_at' => now()->subDays(5),
+                'updated_at' => now()->subDays(5),
             ])
             ->withOrders(
                 installation: true,
@@ -181,30 +169,19 @@ class BookingApiTestSeeder extends Seeder
          * FLEX ONLY
          *
          * Booking = UNCONFIRMED
-         *
-         * price_offer = true
-         * contract = false
-         * installation = true
-         * extension = false
-         * operation لا يظهر
          * ========================================
          */
 
         Booking::factory()
             ->for($flexCustomer)
             ->state([
-                'booking_type' => 'internal',
+                'booking_type' => BookingTypeEnum::LOCAL->value,
 
                 'status' =>
                     BookingStatusEnum::UNCONFIRMED->value,
 
-                'start_date' => now()
-                    ->subDays(2)
-                    ->toDateString(),
-
-                'end_date' => now()
-                    ->addDays(20)
-                    ->toDateString(),
+                'created_at' => now()->subDays(2),
+                'updated_at' => now()->subDays(2),
             ])
             ->withOrders(
                 installation: true,
@@ -227,30 +204,19 @@ class BookingApiTestSeeder extends Seeder
          * ELECTRONIC ONLY
          *
          * Booking = UNCONFIRMED
-         *
-         * price_offer = false
-         * contract = false
-         * operation = false
-         *
-         * installation / extension لا يظهروا
          * ========================================
          */
 
         Booking::factory()
             ->for($electronicCustomer)
             ->state([
-                'booking_type' => 'internal',
+                'booking_type' => BookingTypeEnum::LOCAL->value,
 
                 'status' =>
                     BookingStatusEnum::UNCONFIRMED->value,
 
-                'start_date' => now()
-                    ->subDays(10)
-                    ->toDateString(),
-
-                'end_date' => now()
-                    ->addDays(10)
-                    ->toDateString(),
+                'created_at' => now()->subDays(10),
+                'updated_at' => now()->subDays(10),
             ])
             ->withOrders(
                 installation: false,
@@ -272,32 +238,20 @@ class BookingApiTestSeeder extends Seeder
          * ========================================
          * EXTERNAL ONLY
          *
-         * كل أنواع الخارجي الخمسة
          * Booking = UNCONFIRMED
-         *
-         * price_offer = true
-         * contract = true
-         * installation = false
-         * extension = true
-         * operation لا يظهر
          * ========================================
          */
 
         Booking::factory()
             ->for($externalCustomer)
             ->state([
-                'booking_type' => 'external',
+                'booking_type' =>  BookingTypeEnum::FOREIGN->value,
 
                 'status' =>
                     BookingStatusEnum::UNCONFIRMED->value,
 
-                'start_date' => now()
-                    ->subDays(3)
-                    ->toDateString(),
-
-                'end_date' => now()
-                    ->addDays(25)
-                    ->toDateString(),
+                'created_at' => now()->subDays(3),
+                'updated_at' => now()->subDays(3),
             ])
             ->withOrders(
                 installation: false,

@@ -2,14 +2,15 @@
 
 namespace App\Enums;
 
-enum BookingTypeEnum: string
+enum BookingServiceTypeEnum: string
 {
-    case LOCAL = 'local';
-    case FOREIGN = 'foreign';
+    case FLEX = 'flex';
+    case ELECTRONIC = 'electronic';
+    case EXTERNAL = 'external';
 
     public function label(): string
     {
-        return __("enums.booking_types.{$this->value}");
+        return __("enums.booking_service_types.{$this->value}");
     }
 
     public static function options(): array

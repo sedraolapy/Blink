@@ -20,14 +20,11 @@ class CustomerBookingResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'start_date' => $this->start_date?->format('Y-m-d'),
-            'end_date' => $this->end_date?->format('Y-m-d'),
-            'booking_type' => $this->booking_type instanceof BookingTypeEnum
-                ? $this->booking_type->label()
-                : BookingTypeEnum::tryFrom($this->booking_type)?->label(),
+            'created_at' => $this->created_at?->format('Y-m-d'),
+            'booking_type' => $this->booking_type,
 
 
-            'status' => $this->status?->label(),
+            'status' => $this->status,
             'requirements' => $requirementsService->getRequirements($this->resource),
         ];
     }

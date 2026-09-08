@@ -38,8 +38,9 @@ return [
     ],
 
     'booking_types' => [
-        'internal' => 'داخلي',
-        'external' => 'خارجي',
+        'local' => 'محلي',
+        'foreign' => 'أجنبي',
+        'flex' => 'فليكس',
     ],
 
     'contract_statuses' => [
@@ -64,5 +65,17 @@ return [
         'confirmed' => 'مؤكد',
         'unconfirmed' => 'غير مؤكد',
     ],
+
+    'advertiser_types' => [
+        'local' => 'محلي',
+        'foreign' => 'أجنبي',
+    ],
+
+    'booking_service_types' => [
+        'flex' => 'فليكس',
+        'electronic' => 'إلكتروني',
+        'external' => 'إعلانات خارجية',
+    ],
+
 
 ];

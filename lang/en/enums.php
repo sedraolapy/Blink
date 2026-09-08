@@ -38,8 +38,9 @@ return [
     ],
 
     'booking_types' => [
-        'internal' => 'Internal',
-        'external' => 'External',
+        'local' => 'Local',
+        'foreign' => 'Foreign',
+        'flex' => 'Flex',
     ],
 
     'contract_statuses' => [
@@ -63,5 +64,17 @@ return [
     'booking_statuses' => [
         'confirmed' => 'Confirmed',
         'unconfirmed' => 'Unconfirmed',
+    ],
+
+    'advertiser_types' => [
+        'local' => 'Local',
+        'foreign' => 'Foreign',
+    ],
+
+
+    'booking_service_types' => [
+        'flex' => 'Flex',
+        'electronic' => 'Electronic',
+        'external' => 'External Advertising',
     ],
 ];

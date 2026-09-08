@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\BookingItemStatusEnum;
 use App\Enums\BookingStatusEnum;
+use App\Enums\BookingTypeEnum;
 use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\ExternalAsset;
@@ -73,13 +74,10 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
 
             $confirmedBooking = Booking::query()->create([
                 'customer_id' => $customer->id,
-                'booking_type' => 'external',
+                'booking_type' =>  BookingTypeEnum::FOREIGN->value,
 
                 'status' =>
                     BookingStatusEnum::CONFIRMED->value,
-
-                'start_date' => '2026-09-10',
-                'end_date' => '2026-12-15',
 
                 'installation_order' => false,
                 'extension_order' => false,
@@ -229,13 +227,10 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
             $unconfirmedBooking =
                 Booking::query()->create([
                     'customer_id' => $customer->id,
-                    'booking_type' => 'external',
+                    'booking_type' =>  BookingTypeEnum::FOREIGN->value,
 
                     'status' =>
                         BookingStatusEnum::UNCONFIRMED->value,
-
-                    'start_date' => '2027-01-05',
-                    'end_date' => '2027-02-20',
 
                     'installation_order' => false,
                     'extension_order' => false,

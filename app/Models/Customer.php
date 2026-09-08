@@ -4,10 +4,12 @@ namespace App\Models;
 
 use App\Enums\ContractStatusEnum;
 use App\Enums\SubscriptionTypeEnum;
-use Illuminate\Database\Eloquent\Model;
-use Spatie\Translatable\HasTranslations;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Spatie\Translatable\HasTranslations;
 
 class Customer extends Model
 {
@@ -23,7 +25,7 @@ class Customer extends Model
         'name',
     ];
 
-    protected function casts(): array
+    protected function casts()
     {
         return [
             'subscription_type' => SubscriptionTypeEnum::class,
@@ -35,7 +37,28 @@ class Customer extends Model
         return $this->hasMany(Booking::class);
     }
 
-    public function scopeSearch(Builder $query, ?string $search): Builder
+    public function contracts(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Contract::class,
+            Booking::class,
+            'customer_id',
+            'booking_id'
+        );
+    }
+
+    public function latestContract(): HasOneThrough
+    {
+        return $this
+            ->contracts()
+            ->one()
+            ->ofMany([
+                'created_at' => 'max',
+                'id' => 'max',
+            ]);
+    }
+
+    public function scopeSearch(Builder $query,?string $search)
     {
         if (! $search) {
             return $query;
@@ -43,26 +66,31 @@ class Customer extends Model
 
         $locale = app()->getLocale();
 
-        return $query->where(function (Builder $query) use ($search, $locale) {
-            $query
-                ->where("name->{$locale}", 'like', "%{$search}%");
-        });
+        return $query->where(
+            fn (Builder $query) =>
+                $query->where(
+                    "name->{$locale}",
+                    'like',
+                    "%{$search}%"
+                )
+        );
     }
 
-    public function scopeSubscriptionType(Builder $query, SubscriptionTypeEnum|string|null $subscriptionType): Builder
+    public function scopeSubscriptionType(Builder $query, SubscriptionTypeEnum|string|null $subscriptionType)
     {
         if (! $subscriptionType) {
             return $query;
         }
 
-        $value = $subscriptionType instanceof SubscriptionTypeEnum
-            ? $subscriptionType->value
-            : $subscriptionType;
+        $value = $subscriptionType
+            instanceof SubscriptionTypeEnum
+                ? $subscriptionType->value
+                : $subscriptionType;
 
-        return $query->where('subscription_type', $value);
+        return $query->where('subscription_type',$value);
     }
 
-    public function scopeLatestContractStatus(Builder $query,ContractStatusEnum|string|null $status): Builder
+    public function scopeLatestContractStatus(Builder $query,ContractStatusEnum|string|null $status)
     {
         if (! $status) {
             return $query;
@@ -72,23 +100,6 @@ class Customer extends Model
             ? $status->value
             : $status;
 
-        return $query->where(
-            Contract::query()
-                ->select('contracts.status')
-                ->join(
-                    'bookings',
-                    'bookings.id',
-                    '=',
-                    'contracts.booking_id'
-                )
-                ->whereColumn(
-                    'bookings.customer_id',
-                    'customers.id'
-                )
-                ->orderByDesc('contracts.created_at')
-                ->orderByDesc('contracts.id')
-                ->limit(1),
-            $value
-        );
+        return $query->whereHas('latestContract', fn (Builder $query) =>$query->where('status',$value));
     }
 }

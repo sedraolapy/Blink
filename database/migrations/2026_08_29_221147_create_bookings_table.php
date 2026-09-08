@@ -20,9 +20,6 @@ return new class extends Migration
                 ->restrictOnDelete();
 
             $table->string('booking_type');
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
-
             $table->string('status')->default(BookingStatusEnum::UNCONFIRMED->value);
 
             $table->boolean('installation_order')->default(false);

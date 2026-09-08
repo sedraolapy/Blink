@@ -2,18 +2,18 @@
 
 namespace App\Services\Booking\FlexBooking\BookingOptions;
 
-use App\Enums\BookingItemStatusEnum;
+use App\Enums\BookingStatusEnum;
 use App\Models\AdvertisingPeriod;
 use App\Models\FlexBillboard;
 use App\Models\FlexBooking;
 use App\Models\FlexBookingItem;
 use App\Models\FlexBookingPeriod;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Collection as SupportCollection;
+use App\Models\Governorate;
+use Illuminate\Support\Collection;
 
 class FlexBookingOptionsService
 {
-    public function getPeriods(?int $bookingId = null): Collection
+    public function getPeriods(?int $bookingId = null)
     {
         $periods = AdvertisingPeriod::query()
             ->select([
@@ -21,13 +21,14 @@ class FlexBookingOptionsService
                 'number',
             ])
             ->with([
-                'ranges' => fn ($query) => $query->select([
-                    'id',
-                    'advertising_period_id',
-                    'display_group',
-                    'start_month',
-                    'start_day',
-                ]),
+                'ranges' => fn ($query) =>
+                    $query->select([
+                        'id',
+                        'advertising_period_id',
+                        'display_group',
+                        'start_month',
+                        'start_day',
+                    ]),
             ])
             ->orderBy('number')
             ->get();
@@ -91,10 +92,11 @@ class FlexBookingOptionsService
                 );
 
                 if ($bookingId !== null) {
-
                     $period->setAttribute(
                         'was_selected',
-                        $selectedPeriodIds->contains($period->id)
+                        $selectedPeriodIds->contains(
+                            $period->id
+                        )
                     );
                 }
             }
@@ -114,21 +116,17 @@ class FlexBookingOptionsService
         }
 
         return FlexBookingPeriod::query()
-            ->where('flex_booking_id', $flexBookingId)
+            ->where(
+                'flex_booking_id',
+                $flexBookingId
+            )
             ->where('year', now()->year)
             ->pluck('advertising_period_id');
     }
 
-    private function getOccupiedCounts(SupportCollection $periodIds, ?int $bookingId): SupportCollection
+    private function getOccupiedCounts(Collection $periodIds,?int $bookingId)
     {
         return FlexBookingItem::query()
-            ->whereIn(
-                'status',
-                [
-                    BookingItemStatusEnum::BOOKED->value,
-                    BookingItemStatusEnum::UNCONFIRMED->value,
-                ]
-            )
             ->whereHas(
                 'period',
                 function ($query) use (
@@ -143,14 +141,134 @@ class FlexBookingOptionsService
                         )
                         ->when(
                             $bookingId !== null,
-                            fn ($query) => $query->whereHas(
-                                'flexBooking',
-                                fn ($query) => $query->where(
-                                    'booking_id',
+                            fn ($query) =>
+                                $query->whereHas(
+                                    'flexBooking',
+                                    fn ($query) =>
+                                        $query->where(
+                                            'booking_id',
+                                            '!=',
+                                            $bookingId
+                                        )
+                                )
+                        )
+                        ->whereHas(
+                            'flexBooking.booking',
+                            fn ($query) =>
+                                $query->whereIn(
+                                    'status',
+                                    [
+                                        BookingStatusEnum::CONFIRMED->value,
+                                        BookingStatusEnum::UNCONFIRMED->value,
+                                    ]
+                                )
+                        );
+                }
+            )
+            ->with([
+                'period:id,advertising_period_id',
+            ])
+            ->get([
+                'id',
+                'flex_booking_period_id',
+                'flex_billboard_id',
+            ])
+            ->groupBy(
+                fn (FlexBookingItem $item) =>
+                    $item
+                        ->period
+                        ->advertising_period_id
+            )
+            ->map(
+                fn (Collection $items) =>
+                    $items
+                        ->pluck('flex_billboard_id')
+                        ->unique()
+                        ->count()
+            );
+    }
+
+    private function formatMonthDay(?int $month,?int $day)
+    {
+        if ($month === null || $day === null) {
+            return null;
+        }
+
+        return sprintf('%02d-%02d',$month,$day);
+    }
+
+    public function getAvailableAssets(array $data): array
+    {
+        $bookingId = isset($data['booking_id'])
+            ? (int) $data['booking_id']
+            : null;
+
+        $governorateId = (int) $data['governorate_id'];
+
+        $periodIds = collect($data['period_ids'])
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        $year = now()->year;
+
+        $governorate = Governorate::query()
+            ->findOrFail($governorateId);
+
+        $periods = AdvertisingPeriod::query()
+            ->whereIn('id', $periodIds)
+            ->orderBy('number')
+            ->get([
+                'id',
+                'number',
+            ]);
+
+        $billboards = FlexBillboard::query()
+            ->governorate($governorateId)
+            ->search($data['search'] ?? null)
+            ->with([
+                'area:id,governorate_id,name',
+            ])
+            ->orderBy('id')
+            ->get([
+                'id',
+                'code',
+                'area_id',
+                'location_name',
+                'width',
+                'height',
+            ]);
+
+        $occupiedByPeriod = FlexBookingItem::query()
+            ->whereHas(
+                'period',
+                fn ($query) =>
+                    $query
+                        ->where('year', $year)
+                        ->whereIn(
+                            'advertising_period_id',
+                            $periodIds
+                        )
+            )
+            ->whereHas(
+                'period.flexBooking.booking',
+                function ($query) use ($bookingId) {
+                    $query
+                        ->whereIn(
+                            'status',
+                            [
+                                BookingStatusEnum::CONFIRMED->value,
+                                BookingStatusEnum::UNCONFIRMED->value,
+                            ]
+                        )
+                        ->when(
+                            $bookingId !== null,
+                            fn ($query) =>
+                                $query->where(
+                                    'id',
                                     '!=',
                                     $bookingId
                                 )
-                            )
                         );
                 }
             )
@@ -167,20 +285,40 @@ class FlexBookingOptionsService
                     $item->period->advertising_period_id
             )
             ->map(
-                fn (SupportCollection $items) =>
+                fn ($items) =>
                     $items
                         ->pluck('flex_billboard_id')
                         ->unique()
-                        ->count()
             );
-    }
 
-    private function formatMonthDay(?int $month, ?int $day)
-    {
-        if ($month === null || $day === null) {
-            return null;
-        }
+        $periodsData = $periods->map(
+            function (AdvertisingPeriod $period) use (
+                $billboards,
+                $occupiedByPeriod
+            ) {
+                $occupiedBillboardIds = $occupiedByPeriod->get(
+                    $period->id,
+                    collect()
+                );
 
-        return sprintf('%02d-%02d',$month,$day);
+                return [
+                    'period' => $period,
+
+                    'items' => $billboards
+                        ->reject(
+                            fn (FlexBillboard $billboard) =>
+                                $occupiedBillboardIds->contains(
+                                    $billboard->id
+                                )
+                        )
+                        ->values(),
+                ];
+            }
+        );
+
+        return [
+            'governorate' => $governorate,
+            'periods' => $periodsData,
+        ];
     }
 }
