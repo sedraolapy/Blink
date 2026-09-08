@@ -27,7 +27,6 @@ return new class extends Migration
                 ->constrained('flex_designs')
                 ->nullOnDelete();
 
-            $table->decimal('unit_price_at_booking', 12, 2);
 
             $table->boolean('has_dykat')
                 ->default(false);

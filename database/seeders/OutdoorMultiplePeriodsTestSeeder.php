@@ -148,9 +148,6 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                 'design_id' =>
                     $confirmedDesign1->id,
 
-                'unit_price_at_booking' =>
-                    $asset->local_price,
-
                 'status' =>
                     BookingItemStatusEnum::BOOKED->value,
             ]);
@@ -177,9 +174,6 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
 
                 'design_id' =>
                     $confirmedDesign2->id,
-
-                'unit_price_at_booking' =>
-                    $asset->local_price,
 
                 'status' =>
                     BookingItemStatusEnum::BOOKED->value,
@@ -208,8 +202,6 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                 'design_id' =>
                     $confirmedDesign3->id,
 
-                'unit_price_at_booking' =>
-                    $asset->local_price,
 
                 'status' =>
                     BookingItemStatusEnum::BOOKED->value,
@@ -292,8 +284,6 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                 'design_id' =>
                     $unconfirmedDesign1->id,
 
-                'unit_price_at_booking' =>
-                    $asset->local_price,
 
                 'status' =>
                     BookingItemStatusEnum::UNCONFIRMED->value,
@@ -322,8 +312,6 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                 'design_id' =>
                     $unconfirmedDesign2->id,
 
-                'unit_price_at_booking' =>
-                    $asset->local_price,
 
                 'status' =>
                     BookingItemStatusEnum::UNCONFIRMED->value,

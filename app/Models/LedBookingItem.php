@@ -15,14 +15,12 @@ class LedBookingItem extends Model
         'led_booking_period_id',
         'led_screen_id',
         'led_network_id',
-        'unit_price_at_booking',
         'is_gift',
     ];
 
     protected function casts(): array
     {
         return [
-            'unit_price_at_booking' => 'decimal:2',
             'is_gift' => 'boolean',
             'status' => BookingItemStatusEnum::class,
         ];

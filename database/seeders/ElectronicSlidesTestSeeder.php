@@ -122,9 +122,6 @@ class ElectronicSlidesTestSeeder extends Seeder
 
                     'led_network_id' => null,
 
-                    'unit_price_at_booking' =>
-                        $standaloneScreen->local_price ?? 0,
-
                     'is_gift' => false,
 
                     'status' =>
@@ -175,9 +172,6 @@ class ElectronicSlidesTestSeeder extends Seeder
 
                     'led_screen_id' => null,
                     'led_network_id' => $network->id,
-
-                    'unit_price_at_booking' =>
-                        $network->local_price ?? 0,
 
                     'is_gift' => false,
 
@@ -285,9 +279,6 @@ class ElectronicSlidesTestSeeder extends Seeder
 
                     'led_network_id' => null,
 
-                    'unit_price_at_booking' =>
-                        $standaloneScreen->local_price ?? 0,
-
                     'is_gift' => false,
 
                     'status' =>
@@ -319,9 +310,6 @@ class ElectronicSlidesTestSeeder extends Seeder
 
                     'led_screen_id' => null,
                     'led_network_id' => $network->id,
-
-                    'unit_price_at_booking' =>
-                        $network->local_price ?? 0,
 
                     'is_gift' => false,
 

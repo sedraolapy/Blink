@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AdvertisingPeriod\AdvertisingPeriodController;
 use App\Http\Controllers\API\Auth\LoginController;
+use App\Http\Controllers\API\Booking\BookingController;
 use App\Http\Controllers\Api\Booking\FlexBooking\BookingOptions\FlexBookingOptionsController;
 use App\Http\Controllers\Api\Booking\FlexBooking\FlexBookingController;
 use App\Http\Controllers\API\Customer\CustomerController;
@@ -54,6 +55,8 @@ Route::middleware('localization')->group(function () {
         Route::get('/booking-options/flex/periods',[FlexBookingOptionsController::class, 'periods']);
         Route::post('/assets-available/flex/options-booking',[FlexBookingOptionsController::class, 'availableAssets']);
         Route::post('/bookings/flex',[FlexBookingController::class, 'store']);
+        Route::patch('/bookings/{booking}',[BookingController::class, 'updateAdvertiserType']);
+        Route::put('/bookings/{bookingId}/flex',[FlexBookingController::class, 'update']);
     });
 
 });

@@ -159,8 +159,6 @@ class BookingFactory extends Factory
 
                     'design_id' => null,
 
-                    'unit_price_at_booking' =>
-                        $billboard->local_price,
 
                     'has_dykat' => false,
                     'is_gift' => false,
@@ -218,8 +216,6 @@ class BookingFactory extends Factory
 
                     'led_network_id' => null,
 
-                    'unit_price_at_booking' =>
-                        $screen->local_price,
 
                     'is_gift' => false,
 
@@ -243,9 +239,6 @@ class BookingFactory extends Factory
 
                     'led_network_id' =>
                         $network->id,
-
-                    'unit_price_at_booking' =>
-                        $network->local_price,
 
                     'is_gift' => false,
 
@@ -312,8 +305,6 @@ class BookingFactory extends Factory
 
                         'design_id' => null,
 
-                        'unit_price_at_booking' =>
-                            $asset->local_price,
 
                         'status' => $status->value,
                     ]);

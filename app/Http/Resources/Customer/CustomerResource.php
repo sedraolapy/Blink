@@ -18,9 +18,8 @@ class CustomerResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'phone' => $this->phone,
-
             'subscription_type' => $this->subscription_type,
-            'contract_status' => $this->latest_contract_status,
+            'contract_status' => $this->latestContract?->status,
         ];
     }
 }

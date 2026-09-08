@@ -29,21 +29,17 @@ return [
     ],
     'periods_retrieved' => 'Flex booking periods retrieved successfully.',
     'flex_booking' => [
-        'periods_retrieved' =>
-            'Flex booking periods retrieved successfully.',
+        'periods_retrieved' => 'Flex booking periods retrieved successfully.',
+        'available_assets_retrieved' => 'Available flex billboards retrieved successfully.',
+        'saved' => 'Flex booking saved successfully.',
+        'customer_mismatch' => 'The selected customer does not match the booking customer.',
+        'already_exists' => 'A flex booking already exists for this booking.',
+        'assets_not_available' => 'One or more selected flex billboards are no longer available for the selected period.',
+        'updated' => 'Flex booking updated successfully.',
+        'duplicate_assets' => 'The same flex billboard cannot be selected more than once within the same period.',
+    ],
 
-        'available_assets_retrieved' =>
-            'Available flex billboards retrieved successfully.',
-            'saved' =>
-            'Flex booking saved successfully.',
-    
-        'customer_mismatch' =>
-            'The selected customer does not match the booking customer.',
-    
-        'already_exists' =>
-            'A flex booking already exists for this booking.',
-    
-        'assets_not_available' =>
-            'One or more selected flex billboards are no longer available for the selected period.',
+    'booking' => [
+        'updated' => 'Booking updated successfully.',
     ],
 ];

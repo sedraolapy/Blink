@@ -92,14 +92,31 @@ class ElectronicService
         );
 
         return [
-            'summary' => $this->getSummary(),
+            'summary' => $this->getSummary($filters),
             'items' => $items,
         ];
     }
 
-    private function getSummary(): array
+    private function getSummary(array $filters): array
     {
-        $confirmedBookings = LedBooking::query()
+        $search = $filters['search'] ?? null;
+    
+        $governorateId = isset($filters['governorate_id'])
+            ? (int) $filters['governorate_id']
+            : null;
+    
+        $screensQuery = LedScreen::query()
+            ->whereNull('network_id')
+            ->search($search)
+            ->governorate($governorateId);
+    
+        $networksQuery = LedNetwork::query()
+            ->search($search)
+            ->governorate($governorateId);
+    
+        $hasAssetFilters = filled($search) || $governorateId !== null;
+    
+        $confirmedBookingsQuery = LedBooking::query()
             ->join(
                 'bookings',
                 'bookings.id',
@@ -121,11 +138,9 @@ class ElectronicService
             ->where(
                 'bookings.status',
                 BookingStatusEnum::CONFIRMED->value
-            )
-            ->distinct()
-            ->count('led_bookings.id');
-
-        $unconfirmedBookings = LedBooking::query()
+            );
+    
+        $unconfirmedBookingsQuery = LedBooking::query()
             ->join(
                 'bookings',
                 'bookings.id',
@@ -147,15 +162,49 @@ class ElectronicService
             ->where(
                 'bookings.status',
                 BookingStatusEnum::UNCONFIRMED->value
-            )
-            ->distinct()
-            ->count('led_bookings.id');
-
+            );
+    
+        if ($hasAssetFilters) {
+            $screenIdsQuery = LedScreen::query()
+                ->whereNull('network_id')
+                ->search($search)
+                ->governorate($governorateId)
+                ->select('led_screens.id');
+    
+            $networkIdsQuery = LedNetwork::query()
+                ->search($search)
+                ->governorate($governorateId)
+                ->select('led_networks.id');
+    
+            $applyAssetFilter = function ($query) use (
+                $screenIdsQuery,
+                $networkIdsQuery
+            ) {
+                $query->where(function ($query) use (
+                    $screenIdsQuery,
+                    $networkIdsQuery
+                ) {
+                    $query
+                        ->whereIn(
+                            'items.led_screen_id',
+                            clone $screenIdsQuery
+                        )
+                        ->orWhereIn(
+                            'items.led_network_id',
+                            clone $networkIdsQuery
+                        );
+                });
+            };
+    
+            $applyAssetFilter($confirmedBookingsQuery);
+            $applyAssetFilter($unconfirmedBookingsQuery);
+        }
+    
         return [
-            'total_screens' => LedScreen::query()->whereNull('network_id')->count(),
-            'networks_count' => LedNetwork::query()->count(),
-            'confirmed_bookings' => $confirmedBookings,
-            'unconfirmed_bookings' => $unconfirmedBookings,
+            'total_screens' => (clone $screensQuery)->count(),
+            'networks_count' => (clone $networksQuery)->count(),
+            'confirmed_bookings' => $confirmedBookingsQuery->distinct()->count('led_bookings.id'),
+            'unconfirmed_bookings' => $unconfirmedBookingsQuery->distinct()->count('led_bookings.id'),
         ];
     }
 

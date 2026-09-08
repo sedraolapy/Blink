@@ -49,13 +49,16 @@ class Customer extends Model
 
     public function latestContract(): HasOneThrough
     {
-        return $this
-            ->contracts()
-            ->one()
-            ->ofMany([
-                'created_at' => 'max',
-                'id' => 'max',
-            ]);
+        return $this->hasOneThrough(
+            Contract::class,
+            Booking::class,
+            'customer_id',
+            'booking_id',
+            'id',
+            'id'
+        )
+            ->orderByDesc('contracts.created_at')
+            ->orderByDesc('contracts.id');
     }
 
     public function scopeSearch(Builder $query,?string $search)
@@ -90,16 +93,26 @@ class Customer extends Model
         return $query->where('subscription_type',$value);
     }
 
-    public function scopeLatestContractStatus(Builder $query,ContractStatusEnum|string|null $status)
+    public function scopeLatestContractStatus(Builder $query,?string $status)
     {
         if (! $status) {
             return $query;
         }
-
-        $value = $status instanceof ContractStatusEnum
-            ? $status->value
-            : $status;
-
-        return $query->whereHas('latestContract', fn (Builder $query) =>$query->where('status',$value));
+    
+        $latestContractStatus = Contract::query()
+            ->select('contracts.status')
+            ->whereHas(
+                'booking',
+                fn (Builder $bookingQuery) =>
+                    $bookingQuery->whereColumn(
+                        'bookings.customer_id',
+                        'customers.id'
+                    )
+            )
+            ->orderByDesc('contracts.created_at')
+            ->orderByDesc('contracts.id')
+            ->limit(1);
+    
+        return $query->where($latestContractStatus,'=',$status);
     }
 }

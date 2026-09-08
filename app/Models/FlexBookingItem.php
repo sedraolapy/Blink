@@ -15,7 +15,6 @@ class FlexBookingItem extends Model
         'flex_booking_period_id',
         'flex_billboard_id',
         'design_id',
-        'unit_price_at_booking',
         'has_dykat',
         'is_gift',
         'status',
@@ -24,7 +23,6 @@ class FlexBookingItem extends Model
     protected function casts(): array
     {
         return [
-            'unit_price_at_booking' => 'decimal:2',
             'has_dykat' => 'boolean',
             'is_gift' => 'boolean',
             'status' => BookingItemStatusEnum::class,

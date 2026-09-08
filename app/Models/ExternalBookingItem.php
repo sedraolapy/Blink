@@ -14,14 +14,12 @@ class ExternalBookingItem extends Model
         'external_booking_period_id',
         'external_asset_id',
         'design_id',
-        'unit_price_at_booking',
         'status',
     ];
 
     protected function casts(): array
     {
         return [
-            'unit_price_at_booking' => 'decimal:2',
             'status' => BookingItemStatusEnum::class,
         ];
     }

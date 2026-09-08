@@ -28,8 +28,6 @@ return new class extends Migration
                 ->constrained('external_designs')
                 ->nullOnDelete();
 
-            $table->decimal('unit_price_at_booking', 12, 2);
-
             $table->string('status')->default(BookingItemStatusEnum::UNCONFIRMED->value);
 
             $table->timestamps();

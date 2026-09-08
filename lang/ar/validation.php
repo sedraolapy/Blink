@@ -4,6 +4,11 @@ return [
 
     'required' => 'حقل :attribute مطلوب.',
     'email' => 'يجب أن يكون :attribute بريدًا إلكترونيًا صالحًا.',
+    'in' => 'القيمة المحددة لـ :attribute غير صالحة.',
+    'distinct' => 'حقل :attribute يحتوي على قيمة مكررة.',
+    'boolean' => 'يجب أن تكون قيمة :attribute صحيحة أو خاطئة.',
+    'present' => 'يجب أن يكون حقل :attribute موجودا.',
+    'array' => 'يجب أن يكون حقل :attribute مصفوفة.',
     'string' => 'يجب أن يكون :attribute نصًا.',
     'min' => [
         'string' => 'يجب ألا يقل :attribute عن :min أحرف.',

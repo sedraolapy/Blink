@@ -27,13 +27,30 @@ class CustomersTable
                     ->searchable(),
 
                 TextColumn::make('subscription_type')
-                    ->label(__('filament/admin/customer_resource.subscription_type'))
+                    ->label(
+                        __('filament/admin/customer_resource.subscription_type')
+                    )
                     ->badge()
                     ->formatStateUsing(
                         fn ($state): string =>
                             $state instanceof SubscriptionTypeEnum
                                 ? $state->label()
-                                : (SubscriptionTypeEnum::tryFrom($state)?->label() ?? $state)
+                                : (
+                                    SubscriptionTypeEnum::tryFrom($state)?->label()
+                                    ?? $state
+                                )
+                    )
+                    ->color(
+                        fn ($state): string => match (
+                            $state instanceof SubscriptionTypeEnum
+                                ? $state
+                                : SubscriptionTypeEnum::tryFrom($state)
+                        ) {
+                            SubscriptionTypeEnum::GOLD => 'warning',
+                            SubscriptionTypeEnum::SILVER => 'gray',
+                            SubscriptionTypeEnum::BRONZE => 'danger',
+                            default => 'gray',
+                        }
                     ),
 
                 TextColumn::make('created_at')

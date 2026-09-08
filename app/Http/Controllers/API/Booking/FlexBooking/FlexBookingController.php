@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api\Booking\FlexBooking;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Booking\FlexBooking\StoreFlexBookingRequest;
+use App\Http\Requests\Booking\FlexBooking\UpdateFlexBookingRequest;
 use App\Http\Resources\Booking\FlexBooking\StoreFlexBookingResource;
+use App\Http\Resources\Booking\FlexBooking\UpdateFlexBookingResource;
 use App\Services\Booking\FlexBooking\FlexBookingService;
 
 class FlexBookingController extends Controller
@@ -20,6 +22,17 @@ class FlexBookingController extends Controller
             __('messages.flex_booking.saved'),
             new StoreFlexBookingResource($result),
             201
+        );
+    }
+
+    public function update(int $bookingId,UpdateFlexBookingRequest $request) 
+    {
+        $data =  $request->validated();
+        $result = $this->service->update($bookingId,$data);
+    
+        return sendResponse(
+            __('messages.flex_booking.updated'),
+            new UpdateFlexBookingResource($result)
         );
     }
 }

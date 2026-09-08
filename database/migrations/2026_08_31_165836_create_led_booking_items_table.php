@@ -29,8 +29,6 @@ return new class extends Migration
                 ->constrained('led_networks')
                 ->restrictOnDelete();
 
-            $table->decimal('unit_price_at_booking', 12, 2);
-
             $table->boolean('is_gift')
                 ->default(false);
 
