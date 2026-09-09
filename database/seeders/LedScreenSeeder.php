@@ -2,137 +2,284 @@
 
 namespace Database\Seeders;
 
-use App\Models\Area;
+use App\Models\Governorate;
 use App\Models\LedNetwork;
 use App\Models\LedScreen;
+use Database\Seeders\Concerns\GeneratesDemoCoordinates;
 use Illuminate\Database\Seeder;
 
 class LedScreenSeeder extends Seeder
 {
+    use GeneratesDemoCoordinates;
+
     public function run(): void
     {
-        $areas = Area::query()
-            ->with('governorate')
+        $governorates = Governorate::query()
+            ->whereHas('areas')
+            ->with([
+                'areas' => fn ($query) =>
+                    $query->orderBy('id'),
+            ])
+            ->orderBy('id')
             ->get();
 
-        if ($areas->isEmpty()) {
+        if ($governorates->isEmpty()) {
             $this->command?->error(
-                'No areas found. Run AreaSeeder first.'
+                'No governorates with areas found. Run geography seeders first.'
             );
 
             return;
         }
 
-        for ($i = 1; $i <= 30; $i++) {
+        /*
+        |--------------------------------------------------------------------------
+        | Independent Screens
+        |--------------------------------------------------------------------------
+        |
+        | 30 شاشة موزعين بالتناوب على كل المحافظات.
+        |
+        */
 
-            $area = $areas[($i - 1) % $areas->count()];
+        for ($i = 1; $i <= 30; $i++) {
+            $area = $this->distributedArea(
+                $governorates,
+                $i - 1
+            );
+
+            $areaCenter = $this->areaCenter(
+                $area
+            );
+
+            $coordinates = $this->pointNear(
+                $areaCenter['latitude'],
+                $areaCenter['longitude'],
+                80,
+                900,
+                "independent-led-{$i}"
+            );
+
+            $areaNameAr =
+                $area->getTranslation(
+                    'name',
+                    'ar'
+                );
+
+            $areaNameEn =
+                $area->getTranslation(
+                    'name',
+                    'en'
+                );
 
             LedScreen::updateOrCreate(
                 [
-                    'code' => sprintf('LED-IND-%03d', $i),
+                    'code' => sprintf(
+                        'LED-IND-%03d',
+                        $i
+                    ),
                 ],
                 [
                     'area_id' => $area->id,
+
                     'network_id' => null,
 
                     'location_name' => [
-                        'ar' => "شاشة إلكترونية مستقلة {$i}",
-                        'en' => "Independent LED Screen {$i}",
+                        'ar' =>
+                            "شاشة إلكترونية مستقلة - {$areaNameAr} {$i}",
+
+                        'en' =>
+                            "Independent LED Screen - {$areaNameEn} {$i}",
                     ],
 
-                    'latitude' => 33.5000000 + ($i * 0.001),
-                    'longitude' => 36.2000000 + ($i * 0.001),
+                    'latitude' =>
+                        $coordinates['latitude'],
 
-                    'width' => 4 + ($i % 3),
+                    'longitude' =>
+                        $coordinates['longitude'],
+
+                    'width' =>
+                        4 + ($i % 3),
+
                     'height' => 3,
 
                     'width_px' => 1920,
+
                     'height_px' => 1080,
 
-                    'local_price' => 1500 + ($i * 50),
-                    'foreign_price' => 2000 + ($i * 50),
+                    'local_price' =>
+                        1500 + ($i * 50),
+
+                    'foreign_price' =>
+                        2000 + ($i * 50),
                 ]
             );
         }
 
-        for ($i = 1; $i <= 8; $i++) {
+        /*
+        |--------------------------------------------------------------------------
+        | LED Networks
+        |--------------------------------------------------------------------------
+        |
+        | Network واحدة لكل محافظة.
+        |
+        */
 
-            $area = $areas[($i - 1) % $areas->count()];
+        foreach (
+            $governorates->values()
+            as $index => $governorate
+        ) {
+            $networkNumber =
+                $index + 1;
+
+            $areas =
+                $governorate->areas->values();
+
+            /*
+             * نختار Area من المحافظة نفسها.
+             */
+            $area = $areas->get(
+                $index % $areas->count()
+            );
+
+            $governorateNameAr =
+                $governorate->getTranslation(
+                    'name',
+                    'ar'
+                );
+
+            $governorateNameEn =
+                $governorate->getTranslation(
+                    'name',
+                    'en'
+                );
+
+            $areaNameAr =
+                $area->getTranslation(
+                    'name',
+                    'ar'
+                );
+
+            $areaNameEn =
+                $area->getTranslation(
+                    'name',
+                    'en'
+                );
+
+            $networkNameEn =
+                "Test LED Network {$networkNumber} - {$governorateNameEn}";
 
             $network = LedNetwork::updateOrCreate(
                 [
-                    'location_name->en' => "Test LED Network {$i}",
+                    'location_name->en' =>
+                        $networkNameEn,
                 ],
                 [
                     'location_name' => [
-                        'ar' => "شبكة شاشات تجريبية {$i}",
-                        'en' => "Test LED Network {$i}",
+                        'ar' =>
+                            "شبكة شاشات {$governorateNameAr} - {$areaNameAr}",
+
+                        'en' =>
+                            $networkNameEn,
                     ],
 
-                    'local_price' => 3000 + ($i * 100),
-                    'foreign_price' => 4000 + ($i * 100),
+                    'local_price' =>
+                        3000
+                        + ($networkNumber * 100),
+
+                    'foreign_price' =>
+                        4000
+                        + ($networkNumber * 100),
                 ]
             );
 
-            LedScreen::updateOrCreate(
-                [
-                    'code' => sprintf(
-                        'LED-NET-%02d-01',
-                        $i
-                    ),
-                ],
-                [
-                    'area_id' => $area->id,
-                    'network_id' => $network->id,
+            /*
+             * مركز الـArea.
+             */
+            $areaCenter =
+                $this->areaCenter(
+                    $area
+                );
 
-                    'location_name' => [
-                        'ar' => "الشاشة الأولى ضمن الشبكة {$i}",
-                        'en' => "Network {$i} Screen 1",
+            /*
+             * مركز خاص للـNetwork ضمن الـArea.
+             */
+            $networkCenter =
+                $this->pointNear(
+                    $areaCenter['latitude'],
+                    $areaCenter['longitude'],
+                    100,
+                    700,
+                    "network-center-{$networkNumber}"
+                );
+
+            /*
+             * شاشتين لكل Network.
+             *
+             * كل شاشة بين 30 و180 متر تقريباً
+             * من مركز الشبكة.
+             */
+            $screensCount = 2 + (($networkNumber - 1) % 4);
+
+            for (
+                $screenNumber = 1;
+                $screenNumber <= $screensCount;
+                $screenNumber++
+            ) {
+                $coordinates =
+                    $this->pointNear(
+                        $networkCenter['latitude'],
+                        $networkCenter['longitude'],
+                        30,
+                        180,
+                        "network-{$networkNumber}-screen-{$screenNumber}"
+                    );
+
+                LedScreen::updateOrCreate(
+                    [
+                        'code' => sprintf(
+                            'LED-NET-%02d-%02d',
+                            $networkNumber,
+                            $screenNumber
+                        ),
                     ],
+                    [
+                        'area_id' =>
+                            $area->id,
 
-                    'latitude' => 33.6000000 + ($i * 0.001),
-                    'longitude' => 36.3000000 + ($i * 0.001),
+                        'network_id' =>
+                            $network->id,
 
-                    'width' => 5,
-                    'height' => 3,
+                        'location_name' => [
+                            'ar' =>
+                                "الشاشة {$screenNumber} ضمن شبكة {$governorateNameAr}",
 
-                    'width_px' => 1920,
-                    'height_px' => 1080,
+                            'en' =>
+                                "{$governorateNameEn} Network {$networkNumber} Screen {$screenNumber}",
+                        ],
 
-                    'local_price' => null,
-                    'foreign_price' => null,
-                ]
-            );
+                        'latitude' =>
+                            $coordinates['latitude'],
 
-            LedScreen::updateOrCreate(
-                [
-                    'code' => sprintf(
-                        'LED-NET-%02d-02',
-                        $i
-                    ),
-                ],
-                [
-                    'area_id' => $area->id,
-                    'network_id' => $network->id,
+                        'longitude' =>
+                            $coordinates['longitude'],
 
-                    'location_name' => [
-                        'ar' => "الشاشة الثانية ضمن الشبكة {$i}",
-                        'en' => "Network {$i} Screen 2",
-                    ],
+                        'width' => 5,
 
-                    'latitude' => 33.7000000 + ($i * 0.001),
-                    'longitude' => 36.4000000 + ($i * 0.001),
+                        'height' => 3,
 
-                    'width' => 5,
-                    'height' => 3,
+                        'width_px' => 1920,
 
-                    'width_px' => 1920,
-                    'height_px' => 1080,
+                        'height_px' => 1080,
 
-                    'local_price' => null,
-                    'foreign_price' => null,
-                ]
-            );
+                        /*
+                         * سعر الشبكة موجود على LedNetwork
+                         * لذلك شاشاتها ما إلها سعر مستقل.
+                         */
+                        'local_price' => null,
+
+                        'foreign_price' => null,
+                    ]
+                );
+            }
         }
     }
 }

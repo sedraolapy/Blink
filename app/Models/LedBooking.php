@@ -11,7 +11,15 @@ class LedBooking extends Model
 
     protected $fillable = [
         'booking_id',
+        'operation_order',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'operation_order' => 'boolean',
+        ];
+    }
 
     public function booking()
     {

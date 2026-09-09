@@ -11,7 +11,18 @@ class FlexBooking extends Model
 
     protected $fillable = [
         'booking_id',
+        'installation_order',
+        'extension_order',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'installation_order' => 'boolean',
+            'extension_order' => 'boolean',
+        ];
+    }
+
 
     public function booking()
     {

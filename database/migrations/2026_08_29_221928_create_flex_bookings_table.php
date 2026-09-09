@@ -17,6 +17,10 @@ return new class extends Migration
                 ->unique()
                 ->constrained('bookings')
                 ->cascadeOnDelete();
+
+            $table->boolean('installation_order')->default(false);
+            $table->boolean('extension_order')->default(false);
+            
             $table->timestamps();
         });
     }

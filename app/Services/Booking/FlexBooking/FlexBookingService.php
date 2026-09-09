@@ -55,7 +55,7 @@ class FlexBookingService
 
     public function update(int $bookingId,array $data)
     {
-        return DB::transaction(function () use ($bookingId,$data) 
+        return DB::transaction(function () use ($bookingId,$data)
         {
             $booking = Booking::query()
                 ->lockForUpdate()
@@ -195,7 +195,7 @@ class FlexBookingService
             ->values();
     }
 
-    private function lockBillboards(Collection $requestedItems) 
+    private function lockBillboards(Collection $requestedItems)
     {
         $billboardIds = $requestedItems
             ->pluck('flex_id')
@@ -262,7 +262,7 @@ class FlexBookingService
     {
         return collect($designNames)
             ->mapWithKeys(
-                function (string $name) use ($flexBooking) 
+                function (string $name) use ($flexBooking)
                 {
                     $design = FlexDesign::query()->create([
                         'flex_booking_id' => $flexBooking->id,
@@ -307,7 +307,7 @@ class FlexBookingService
 
         return collect($designNames)
             ->mapWithKeys(
-                function (string $name) use ($flexBooking,$existingDesigns) 
+                function (string $name) use ($flexBooking,$existingDesigns)
                 {
                     $design =
                         $existingDesigns->get($name)
@@ -323,7 +323,7 @@ class FlexBookingService
             );
     }
 
-    private function syncPeriodsAndItems(FlexBooking $flexBooking,array $periods,Collection $billboards,Collection $designs) 
+    private function syncPeriodsAndItems(FlexBooking $flexBooking,array $periods,Collection $billboards,Collection $designs)
     {
         $year = now()->year;
 
@@ -339,7 +339,7 @@ class FlexBookingService
             ->get()
             ->keyBy('advertising_period_id');
 
-        foreach ($periods as $periodData) 
+        foreach ($periods as $periodData)
         {
             $periodId =(int) $periodData['period_id'];
             $period = $existingPeriods->get($periodId);
@@ -456,5 +456,18 @@ class FlexBookingService
             'items_count' => $itemsCount,
             'designs_count' => $designsCount,
         ];
+    }
+
+    public function show(int $bookingId): FlexBooking
+    {
+        return FlexBooking::query()
+            ->where('booking_id', $bookingId)
+            ->with([
+                'designs' => fn ($query) => $query->orderBy('id'),
+                'periods.advertisingPeriod',
+                'periods.bookingItems.design',
+                'periods.bookingItems.billboard.area.governorate',
+            ])
+            ->firstOrFail();
     }
 }

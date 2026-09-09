@@ -37,9 +37,11 @@ return [
         'assets_not_available' => 'One or more selected flex billboards are no longer available for the selected period.',
         'updated' => 'Flex booking updated successfully.',
         'duplicate_assets' => 'The same flex billboard cannot be selected more than once within the same period.',
+        'show' => 'Flex booking retrieved successfully.',
     ],
 
     'booking' => [
         'updated' => 'Booking updated successfully.',
+        'show' => 'Booking retrieved successfully.',
     ],
 ];

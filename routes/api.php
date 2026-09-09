@@ -50,13 +50,16 @@ Route::middleware('localization')->group(function () {
             Route::get('/{id}', [OutdoorController::class, 'show']);
         });
 
-
+        // bookings
+        Route::patch('/bookings/{booking}',[BookingController::class, 'updateAdvertiserType']);
+        Route::get('/bookings/{bookingId}',[BookingController::class, 'show']);
+        
         //flex bookings
         Route::get('/booking-options/flex/periods',[FlexBookingOptionsController::class, 'periods']);
         Route::post('/assets-available/flex/options-booking',[FlexBookingOptionsController::class, 'availableAssets']);
         Route::post('/bookings/flex',[FlexBookingController::class, 'store']);
-        Route::patch('/bookings/{booking}',[BookingController::class, 'updateAdvertiserType']);
         Route::put('/bookings/{bookingId}/flex',[FlexBookingController::class, 'update']);
+        Route::get('/bookings/{bookingId}/flex',[FlexBookingController::class, 'show']);
     });
 
 });

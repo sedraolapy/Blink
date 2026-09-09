@@ -18,6 +18,8 @@ return new class extends Migration
             ->unique()
             ->constrained('bookings')
             ->cascadeOnDelete();
+
+            $table->boolean('operation_order')->default(false);
             
             $table->timestamps();
         });
