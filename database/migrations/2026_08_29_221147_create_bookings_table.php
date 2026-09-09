@@ -17,7 +17,7 @@ return new class extends Migration
 
             $table->foreignId('customer_id')
                 ->constrained('customers')
-                ->restrictOnDelete();
+                ->cascadeOnDelete();
 
             $table->string('booking_type');
             $table->string('status')->default(BookingStatusEnum::UNCONFIRMED->value);

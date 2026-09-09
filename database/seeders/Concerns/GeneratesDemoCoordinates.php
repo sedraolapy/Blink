@@ -9,16 +9,6 @@ use Illuminate\Support\Str;
 
 trait GeneratesDemoCoordinates
 {
-    /**
-     * اختيار Area بالتناوب بين المحافظات.
-     *
-     * مثال:
-     * 0 => أول محافظة
-     * 1 => ثاني محافظة
-     * ...
-     * وبعد انتهاء المحافظات نرجع لأول محافظة
-     * لكن Area التالية منها.
-     */
     private function distributedArea(
         Collection $governorates,
         int $index
@@ -38,14 +28,18 @@ trait GeneratesDemoCoordinates
             $governoratesCount
         );
 
-        return $areas->get(
+        $area = $areas->get(
             $round % $areas->count()
         );
+
+        $area->setRelation(
+            'governorate',
+            $governorate
+        );
+
+        return $area;
     }
 
-    /**
-     * نقطة تقريبية لكل Area حول مركز المحافظة.
-     */
     private function areaCenter(Area $area): array
     {
         $governorate = $area->governorate;
@@ -68,12 +62,6 @@ trait GeneratesDemoCoordinates
         );
     }
 
-    /**
-     * توليد نقطة قريبة من نقطة معينة.
-     *
-     * النتيجة ثابتة لنفس seed، لذلك seeding
-     * يعطي نفس الإحداثيات بكل مرة.
-     */
     private function pointNear(
         float $latitude,
         float $longitude,
@@ -90,10 +78,13 @@ trait GeneratesDemoCoordinates
         );
 
         $radius = sqrt(
-            ($radiusRandom * (
-                ($maxRadiusMeters ** 2)
-                - ($minRadiusMeters ** 2)
-            ))
+            (
+                $radiusRandom
+                * (
+                    ($maxRadiusMeters ** 2)
+                    - ($minRadiusMeters ** 2)
+                )
+            )
             + ($minRadiusMeters ** 2)
         );
 
@@ -104,9 +95,13 @@ trait GeneratesDemoCoordinates
             * cos($angle);
 
         $longitudeOffset =
-            ($radius / (
-                111320 * cos(deg2rad($latitude))
-            ))
+            (
+                $radius
+                / (
+                    111320
+                    * cos(deg2rad($latitude))
+                )
+            )
             * sin($angle);
 
         return [
@@ -122,11 +117,9 @@ trait GeneratesDemoCoordinates
         ];
     }
 
-    /**
-     * Random ثابت حسب النص.
-     */
-    private function seededUnit(string $seed): float
-    {
+    private function seededUnit(
+        string $seed
+    ): float {
         $unsigned = (float) sprintf(
             '%u',
             crc32($seed)
@@ -135,9 +128,6 @@ trait GeneratesDemoCoordinates
         return $unsigned / 4294967295;
     }
 
-    /**
-     * مركز تقريبي لكل محافظة سورية.
-     */
     private function governorateCenter(
         Governorate $governorate
     ): array {
@@ -151,113 +141,155 @@ trait GeneratesDemoCoordinates
         );
 
         [$latitude, $longitude] = match (true) {
-
-            Str::contains($name, [
-                'rif dimashq',
-                'rural damascus',
-                'damascus countryside',
-            ]) => [
+            Str::contains(
+                $name,
+                [
+                    'rif dimashq',
+                    'rural damascus',
+                    'damascus countryside',
+                ]
+            ) => [
                 33.5167,
                 36.7500,
             ],
 
-            Str::contains($name, [
-                'damascus',
-                'dimashq',
-            ]) => [
+            Str::contains(
+                $name,
+                [
+                    'damascus',
+                    'dimashq',
+                ]
+            ) => [
                 33.5138,
                 36.2765,
             ],
 
-            Str::contains($name, 'aleppo') => [
+            Str::contains(
+                $name,
+                'aleppo'
+            ) => [
                 36.2021,
                 37.1343,
             ],
 
-            Str::contains($name, 'homs') => [
+            Str::contains(
+                $name,
+                'homs'
+            ) => [
                 34.7324,
                 36.7137,
             ],
 
-            Str::contains($name, 'hama') => [
+            Str::contains(
+                $name,
+                'hama'
+            ) => [
                 35.1318,
                 36.7578,
             ],
 
-            Str::contains($name, [
-                'latakia',
-                'lattakia',
-            ]) => [
+            Str::contains(
+                $name,
+                [
+                    'latakia',
+                    'lattakia',
+                ]
+            ) => [
                 35.5317,
                 35.7901,
             ],
 
-            Str::contains($name, [
-                'tartus',
-                'tartous',
-            ]) => [
+            Str::contains(
+                $name,
+                [
+                    'tartus',
+                    'tartous',
+                ]
+            ) => [
                 34.8890,
                 35.8866,
             ],
 
-            Str::contains($name, 'idlib') => [
+            Str::contains(
+                $name,
+                'idlib'
+            ) => [
                 35.9306,
                 36.6339,
             ],
 
-            Str::contains($name, [
-                'daraa',
-                "dar'a",
-            ]) => [
+            Str::contains(
+                $name,
+                [
+                    'daraa',
+                    "dar'a",
+                ]
+            ) => [
                 32.6189,
                 36.1021,
             ],
 
-            Str::contains($name, [
-                'sweida',
-                'suwayda',
-                'suweyda',
-            ]) => [
+            Str::contains(
+                $name,
+                [
+                    'sweida',
+                    'suwayda',
+                    'suweyda',
+                ]
+            ) => [
                 32.7089,
                 36.5695,
             ],
 
-            Str::contains($name, [
-                'quneitra',
-                'qunaytira',
-            ]) => [
+            Str::contains(
+                $name,
+                [
+                    'quneitra',
+                    'qunaytira',
+                ]
+            ) => [
                 33.1259,
                 35.8246,
             ],
 
-            Str::contains($name, [
-                'deir',
-                'dayr',
-            ]) => [
+            Str::contains(
+                $name,
+                [
+                    'deir',
+                    'dayr',
+                ]
+            ) => [
                 35.3359,
                 40.1408,
             ],
 
-            Str::contains($name, [
-                'raqqa',
-                'raqqah',
-            ]) => [
+            Str::contains(
+                $name,
+                [
+                    'raqqa',
+                    'raqqah',
+                ]
+            ) => [
                 35.9500,
                 39.0100,
             ],
 
-            Str::contains($name, [
-                'hasakah',
-                'hassakeh',
-                'hassakah',
-            ]) => [
+            Str::contains(
+                $name,
+                [
+                    'hasakah',
+                    'hassakeh',
+                    'hassakah',
+                ]
+            ) => [
                 36.5024,
                 40.7477,
             ],
 
-            default => $this->fallbackGovernorateCenter(
-                $governorate
-            ),
+            default =>
+                $this->fallbackGovernorateCenter(
+                    $governorate
+                ),
         };
 
         return [
@@ -266,11 +298,6 @@ trait GeneratesDemoCoordinates
         ];
     }
 
-    /**
-     * إذا اسم المحافظة بالإنكليزي مختلف عن الأسماء
-     * المعروفة، ما منحطها بدمشق؛ منعطيها نقطة
-     * ثابتة ضمن حدود سوريا التقريبية.
-     */
     private function fallbackGovernorateCenter(
         Governorate $governorate
     ): array {
@@ -292,9 +319,6 @@ trait GeneratesDemoCoordinates
         ];
     }
 
-    /**
-     * كود مختصر للمحافظة.
-     */
     private function governorateCode(
         Governorate $governorate
     ): string {
@@ -308,64 +332,105 @@ trait GeneratesDemoCoordinates
         );
 
         return match (true) {
+            Str::contains(
+                $name,
+                [
+                    'rif dimashq',
+                    'rural damascus',
+                    'damascus countryside',
+                ]
+            ) => 'RIF',
 
-            Str::contains($name, [
-                'rif dimashq',
-                'rural damascus',
-                'damascus countryside',
-            ]) => 'RIF',
+            Str::contains(
+                $name,
+                [
+                    'damascus',
+                    'dimashq',
+                ]
+            ) => 'DAM',
 
-            Str::contains($name, [
-                'damascus',
-                'dimashq',
-            ]) => 'DAM',
+            Str::contains(
+                $name,
+                'aleppo'
+            ) => 'ALE',
 
-            Str::contains($name, 'aleppo') => 'ALE',
+            Str::contains(
+                $name,
+                'homs'
+            ) => 'HOM',
 
-            Str::contains($name, 'homs') => 'HOM',
+            Str::contains(
+                $name,
+                'hama'
+            ) => 'HAM',
 
-            Str::contains($name, 'hama') => 'HAM',
+            Str::contains(
+                $name,
+                [
+                    'latakia',
+                    'lattakia',
+                ]
+            ) => 'LAT',
 
-            Str::contains($name, [
-                'latakia',
-                'lattakia',
-            ]) => 'LAT',
+            Str::contains(
+                $name,
+                [
+                    'tartus',
+                    'tartous',
+                ]
+            ) => 'TAR',
 
-            Str::contains($name, [
-                'tartus',
-                'tartous',
-            ]) => 'TAR',
+            Str::contains(
+                $name,
+                'idlib'
+            ) => 'IDL',
 
-            Str::contains($name, 'idlib') => 'IDL',
+            Str::contains(
+                $name,
+                'daraa'
+            ) => 'DAR',
 
-            Str::contains($name, 'daraa') => 'DAR',
+            Str::contains(
+                $name,
+                [
+                    'sweida',
+                    'suwayda',
+                    'suweyda',
+                ]
+            ) => 'SWE',
 
-            Str::contains($name, [
-                'sweida',
-                'suwayda',
-                'suweyda',
-            ]) => 'SWE',
+            Str::contains(
+                $name,
+                [
+                    'quneitra',
+                    'qunaytira',
+                ]
+            ) => 'QUN',
 
-            Str::contains($name, [
-                'quneitra',
-                'qunaytira',
-            ]) => 'QUN',
+            Str::contains(
+                $name,
+                [
+                    'deir',
+                    'dayr',
+                ]
+            ) => 'DEZ',
 
-            Str::contains($name, [
-                'deir',
-                'dayr',
-            ]) => 'DEZ',
+            Str::contains(
+                $name,
+                [
+                    'raqqa',
+                    'raqqah',
+                ]
+            ) => 'RAQ',
 
-            Str::contains($name, [
-                'raqqa',
-                'raqqah',
-            ]) => 'RAQ',
-
-            Str::contains($name, [
-                'hasakah',
-                'hassakeh',
-                'hassakah',
-            ]) => 'HAS',
+            Str::contains(
+                $name,
+                [
+                    'hasakah',
+                    'hassakeh',
+                    'hassakah',
+                ]
+            ) => 'HAS',
 
             default => sprintf(
                 'G%02d',

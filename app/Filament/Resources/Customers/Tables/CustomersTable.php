@@ -71,7 +71,17 @@ class CustomersTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->requiresConfirmation()
+                    ->modalHeading(
+                        __('filament/admin/customer_resource.delete_customer_heading')
+                    )
+                    ->modalDescription(
+                        __('filament/admin/customer_resource.delete_customer_description')
+                    )
+                    ->modalSubmitActionLabel(
+                        __('filament/admin/customer_resource.delete_customer_submit')
+                    ),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

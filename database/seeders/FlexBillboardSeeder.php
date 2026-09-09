@@ -18,10 +18,6 @@ class FlexBillboardSeeder extends Seeder
         |--------------------------------------------------------------------------
         | اللوحات الأساسية
         |--------------------------------------------------------------------------
-        |
-        | منخليهم أول شي حتى تبقى IDs القديمة ثابتة
-        | للحجوزات والاختبارات الحالية.
-        |
         */
 
         $billboards = [
@@ -127,8 +123,11 @@ class FlexBillboardSeeder extends Seeder
 
         /*
         |--------------------------------------------------------------------------
-        | لوحات موزعة على كل المحافظات
+        | اللوحات المولدة
         |--------------------------------------------------------------------------
+        |
+        | 3 لوحات أساسية + 197 = 200
+        |
         */
 
         $governorates = Governorate::query()
@@ -140,10 +139,24 @@ class FlexBillboardSeeder extends Seeder
             ->orderBy('id')
             ->get();
 
-        foreach ($governorates as $governorate) {
-            $areas = $governorate
-                ->areas
-                ->values();
+        if ($governorates->isEmpty()) {
+            return;
+        }
+
+        $totalGeneratedBillboards = 197;
+
+        for (
+            $i = 1;
+            $i <= $totalGeneratedBillboards;
+            $i++
+        ) {
+            $area = $this->distributedArea(
+                $governorates,
+                $i - 1
+            );
+
+            $governorate =
+                $area->governorate;
 
             $governorateNameAr =
                 $governorate->getTranslation(
@@ -157,82 +170,76 @@ class FlexBillboardSeeder extends Seeder
                     'en'
                 );
 
-            for ($i = 1; $i <= 2; $i++) {
-                $area = $areas->get(
-                    ($i - 1) % $areas->count()
+            $areaNameAr =
+                $area->getTranslation(
+                    'name',
+                    'ar'
                 );
 
-                $areaNameAr = $area
-                    ->getTranslation(
-                        'name',
-                        'ar'
-                    );
+            $areaNameEn =
+                $area->getTranslation(
+                    'name',
+                    'en'
+                );
 
-                $areaNameEn = $area
-                    ->getTranslation(
-                        'name',
-                        'en'
-                    );
-
-                $areaCenter = $this->areaCenter(
+            $areaCenter =
+                $this->areaCenter(
                     $area
                 );
 
-                $coordinates = $this->pointNear(
+            $coordinates =
+                $this->pointNear(
                     $areaCenter['latitude'],
                     $areaCenter['longitude'],
                     80,
-                    800,
-                    "flex-{$governorate->id}-{$i}"
+                    1200,
+                    "flex-generated-{$i}"
                 );
 
-                $code = sprintf(
-                    'FLX-%s-%02d-%02d',
-                    $this->governorateCode(
-                        $governorate
-                    ),
-                    $governorate->id,
-                    $i
-                );
+            $code = sprintf(
+                'FLX-%s-%04d',
+                $this->governorateCode(
+                    $governorate
+                ),
+                $i
+            );
 
-                FlexBillboard::updateOrCreate(
-                    [
-                        'code' => $code,
+            FlexBillboard::updateOrCreate(
+                [
+                    'code' => $code,
+                ],
+                [
+                    'area_id' => $area->id,
+
+                    'location_name' => [
+                        'ar' =>
+                            "لوحة فليكس {$governorateNameAr} - {$areaNameAr} {$i}",
+
+                        'en' =>
+                            "{$governorateNameEn} {$areaNameEn} Flex Billboard {$i}",
                     ],
-                    [
-                        'area_id' => $area->id,
 
-                        'location_name' => [
-                            'ar' =>
-                                "لوحة فليكس {$governorateNameAr} - {$areaNameAr} {$i}",
+                    'latitude' =>
+                        $coordinates['latitude'],
 
-                            'en' =>
-                                "{$governorateNameEn} {$areaNameEn} Flex Billboard {$i}",
-                        ],
+                    'longitude' =>
+                        $coordinates['longitude'],
 
-                        'latitude' =>
-                            $coordinates['latitude'],
+                    'width' =>
+                        4 + ($i % 4),
 
-                        'longitude' =>
-                            $coordinates['longitude'],
+                    'height' =>
+                        3 + ($i % 2),
 
-                        'width' =>
-                            5 + ($i % 2),
+                    'local_price' =>
+                        1800000
+                        + (($i % 20) * 100000),
 
-                        'height' => 3,
-
-                        'local_price' =>
-                            1800000
-                            + ($governorate->id * 100000)
-                            + ($i * 50000),
-
-                        'foreign_price' =>
-                            150
-                            + ($governorate->id * 5)
-                            + ($i * 10),
-                    ]
-                );
-            }
+                    'foreign_price' =>
+                        150
+                        + (($i % 20) * 10),
+                ]
+            );
         }
     }
 }

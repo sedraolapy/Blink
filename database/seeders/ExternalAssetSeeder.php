@@ -29,58 +29,90 @@ class ExternalAssetSeeder extends Seeder
 
         $types = [
             [
-                'type' => ExternalAssetTypeEnum::MURAL,
+                'type' =>
+                    ExternalAssetTypeEnum::MURAL,
+
                 'code' => 'MUR',
-                'ar' => 'جدارية إعلانية',
-                'en' => 'Advertising Mural',
+
+                'ar' =>
+                    'جدارية إعلانية',
+
+                'en' =>
+                    'Advertising Mural',
             ],
 
             [
-                'type' => ExternalAssetTypeEnum::ROOFTOP,
+                'type' =>
+                    ExternalAssetTypeEnum::ROOFTOP,
+
                 'code' => 'ROO',
-                'ar' => 'سطحية إعلانية',
-                'en' => 'Advertising Rooftop',
+
+                'ar' =>
+                    'سطحية إعلانية',
+
+                'en' =>
+                    'Advertising Rooftop',
             ],
 
             [
-                'type' => ExternalAssetTypeEnum::TUNNEL,
+                'type' =>
+                    ExternalAssetTypeEnum::TUNNEL,
+
                 'code' => 'TUN',
-                'ar' => 'إعلان نفق',
-                'en' => 'Tunnel Advertisement',
+
+                'ar' =>
+                    'إعلان نفق',
+
+                'en' =>
+                    'Tunnel Advertisement',
             ],
 
             [
-                'type' => ExternalAssetTypeEnum::BRIDGE,
+                'type' =>
+                    ExternalAssetTypeEnum::BRIDGE,
+
                 'code' => 'BRG',
-                'ar' => 'إعلان جسر',
-                'en' => 'Bridge Advertisement',
+
+                'ar' =>
+                    'إعلان جسر',
+
+                'en' =>
+                    'Bridge Advertisement',
             ],
 
             [
-                'type' => ExternalAssetTypeEnum::UNIPOLE,
+                'type' =>
+                    ExternalAssetTypeEnum::UNIPOLE,
+
                 'code' => 'UNI',
-                'ar' => 'يوني بول',
-                'en' => 'Unipole',
+
+                'ar' =>
+                    'يوني بول',
+
+                'en' =>
+                    'Unipole',
             ],
         ];
 
-        foreach ($types as $typeIndex => $data) {
-            for ($i = 1; $i <= 30; $i++) {
+        $itemsPerType = 200;
 
-                /*
-                 * كل record يروح لمحافظة مختلفة بالتناوب.
-                 *
-                 * typeIndex * 30 حتى كل نوع يبدأ
-                 * من توزيع مختلف شوي.
-                 */
+        foreach (
+            $types as $typeIndex => $data
+        ) {
+            for (
+                $i = 1;
+                $i <= $itemsPerType;
+                $i++
+            ) {
                 $distributionIndex =
-                    ($typeIndex * 30)
+                    ($typeIndex * $itemsPerType)
                     + ($i - 1);
 
-                $area = $this->distributedArea(
-                    $governorates,
-                    $distributionIndex
-                );
+                $area =
+                    $this->distributedArea(
+                        $governorates,
+                        $distributionIndex
+                    );
 
                 $governorate =
                     $area->governorate;
@@ -91,7 +123,7 @@ class ExternalAssetSeeder extends Seeder
                     );
 
                 $code = sprintf(
-                    '%s-%s-%03d',
+                    '%s-%s-%04d',
                     $data['code'],
                     $governorateCode,
                     $i
@@ -123,21 +155,37 @@ class ExternalAssetSeeder extends Seeder
                         'en'
                     );
 
+                $governorateNameAr =
+                    $governorate
+                        ->getTranslation(
+                            'name',
+                            'ar'
+                        );
+
+                $governorateNameEn =
+                    $governorate
+                        ->getTranslation(
+                            'name',
+                            'en'
+                        );
+
                 ExternalAsset::updateOrCreate(
                     [
                         'code' => $code,
                     ],
                     [
-                        'type' => $data['type'],
+                        'type' =>
+                            $data['type'],
 
-                        'area_id' => $area->id,
+                        'area_id' =>
+                            $area->id,
 
                         'location_name' => [
                             'ar' =>
-                                "{$data['ar']} - {$areaNameAr} {$i}",
+                                "{$data['ar']} {$governorateNameAr} - {$areaNameAr} {$i}",
 
                             'en' =>
-                                "{$data['en']} - {$areaNameEn} {$i}",
+                                "{$data['en']} {$governorateNameEn} - {$areaNameEn} {$i}",
                         ],
 
                         'latitude' =>
@@ -154,11 +202,11 @@ class ExternalAssetSeeder extends Seeder
 
                         'local_price' =>
                             3000000
-                            + ($i * 100000),
+                            + (($i % 30) * 100000),
 
                         'foreign_price' =>
                             250
-                            + ($i * 10),
+                            + (($i % 30) * 10),
                     ]
                 );
             }

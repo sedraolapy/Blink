@@ -35,28 +35,37 @@ class LedScreenSeeder extends Seeder
         |--------------------------------------------------------------------------
         | Independent Screens
         |--------------------------------------------------------------------------
-        |
-        | 30 شاشة موزعين بالتناوب على كل المحافظات.
-        |
         */
 
-        for ($i = 1; $i <= 30; $i++) {
-            $area = $this->distributedArea(
-                $governorates,
-                $i - 1
-            );
+        $independentScreensCount = 200;
 
-            $areaCenter = $this->areaCenter(
-                $area
-            );
+        for (
+            $i = 1;
+            $i <= $independentScreensCount;
+            $i++
+        ) {
+            $area =
+                $this->distributedArea(
+                    $governorates,
+                    $i - 1
+                );
 
-            $coordinates = $this->pointNear(
-                $areaCenter['latitude'],
-                $areaCenter['longitude'],
-                80,
-                900,
-                "independent-led-{$i}"
-            );
+            $governorate =
+                $area->governorate;
+
+            $areaCenter =
+                $this->areaCenter(
+                    $area
+                );
+
+            $coordinates =
+                $this->pointNear(
+                    $areaCenter['latitude'],
+                    $areaCenter['longitude'],
+                    80,
+                    1000,
+                    "independent-led-{$i}"
+                );
 
             $areaNameAr =
                 $area->getTranslation(
@@ -70,24 +79,40 @@ class LedScreenSeeder extends Seeder
                     'en'
                 );
 
+            $governorateNameAr =
+                $governorate
+                    ->getTranslation(
+                        'name',
+                        'ar'
+                    );
+
+            $governorateNameEn =
+                $governorate
+                    ->getTranslation(
+                        'name',
+                        'en'
+                    );
+
             LedScreen::updateOrCreate(
                 [
                     'code' => sprintf(
-                        'LED-IND-%03d',
+                        'LED-IND-%04d',
                         $i
                     ),
                 ],
                 [
-                    'area_id' => $area->id,
+                    'area_id' =>
+                        $area->id,
 
-                    'network_id' => null,
+                    'network_id' =>
+                        null,
 
                     'location_name' => [
                         'ar' =>
-                            "شاشة إلكترونية مستقلة - {$areaNameAr} {$i}",
+                            "شاشة إلكترونية مستقلة {$governorateNameAr} - {$areaNameAr} {$i}",
 
                         'en' =>
-                            "Independent LED Screen - {$areaNameEn} {$i}",
+                            "Independent LED Screen {$governorateNameEn} - {$areaNameEn} {$i}",
                     ],
 
                     'latitude' =>
@@ -99,17 +124,22 @@ class LedScreenSeeder extends Seeder
                     'width' =>
                         4 + ($i % 3),
 
-                    'height' => 3,
+                    'height' =>
+                        3 + ($i % 2),
 
-                    'width_px' => 1920,
+                    'width_px' =>
+                        1920,
 
-                    'height_px' => 1080,
+                    'height_px' =>
+                        1080,
 
                     'local_price' =>
-                        1500 + ($i * 50),
+                        1500
+                        + (($i % 30) * 50),
 
                     'foreign_price' =>
-                        2000 + ($i * 50),
+                        2000
+                        + (($i % 30) * 50),
                 ]
             );
         }
@@ -120,6 +150,7 @@ class LedScreenSeeder extends Seeder
         |--------------------------------------------------------------------------
         |
         | Network واحدة لكل محافظة.
+        | كل Network فيها 2 إلى 5 شاشات.
         |
         */
 
@@ -131,26 +162,34 @@ class LedScreenSeeder extends Seeder
                 $index + 1;
 
             $areas =
-                $governorate->areas->values();
+                $governorate
+                    ->areas
+                    ->values();
 
-            /*
-             * نختار Area من المحافظة نفسها.
-             */
-            $area = $areas->get(
-                $index % $areas->count()
+            $area =
+                $areas->get(
+                    $index
+                    % $areas->count()
+                );
+
+            $area->setRelation(
+                'governorate',
+                $governorate
             );
 
             $governorateNameAr =
-                $governorate->getTranslation(
-                    'name',
-                    'ar'
-                );
+                $governorate
+                    ->getTranslation(
+                        'name',
+                        'ar'
+                    );
 
             $governorateNameEn =
-                $governorate->getTranslation(
-                    'name',
-                    'en'
-                );
+                $governorate
+                    ->getTranslation(
+                        'name',
+                        'en'
+                    );
 
             $areaNameAr =
                 $area->getTranslation(
@@ -167,40 +206,38 @@ class LedScreenSeeder extends Seeder
             $networkNameEn =
                 "Test LED Network {$networkNumber} - {$governorateNameEn}";
 
-            $network = LedNetwork::updateOrCreate(
-                [
-                    'location_name->en' =>
-                        $networkNameEn,
-                ],
-                [
-                    'location_name' => [
-                        'ar' =>
-                            "شبكة شاشات {$governorateNameAr} - {$areaNameAr}",
-
-                        'en' =>
+            $network =
+                LedNetwork::updateOrCreate(
+                    [
+                        'location_name->en' =>
                             $networkNameEn,
                     ],
+                    [
+                        'location_name' => [
+                            'ar' =>
+                                "شبكة شاشات {$governorateNameAr} - {$areaNameAr}",
 
-                    'local_price' =>
-                        3000
-                        + ($networkNumber * 100),
+                            'en' =>
+                                $networkNameEn,
+                        ],
 
-                    'foreign_price' =>
-                        4000
-                        + ($networkNumber * 100),
-                ]
-            );
+                        'local_price' =>
+                            3000
+                            + ($networkNumber * 100),
 
-            /*
-             * مركز الـArea.
-             */
+                        'foreign_price' =>
+                            4000
+                            + ($networkNumber * 100),
+                    ]
+                );
+
             $areaCenter =
                 $this->areaCenter(
                     $area
                 );
 
             /*
-             * مركز خاص للـNetwork ضمن الـArea.
+             * مكان مركزي خاص بالشبكة.
              */
             $networkCenter =
                 $this->pointNear(
@@ -212,12 +249,13 @@ class LedScreenSeeder extends Seeder
                 );
 
             /*
-             * شاشتين لكل Network.
-             *
-             * كل شاشة بين 30 و180 متر تقريباً
-             * من مركز الشبكة.
+             * 2، 3، 4، 5 ثم يرجع يعيد.
              */
-            $screensCount = 2 + (($networkNumber - 1) % 4);
+            $screensCount =
+                2 + (
+                    ($networkNumber - 1)
+                    % 4
+                );
 
             for (
                 $screenNumber = 1;
@@ -262,21 +300,23 @@ class LedScreenSeeder extends Seeder
                         'longitude' =>
                             $coordinates['longitude'],
 
-                        'width' => 5,
+                        'width' =>
+                            5,
 
-                        'height' => 3,
+                        'height' =>
+                            3,
 
-                        'width_px' => 1920,
+                        'width_px' =>
+                            1920,
 
-                        'height_px' => 1080,
+                        'height_px' =>
+                            1080,
 
-                        /*
-                         * سعر الشبكة موجود على LedNetwork
-                         * لذلك شاشاتها ما إلها سعر مستقل.
-                         */
-                        'local_price' => null,
+                        'local_price' =>
+                            null,
 
-                        'foreign_price' => null,
+                        'foreign_price' =>
+                            null,
                     ]
                 );
             }
