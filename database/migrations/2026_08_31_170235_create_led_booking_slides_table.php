@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('led_booking_slides', function (Blueprint $table) {
@@ -16,10 +13,6 @@ return new class extends Migration
 
             $table->foreignId('led_booking_item_id')
                 ->constrained('led_booking_items')
-                ->cascadeOnDelete();
-
-            $table->foreignId('led_screen_id')
-                ->constrained('led_screens')
                 ->cascadeOnDelete();
 
             $table->foreignId('design_id')
@@ -31,13 +24,10 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->unique(['led_booking_item_id','led_screen_id','slide_number'],'led_slide_item_screen_num_unique');
+            $table->unique(['led_booking_item_id','slide_number']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('led_booking_slides');

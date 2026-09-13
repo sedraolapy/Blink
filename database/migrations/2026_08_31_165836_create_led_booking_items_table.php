@@ -36,7 +36,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['led_booking_period_id', 'led_screen_id'],'led_period_screen_unique');
-            $table->unique(['led_booking_period_id', 'led_network_id'],'led_period_network_unique');
         });
     }
 

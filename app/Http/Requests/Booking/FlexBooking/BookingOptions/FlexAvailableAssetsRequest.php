@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Booking\FlexBooking\BookingOptions;
 
+use App\Enums\PermissionEnum;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -10,7 +11,11 @@ class FlexAvailableAssetsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $permission = $this->filled('booking_id')
+        ? PermissionEnum::UPDATE_BOOKING->value
+        : PermissionEnum::CREATE_FLEX_BOOKING->value;
+
+        return $this->user()?->can($permission) ?? false;
     }
 
     public function rules(): array

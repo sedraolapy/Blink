@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Enums\BookingItemStatusEnum;
 use App\Enums\BookingStatusEnum;
 use App\Enums\BookingTypeEnum;
 use App\Models\Booking;
@@ -22,7 +21,6 @@ class ElectronicSlidesTestSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function () {
-
             $customer = Customer::query()->updateOrCreate(
                 [
                     'phone' => '0999222222',
@@ -39,7 +37,6 @@ class ElectronicSlidesTestSeeder extends Seeder
             Booking::query()
                 ->where('customer_id', $customer->id)
                 ->delete();
-
 
             $standaloneScreen = LedScreen::query()
                 ->whereNull('network_id')
@@ -64,6 +61,9 @@ class ElectronicSlidesTestSeeder extends Seeder
                 ->values()
                 ->get(1);
 
+            /*
+             * Confirmed booking
+             */
             $confirmedBooking = Booking::query()->create([
                 'customer_id' => $customer->id,
                 'booking_type' => BookingTypeEnum::LOCAL->value,
@@ -77,7 +77,6 @@ class ElectronicSlidesTestSeeder extends Seeder
             $confirmedLedBooking = LedBooking::query()->create([
                 'booking_id' => $confirmedBooking->id,
             ]);
-
 
             $confirmedDesigns = [];
 
@@ -102,7 +101,9 @@ class ElectronicSlidesTestSeeder extends Seeder
                     ]);
             }
 
-
+            /*
+             * Confirmed standalone screen
+             */
             $standalonePeriod =
                 LedBookingPeriod::query()->create([
                     'led_booking_id' =>
@@ -123,14 +124,10 @@ class ElectronicSlidesTestSeeder extends Seeder
                     'led_network_id' => null,
 
                     'is_gift' => false,
-
-                    'status' =>
-                        BookingItemStatusEnum::BOOKED->value,
                 ]);
 
             $this->createSlide(
                 $standaloneItem->id,
-                $standaloneScreen->id,
                 $confirmedDesigns[
                     'Standalone Design 1'
                 ]->id,
@@ -139,7 +136,6 @@ class ElectronicSlidesTestSeeder extends Seeder
 
             $this->createSlide(
                 $standaloneItem->id,
-                $standaloneScreen->id,
                 $confirmedDesigns[
                     'Standalone Design 2'
                 ]->id,
@@ -148,14 +144,15 @@ class ElectronicSlidesTestSeeder extends Seeder
 
             $this->createSlide(
                 $standaloneItem->id,
-                $standaloneScreen->id,
                 $confirmedDesigns[
                     'Standalone Design 3'
                 ]->id,
                 3
             );
 
-
+            /*
+             * Confirmed network
+             */
             $networkPeriod =
                 LedBookingPeriod::query()->create([
                     'led_booking_id' =>
@@ -165,23 +162,36 @@ class ElectronicSlidesTestSeeder extends Seeder
                     'end_date' => '2026-10-31',
                 ]);
 
-            $networkItem =
+            $networkScreen1Item =
                 LedBookingItem::query()->create([
                     'led_booking_period_id' =>
                         $networkPeriod->id,
 
-                    'led_screen_id' => null,
-                    'led_network_id' => $network->id,
+                    'led_screen_id' =>
+                        $screen1->id,
+
+                    'led_network_id' =>
+                        $network->id,
 
                     'is_gift' => false,
+                ]);
 
-                    'status' =>
-                        BookingItemStatusEnum::BOOKED->value,
+            $networkScreen2Item =
+                LedBookingItem::query()->create([
+                    'led_booking_period_id' =>
+                        $networkPeriod->id,
+
+                    'led_screen_id' =>
+                        $screen2->id,
+
+                    'led_network_id' =>
+                        $network->id,
+
+                    'is_gift' => false,
                 ]);
 
             $this->createSlide(
-                $networkItem->id,
-                $screen1->id,
+                $networkScreen1Item->id,
                 $confirmedDesigns[
                     'Network Screen 1 Design 1'
                 ]->id,
@@ -189,8 +199,7 @@ class ElectronicSlidesTestSeeder extends Seeder
             );
 
             $this->createSlide(
-                $networkItem->id,
-                $screen1->id,
+                $networkScreen1Item->id,
                 $confirmedDesigns[
                     'Network Screen 1 Design 2'
                 ]->id,
@@ -198,8 +207,7 @@ class ElectronicSlidesTestSeeder extends Seeder
             );
 
             $this->createSlide(
-                $networkItem->id,
-                $screen2->id,
+                $networkScreen2Item->id,
                 $confirmedDesigns[
                     'Network Screen 2 Design 1'
                 ]->id,
@@ -207,8 +215,7 @@ class ElectronicSlidesTestSeeder extends Seeder
             );
 
             $this->createSlide(
-                $networkItem->id,
-                $screen2->id,
+                $networkScreen2Item->id,
                 $confirmedDesigns[
                     'Network Screen 2 Design 2'
                 ]->id,
@@ -216,19 +223,21 @@ class ElectronicSlidesTestSeeder extends Seeder
             );
 
             $this->createSlide(
-                $networkItem->id,
-                $screen2->id,
+                $networkScreen2Item->id,
                 $confirmedDesigns[
                     'Network Screen 2 Design 3'
                 ]->id,
                 3
             );
 
-
+            /*
+             * Unconfirmed booking
+             */
             $unconfirmedBooking =
                 Booking::query()->create([
                     'customer_id' => $customer->id,
-                    'booking_type' => BookingTypeEnum::LOCAL->value,
+                    'booking_type' =>
+                        BookingTypeEnum::LOCAL->value,
 
                     'status' =>
                         BookingStatusEnum::UNCONFIRMED->value,
@@ -260,6 +269,9 @@ class ElectronicSlidesTestSeeder extends Seeder
                     ]);
             }
 
+            /*
+             * Unconfirmed standalone
+             */
             $unconfirmedStandalonePeriod =
                 LedBookingPeriod::query()->create([
                     'led_booking_id' =>
@@ -280,20 +292,19 @@ class ElectronicSlidesTestSeeder extends Seeder
                     'led_network_id' => null,
 
                     'is_gift' => false,
-
-                    'status' =>
-                        BookingItemStatusEnum::UNCONFIRMED->value,
                 ]);
 
             $this->createSlide(
                 $unconfirmedStandaloneItem->id,
-                $standaloneScreen->id,
                 $unconfirmedDesigns[
                     'Unconfirmed Standalone Design'
                 ]->id,
                 1
             );
 
+            /*
+             * Unconfirmed network
+             */
             $unconfirmedNetworkPeriod =
                 LedBookingPeriod::query()->create([
                     'led_booking_id' =>
@@ -303,23 +314,36 @@ class ElectronicSlidesTestSeeder extends Seeder
                     'end_date' => '2026-12-31',
                 ]);
 
-            $unconfirmedNetworkItem =
+            $unconfirmedNetworkScreen1Item =
                 LedBookingItem::query()->create([
                     'led_booking_period_id' =>
                         $unconfirmedNetworkPeriod->id,
 
-                    'led_screen_id' => null,
-                    'led_network_id' => $network->id,
+                    'led_screen_id' =>
+                        $screen1->id,
+
+                    'led_network_id' =>
+                        $network->id,
 
                     'is_gift' => false,
+                ]);
 
-                    'status' =>
-                        BookingItemStatusEnum::UNCONFIRMED->value,
+            $unconfirmedNetworkScreen2Item =
+                LedBookingItem::query()->create([
+                    'led_booking_period_id' =>
+                        $unconfirmedNetworkPeriod->id,
+
+                    'led_screen_id' =>
+                        $screen2->id,
+
+                    'led_network_id' =>
+                        $network->id,
+
+                    'is_gift' => false,
                 ]);
 
             $this->createSlide(
-                $unconfirmedNetworkItem->id,
-                $screen1->id,
+                $unconfirmedNetworkScreen1Item->id,
                 $unconfirmedDesigns[
                     'Unconfirmed Network Screen 1 Design'
                 ]->id,
@@ -327,8 +351,7 @@ class ElectronicSlidesTestSeeder extends Seeder
             );
 
             $this->createSlide(
-                $unconfirmedNetworkItem->id,
-                $screen2->id,
+                $unconfirmedNetworkScreen2Item->id,
                 $unconfirmedDesigns[
                     'Unconfirmed Network Screen 2 Design'
                 ]->id,
@@ -339,15 +362,18 @@ class ElectronicSlidesTestSeeder extends Seeder
 
     private function createSlide(
         int $itemId,
-        int $screenId,
         int $designId,
         int $slideNumber
     ): void {
         LedBookingSlide::query()->create([
-            'led_booking_item_id' => $itemId,
-            'led_screen_id' => $screenId,
-            'design_id' => $designId,
-            'slide_number' => $slideNumber,
+            'led_booking_item_id' =>
+                $itemId,
+
+            'design_id' =>
+                $designId,
+
+            'slide_number' =>
+                $slideNumber,
         ]);
     }
 }

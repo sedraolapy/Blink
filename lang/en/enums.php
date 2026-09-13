@@ -43,7 +43,7 @@ return [
         'flex' => 'Flex',
     ],
 
-    'contract_statuses' => [
+    'contract_status' => [
         'pending' => 'Pending',
         'waiting_start' => 'Waiting for Contract Start',
         'in_progress' => 'In Progress',

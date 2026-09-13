@@ -30,11 +30,18 @@ return [
         'designs' => 'designs',
         'design_name' => 'design name',
         'periods' => 'periods',
-        'period_id' => 'period',
         'items' => 'billboards',
         'flex_id' => 'flex billboard',
         'is_gift' => 'gift',
         'has_dykes' => 'dykes',
+        'start_date' => 'start date',
+        'end_date' => 'end date',
+        'screens' => 'screens',
+        'screen' => 'screen',
+        'networks' => 'networks',
+        'network' => 'network',
+        'slides' => 'slides',
+        'slide_number' => 'slide number',
     ],
 
     'custom' => [
@@ -129,5 +136,99 @@ return [
     ],
 
     'booking_id' => 'booking ID',
+
+    'electronic_assets' => [
+        'governorate_id' => [
+            'required' => 'The :attribute field is required.',
+            'integer' => 'The :attribute must be an integer.',
+            'exists' => 'The selected :attribute does not exist.',
+        ],
+
+        'search' => [
+            'string' => 'The :attribute must be a string.',
+            'max' => 'The :attribute may not be greater than 255 characters.',
+        ],
+    ],
+
+    'electronic_booking' => [
+        'advertiser_type' => [
+            'required_without' =>
+                'The :attribute field is required when creating a new booking.',
+        ],
+
+        'periods' => [
+            'required' =>
+                'At least one booking period is required.',
+
+            'min' =>
+                'At least one booking period is required.',
+
+            'items_required' =>
+                'At least one independent screen or network screen is required within the period.',
+
+            'overlap' =>
+                'The same screen cannot be booked in overlapping periods within the same request.',
+        ],
+
+        'end_date' => [
+            'after_or_equal' =>
+                'The :attribute must be after or equal to the start date.',
+        ],
+
+        'slides' => [
+            'min' =>
+                'At least one slide is required.',
+            'duplicate' =>
+                'The slide number cannot be repeated for the same screen.',
+        ],
+
+        'network_screens' => [
+            'min' =>
+                'At least one screen is required within the network.',
+        ],
+
+        'designs' => [
+            'min' => 'At least one design must be added.',
+        ],
+
+        'design_name' => [
+            'in' =>
+                'The selected design does not exist in the designs list.',
+            'required' => 'A design must be selected for each slide.',
+        ],
+
+        'customer_id' => [
+            'booking_mismatch' =>
+                'The selected customer does not match the customer associated with the booking.',
+        ],
+
+        'booking_id' => [
+            'already_exists' =>
+                'An electronic booking already exists for this booking.',
+        ],
+
+
+        'screens' => [
+            'duplicate' =>
+                'The same screen cannot be repeated within the same period.',
+
+            'not_independent' =>
+                'The selected screen is not an independent screen.',
+        ],
+
+        'networks' => [
+            'screen_mismatch' =>
+                'One of the selected screens does not belong to the selected network.',
+            'all_screens_required' =>
+                'All screens belonging to the selected network must be included.',
+        ],
+
+        'availability' => [
+            'conflict' =>
+                'One of the selected screens is already booked during the requested period.',
+        ],
+    ],
+
+
 
 ];

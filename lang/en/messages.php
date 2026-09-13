@@ -44,4 +44,17 @@ return [
         'updated' => 'Booking updated successfully.',
         'show' => 'Booking retrieved successfully.',
     ],
+
+    'electronic_booking_options' => [
+        'assets_success' => 'Electronic screen options retrieved successfully.',
+    ],
+
+    'electronic_booking' => [
+        'store_success' => 'Electronic screen booking saved successfully.',
+        'update_success' => 'Electronic screen booking updated successfully.',
+        'show' => 'Electronic booking details retrieved successfully.',
+    ],
+
+    'not_found' => 'The requested resource was not found.',
+    'forbidden' => 'You do not have permission to perform this action.',
 ];

@@ -27,14 +27,27 @@ class FlexAvailableAssetsResource extends JsonResource
 
                         'items' => $periodData['items']
                             ->map(
-                                fn ($billboard) => [
-                                    'id' => $billboard->id,
-                                    'code' => $billboard->code,
-                                    'name' => $billboard->location_name,
-                                    'area' => $billboard->area?->name,
-                                    'width' => (float) $billboard->width,
-                                    'height' => (float) $billboard->height,
-                                ]
+                                function ($billboard) use (
+                                    $request,
+                                    $periodData
+                                ) {
+                                    $item = [
+                                        'id' => $billboard->id,
+                                        'code' => $billboard->code,
+                                        'name' => $billboard->location_name,
+                                        'area' => $billboard->area?->name,
+                                        'width' => (float) $billboard->width,
+                                        'height' => (float) $billboard->height,
+                                    ];
+
+                                    if ($request->filled('booking_id')) {
+                                        $item['was_selected'] =
+                                            $periodData['selected_billboard_ids']
+                                                ->contains($billboard->id);
+                                    }
+
+                                    return $item;
+                                }
                             )
                             ->values()
                             ->toArray(),

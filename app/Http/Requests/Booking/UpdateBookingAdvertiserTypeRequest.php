@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Booking;
 
 use App\Enums\BookingTypeEnum;
+use App\Enums\PermissionEnum;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -12,7 +13,9 @@ class UpdateBookingAdvertiserTypeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can(
+            PermissionEnum::UPDATE_BOOKING->value
+        ) ?? false;
     }
 
     public function rules(): array
@@ -52,7 +55,7 @@ class UpdateBookingAdvertiserTypeRequest extends FormRequest
                 __('messages.validation_failed'),
                 422,
                 $validator->errors(),
-            
+
             )
         );
     }

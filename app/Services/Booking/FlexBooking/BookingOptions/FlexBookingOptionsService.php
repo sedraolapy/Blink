@@ -291,30 +291,82 @@ class FlexBookingOptionsService
                         ->unique()
             );
 
-        $periodsData = $periods->map(
-            function (AdvertisingPeriod $period) use (
-                $billboards,
-                $occupiedByPeriod
-            ) {
-                $occupiedBillboardIds = $occupiedByPeriod->get(
-                    $period->id,
-                    collect()
-                );
+            $selectedByPeriod = collect();
 
-                return [
-                    'period' => $period,
-
-                    'items' => $billboards
-                        ->reject(
-                            fn (FlexBillboard $billboard) =>
-                                $occupiedBillboardIds->contains(
-                                    $billboard->id
+            if ($bookingId !== null) {
+                $selectedByPeriod = FlexBookingItem::query()
+                    ->whereHas(
+                        'period',
+                        fn ($query) =>
+                            $query
+                                ->where('year', $year)
+                                ->whereIn(
+                                    'advertising_period_id',
+                                    $periodIds
                                 )
-                        )
-                        ->values(),
-                ];
+                    )
+                    ->whereHas(
+                        'period.flexBooking',
+                        fn ($query) =>
+                            $query->where(
+                                'booking_id',
+                                $bookingId
+                            )
+                    )
+                    ->with([
+                        'period:id,advertising_period_id',
+                    ])
+                    ->get([
+                        'id',
+                        'flex_booking_period_id',
+                        'flex_billboard_id',
+                    ])
+                    ->groupBy(
+                        fn (FlexBookingItem $item) =>
+                            $item->period->advertising_period_id
+                    )
+                    ->map(
+                        fn ($items) =>
+                            $items
+                                ->pluck('flex_billboard_id')
+                                ->unique()
+                                ->values()
+                    );
             }
-        );
+
+            $periodsData = $periods->map(
+                function (AdvertisingPeriod $period) use (
+                    $billboards,
+                    $occupiedByPeriod,
+                    $selectedByPeriod
+                ) {
+                    $occupiedBillboardIds = $occupiedByPeriod->get(
+                        $period->id,
+                        collect()
+                    );
+
+                    $selectedBillboardIds = $selectedByPeriod->get(
+                        $period->id,
+                        collect()
+                    );
+
+                    return [
+                        'period' => $period,
+
+                        'selected_billboard_ids' =>
+                            $selectedBillboardIds,
+
+                        'items' => $billboards
+                            ->reject(
+                                fn (FlexBillboard $billboard) =>
+                                    $occupiedBillboardIds->contains(
+                                        $billboard->id
+                                    )
+                            )
+                            ->values(),
+                    ];
+                }
+            );
 
         return [
             'governorate' => $governorate,

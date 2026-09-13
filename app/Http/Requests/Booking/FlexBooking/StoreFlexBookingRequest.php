@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Booking\FlexBooking;
 
+use App\Enums\PermissionEnum;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -11,7 +12,9 @@ class StoreFlexBookingRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can(
+            PermissionEnum::CREATE_FLEX_BOOKING->value
+        ) ?? false;
     }
 
     public function rules(): array

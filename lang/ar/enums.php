@@ -43,7 +43,7 @@ return [
         'flex' => 'فليكس',
     ],
 
-    'contract_statuses' => [
+    'contract_status' => [
         'pending' => 'قيد الانتظار',
         'waiting_start' => 'بانتظار بداية العقد',
         'in_progress' => 'قيد التنفيذ',
