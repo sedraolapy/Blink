@@ -41,6 +41,7 @@ class ShowBookingResource extends JsonResource
                 'type' => 'external',
                 'booking_type_id' => $this->externalBooking->id,
                 'date' => $this->externalBooking->created_at?->toDateString(),
+
                 'orders' => [
                     'installation' => (bool) $this->externalBooking->installation_order,
                     'extension' => (bool) $this->externalBooking->extension_order,
@@ -60,6 +61,12 @@ class ShowBookingResource extends JsonResource
 
             'quotation' => $this->quotation !== null,
             'contract' => $this->contract !== null,
+
+            'orders' => [
+                'installation' => (bool) $this->installation_order,
+                'extension' => (bool) $this->extension_order,
+                'operation' => (bool) $this->operation_order,
+            ],
 
             'types' => $types,
         ];
