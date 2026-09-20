@@ -20,8 +20,8 @@ return new class extends Migration
             ->constrained('bookings')
             ->cascadeOnDelete();
 
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
 
             $table->string('status')->default(ContractStatusEnum::PENDING->value);
 
