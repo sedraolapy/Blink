@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Booking;
 
+use App\Enums\ContractStatusEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -60,7 +61,8 @@ class ShowBookingResource extends JsonResource
             ],
 
             'quotation' => $this->quotation !== null,
-            'contract' => $this->contract !== null,
+            'contract' => $this->contract !== null
+                && $this->contract->status !== ContractStatusEnum::PENDING,
 
             'orders' => [
                 'installation' => (bool) $this->installation_order,
