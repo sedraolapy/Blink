@@ -29,8 +29,7 @@ return new class extends Migration
                 ->constrained('led_networks')
                 ->restrictOnDelete();
 
-            $table->boolean('is_gift')
-                ->default(false);
+            $table->boolean('is_gift')->default(false);
 
             $table->string('status')->default(BookingItemStatusEnum::UNCONFIRMED->value);
             $table->timestamps();

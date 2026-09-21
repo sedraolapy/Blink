@@ -1,0 +1,120 @@
+<?php
+
+namespace App\Http\Requests\Booking\ExternalBooking;
+
+use App\Enums\ExternalAssetTypeEnum;
+use App\Enums\PermissionEnum;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class UpdateExternalBookingRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user()?->can(
+            PermissionEnum::UPDATE_BOOKING->value
+        ) ?? false;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'booking_id' => $this->route('booking_id'),
+            'type' => $this->route('type'),
+        ]);
+    }
+
+    public function rules(): array
+    {
+        return [
+            'booking_id' => [
+                'required',
+                'integer',
+                'exists:bookings,id',
+            ],
+
+            'type' => [
+                'required',
+                Rule::enum(ExternalAssetTypeEnum::class),
+            ],
+
+            'designs' => [
+                'present',
+                'array',
+            ],
+
+            'designs.*' => [
+                'required',
+                'string',
+                'max:255',
+                'distinct',
+            ],
+
+            'periods' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+
+            'periods.*.start_date' => [
+                'required',
+                'date',
+            ],
+
+            'periods.*.end_date' => [
+                'required',
+                'date',
+                'after_or_equal:periods.*.start_date',
+            ],
+
+            'periods.*.items' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+
+            'periods.*.items.*.asset_id' => [
+                'required',
+                'integer',
+                'exists:external_assets,id',
+            ],
+
+            'periods.*.items.*.is_gift' => [
+                'required',
+                'boolean',
+            ],
+
+            'periods.*.items.*.design_name' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+        ];
+    }
+
+    public function after(): array
+    {
+        return [
+            function ($validator) {
+                $designs = collect($this->input('designs', []));
+
+                foreach ($this->input('periods', []) as $periodIndex => $period) {
+                    foreach ($period['items'] ?? [] as $itemIndex => $item) {
+
+                        $designName = $item['design_name'] ?? null;
+
+                        if (
+                            $designName !== null
+                            && !$designs->contains($designName)
+                        ) {
+                            $validator->errors()->add(
+                                "periods.{$periodIndex}.items.{$itemIndex}.design_name",
+                                __('validation.custom.design_name_not_found')
+                            );
+                        }
+                    }
+                }
+            },
+        ];
+    }
+}

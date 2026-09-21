@@ -48,6 +48,47 @@ return [
         'network_id' => [
             'same_area' => 'All screens within the network must belong to the same area.',
             ],
+
+            'booking_id' => [
+                'integer' => 'The :attribute must be an integer.',
+                'exists' => 'The selected :attribute does not exist.',
+            ],
+
+            'type' => [
+                'required' => 'The :attribute field is required.',
+                'enum' => 'The selected :attribute is invalid.',
+            ],
+
+            'governorate_id' => [
+                'required' => 'The :attribute field is required.',
+                'integer' => 'The :attribute must be an integer.',
+                'exists' => 'The selected :attribute does not exist.',
+            ],
+
+            'periods' => [
+                'required' => 'The :attribute field is required.',
+                'array' => 'The :attribute must be an array.',
+                'min' => 'The :attribute must contain at least one period.',
+            ],
+
+            'period_start_date' => [
+                'required' => 'The :attribute field is required.',
+                'date' => 'The :attribute must be a valid date.',
+            ],
+
+            'period_end_date' => [
+                'required' => 'The :attribute field is required.',
+                'date' => 'The :attribute must be a valid date.',
+                'after_or_equal' => 'The :attribute must be after or equal to the start date.',
+            ],
+
+            'search' => [
+                'string' => 'The :attribute must be a string.',
+                'max' => 'The :attribute may not be greater than 255 characters.',
+            ],
+
+            'external_type_already_exists' => 'This outdoor booking type already exists for this booking.',
+            'design_name_not_found' => 'The selected design does not exist in the designs list.',
     ],
 
     'electronic' => [

@@ -57,4 +57,12 @@ return [
 
     'not_found' => 'The requested resource was not found.',
     'forbidden' => 'You do not have permission to perform this action.',
+
+    'external_booking' => [
+        'available_assets_retrieved' =>'Outdoor booking options retrieved successfully.',
+        'saved' => 'Outdoor booking saved successfully.',
+        'show' => 'Outdoor booking details retrieved successfully.',
+        'updated' => 'Outdoor booking updated successfully.',
+    ],
+
 ];

@@ -5,6 +5,7 @@ use App\Http\Controllers\API\Auth\LoginController;
 use App\Http\Controllers\API\Booking\BookingController;
 use App\Http\Controllers\Api\Booking\ElectronicBooking\BookingOptions\ElectronicBookingOptionsController;
 use App\Http\Controllers\API\Booking\ElectronicBooking\ElectronicBookingController;
+use App\Http\Controllers\API\Booking\ExternalBooking\ExternalBookingController;
 use App\Http\Controllers\Api\Booking\FlexBooking\BookingOptions\FlexBookingOptionsController;
 use App\Http\Controllers\Api\Booking\FlexBooking\FlexBookingController;
 use App\Http\Controllers\API\Customer\CustomerController;
@@ -69,6 +70,11 @@ Route::middleware('localization')->group(function () {
         Route::put('/bookings/{booking_id}/electronic',[ElectronicBookingController::class, 'update']);
         Route::get('/bookings/{booking_id}/electronic',[ElectronicBookingController::class, 'show']);
 
+        //external booking
+        Route::post('/booking-options/outdoor/available-assets',[ExternalBookingController::class,'availableAssets']);
+        Route::post('/bookings/outdoor',[ExternalBookingController::class,'store']);
+        Route::get('/bookings/{booking_id}/outdoor/{type}',[ExternalBookingController::class,'show']);
+        Route::put('/bookings/{booking_id}/outdoor/{type}',[ExternalBookingController::class,'update']);
     });
 
 });

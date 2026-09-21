@@ -10,13 +10,13 @@ class ExternalDesign extends Model
     use HasFactory;
 
     protected $fillable = [
-        'external_booking_id',
+        'external_booking_type_id',
         'name',
     ];
 
-    public function externalBooking()
+    public function externalBookingType()
     {
-        return $this->belongsTo(ExternalBooking::class);
+        return $this->belongsTo(ExternalBookingType::class,'external_booking_type_id');
     }
 
     public function items()

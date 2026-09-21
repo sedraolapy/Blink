@@ -14,6 +14,7 @@ class ExternalBookingItem extends Model
         'external_booking_period_id',
         'external_asset_id',
         'design_id',
+        'is_gift',
         'status',
     ];
 
@@ -21,6 +22,7 @@ class ExternalBookingItem extends Model
     {
         return [
             'status' => BookingItemStatusEnum::class,
+            'is_gift' => 'boolean',
         ];
     }
 

@@ -59,12 +59,53 @@ return [
         'network' => 'الشبكة',
         'slides' => 'الشرائح',
         'slide_number' => 'رقم الشريحة',
+
     ],
 
         'custom' => [
             'network_id' => [
                 'same_area' => 'يجب أن تكون جميع الشاشات ضمن الشبكة في نفس المنطقة.',
             ],
+            'booking_id' => [
+                'integer' => 'يجب أن يكون :attribute رقمًا صحيحًا.',
+                'exists' => ':attribute المحدد غير موجود.',
+            ],
+
+            'type' => [
+                'required' => 'حقل :attribute مطلوب.',
+                'enum' => ':attribute المحدد غير صالح.',
+            ],
+
+            'governorate_id' => [
+                'required' => 'حقل :attribute مطلوب.',
+                'integer' => 'يجب أن يكون :attribute رقمًا صحيحًا.',
+                'exists' => ':attribute المحددة غير موجودة.',
+            ],
+
+            'periods' => [
+                'required' => 'حقل :attribute مطلوب.',
+                'array' => 'يجب أن يكون :attribute قائمة.',
+                'min' => 'يجب أن تحتوي :attribute على فترة واحدة على الأقل.',
+            ],
+
+            'period_start_date' => [
+                'required' => 'حقل :attribute مطلوب.',
+                'date' => 'يجب أن يكون :attribute تاريخًا صالحًا.',
+            ],
+
+            'period_end_date' => [
+                'required' => 'حقل :attribute مطلوب.',
+                'date' => 'يجب أن يكون :attribute تاريخًا صالحًا.',
+                'after_or_equal' => 'يجب أن يكون :attribute بعد أو مساويًا لتاريخ البداية.',
+            ],
+
+            'search' => [
+                'string' => 'يجب أن يكون :attribute نصًا.',
+                'max' => 'يجب ألا يتجاوز :attribute 255 محرفًا.',
+            ],
+            'external_type_already_exists' => 'هذا النوع من الحجز الخارجي موجود مسبقاً ضمن الحجز.',
+
+            'design_name_not_found' =>  'التصميم المحدد غير موجود ضمن قائمة التصاميم.',
         ],
 
         'electronic' => [

@@ -33,8 +33,4 @@ class ExternalBooking extends Model
         return $this->hasMany(ExternalBookingType::class);
     }
 
-    public function designs()
-    {
-        return $this->hasMany(ExternalDesign::class);
-    }
 }

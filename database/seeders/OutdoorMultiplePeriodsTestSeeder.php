@@ -74,10 +74,8 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
 
             $confirmedBooking = Booking::query()->create([
                 'customer_id' => $customer->id,
-                'booking_type' =>  BookingTypeEnum::FOREIGN->value,
-
-                'status' =>
-                    BookingStatusEnum::CONFIRMED->value,
+                'booking_type' => BookingTypeEnum::FOREIGN->value,
+                'status' => BookingStatusEnum::CONFIRMED->value,
 
                 'installation_order' => false,
                 'extension_order' => false,
@@ -103,24 +101,24 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
 
             $confirmedDesign1 =
                 ExternalDesign::query()->create([
-                    'external_booking_id' =>
-                        $confirmedExternalBooking->id,
+                    'external_booking_type_id' =>
+                        $confirmedType->id,
 
                     'name' => 'تصميم الحملة الأولى',
                 ]);
 
             $confirmedDesign2 =
                 ExternalDesign::query()->create([
-                    'external_booking_id' =>
-                        $confirmedExternalBooking->id,
+                    'external_booking_type_id' =>
+                        $confirmedType->id,
 
                     'name' => 'تصميم الحملة الثانية',
                 ]);
 
             $confirmedDesign3 =
                 ExternalDesign::query()->create([
-                    'external_booking_id' =>
-                        $confirmedExternalBooking->id,
+                    'external_booking_type_id' =>
+                        $confirmedType->id,
 
                     'name' => 'تصميم الحملة الثالثة',
                 ]);
@@ -202,7 +200,6 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                 'design_id' =>
                     $confirmedDesign3->id,
 
-
                 'status' =>
                     BookingItemStatusEnum::BOOKED->value,
             ]);
@@ -219,10 +216,8 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
             $unconfirmedBooking =
                 Booking::query()->create([
                     'customer_id' => $customer->id,
-                    'booking_type' =>  BookingTypeEnum::FOREIGN->value,
-
-                    'status' =>
-                        BookingStatusEnum::UNCONFIRMED->value,
+                    'booking_type' => BookingTypeEnum::FOREIGN->value,
+                    'status' => BookingStatusEnum::UNCONFIRMED->value,
 
                     'installation_order' => false,
                     'extension_order' => false,
@@ -243,10 +238,14 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                     'type' => $type,
                 ]);
 
+            /*
+             * Designs
+             */
+
             $unconfirmedDesign1 =
                 ExternalDesign::query()->create([
-                    'external_booking_id' =>
-                        $unconfirmedExternalBooking->id,
+                    'external_booking_type_id' =>
+                        $unconfirmedType->id,
 
                     'name' =>
                         'تصميم غير مؤكد الأول',
@@ -254,8 +253,8 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
 
             $unconfirmedDesign2 =
                 ExternalDesign::query()->create([
-                    'external_booking_id' =>
-                        $unconfirmedExternalBooking->id,
+                    'external_booking_type_id' =>
+                        $unconfirmedType->id,
 
                     'name' =>
                         'تصميم غير مؤكد الثاني',
@@ -284,7 +283,6 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                 'design_id' =>
                     $unconfirmedDesign1->id,
 
-
                 'status' =>
                     BookingItemStatusEnum::UNCONFIRMED->value,
             ]);
@@ -311,7 +309,6 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
 
                 'design_id' =>
                     $unconfirmedDesign2->id,
-
 
                 'status' =>
                     BookingItemStatusEnum::UNCONFIRMED->value,

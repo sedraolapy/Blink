@@ -30,6 +30,8 @@ return new class extends Migration
 
             $table->string('status')->default(BookingItemStatusEnum::UNCONFIRMED->value);
 
+            $table->boolean('is_gift')->default(false);
+            
             $table->timestamps();
 
             $table->unique(['external_booking_period_id', 'external_asset_id'],'external_period_asset_unique');

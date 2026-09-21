@@ -31,4 +31,9 @@ class ExternalBookingType extends Model
     {
         return $this->hasMany(ExternalBookingPeriod::class);
     }
+
+    public function designs()
+    {
+        return $this->hasMany(ExternalDesign::class,'external_booking_type_id');
+    }
 }

@@ -7,18 +7,29 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ElectronicBookingOptionNetworkResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
+        $firstScreen = $this->screens->first();
+
         return [
             'id' => $this->id,
             'name' => $this->location_name,
+
             'screens_count' => $this->screens->count(),
-            'screens' => ElectronicBookingOptionScreenResource::collection($this->screens),
+            'area' => $firstScreen?->area?->name,
+
+            'screens' => $this->screens
+                ->map(function ($screen) {
+                    return [
+                        'id' => $screen->id,
+                        'code' => $screen->code,
+                        'name' => $screen->location_name,
+                        'width' => (float) $screen->width,
+                        'height' => (float) $screen->height,
+                        'resolution' => "{$screen->width_px}x{$screen->height_px}",
+                    ];
+                })
+                ->values(),
         ];
     }
 }

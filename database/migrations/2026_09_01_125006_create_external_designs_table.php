@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('external_designs', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('external_booking_id')
-            ->constrained('external_bookings')
-            ->cascadeOnDelete();
+            $table->foreignId('external_booking_type_id')
+                ->constrained('external_booking_types')
+                ->cascadeOnDelete();
 
             $table->string('name');
 
