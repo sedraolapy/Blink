@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Booking\FlexBooking\BookingOptions;
 
 use App\Enums\PermissionEnum;
+use App\Models\Booking;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -11,11 +12,30 @@ class FlexPeriodOptionsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $permission = $this->filled('booking_id')
-            ? PermissionEnum::UPDATE_BOOKING->value
-            : PermissionEnum::CREATE_FLEX_BOOKING->value;
+        $user = $this->user();
 
-        return $this->user()?->can($permission) ?? false;
+        if (!$user) {
+            return false;
+        }
+
+        $bookingId = $this->input('booking_id');
+
+        if (!$bookingId) {
+            return $user->can(
+                PermissionEnum::CREATE_FLEX_BOOKING->value
+            );
+        }
+
+        $hasFlexBooking = Booking::query()
+            ->whereKey($bookingId)
+            ->whereHas('flexBooking')
+            ->exists();
+
+        return $user->can(
+            $hasFlexBooking
+                ? PermissionEnum::UPDATE_BOOKING->value
+                : PermissionEnum::CREATE_FLEX_BOOKING->value
+        );
     }
 
     public function rules(): array

@@ -100,22 +100,22 @@ class ElectronicService
     private function getSummary(array $filters): array
     {
         $search = $filters['search'] ?? null;
-    
+
         $governorateId = isset($filters['governorate_id'])
             ? (int) $filters['governorate_id']
             : null;
-    
+
         $screensQuery = LedScreen::query()
             ->whereNull('network_id')
             ->search($search)
             ->governorate($governorateId);
-    
+
         $networksQuery = LedNetwork::query()
             ->search($search)
             ->governorate($governorateId);
-    
+
         $hasAssetFilters = filled($search) || $governorateId !== null;
-    
+
         $confirmedBookingsQuery = LedBooking::query()
             ->join(
                 'bookings',
@@ -139,7 +139,7 @@ class ElectronicService
                 'bookings.status',
                 BookingStatusEnum::CONFIRMED->value
             );
-    
+
         $unconfirmedBookingsQuery = LedBooking::query()
             ->join(
                 'bookings',
@@ -163,19 +163,19 @@ class ElectronicService
                 'bookings.status',
                 BookingStatusEnum::UNCONFIRMED->value
             );
-    
+
         if ($hasAssetFilters) {
             $screenIdsQuery = LedScreen::query()
                 ->whereNull('network_id')
                 ->search($search)
                 ->governorate($governorateId)
                 ->select('led_screens.id');
-    
+
             $networkIdsQuery = LedNetwork::query()
                 ->search($search)
                 ->governorate($governorateId)
                 ->select('led_networks.id');
-    
+
             $applyAssetFilter = function ($query) use (
                 $screenIdsQuery,
                 $networkIdsQuery
@@ -195,11 +195,11 @@ class ElectronicService
                         );
                 });
             };
-    
+
             $applyAssetFilter($confirmedBookingsQuery);
             $applyAssetFilter($unconfirmedBookingsQuery);
         }
-    
+
         return [
             'total_screens' => (clone $screensQuery)->count(),
             'networks_count' => (clone $networksQuery)->count(),
@@ -413,10 +413,8 @@ class ElectronicService
                                         ->end_date
                                         ?->format('Y-m-d'),
 
-                                'slides' =>
-                                    $this->formatSlides(
-                                        $item
-                                    ),
+                                'designs' =>
+                                    $this->formatDesigns($item),
                             ]
                         )
                         ->sortBy('start_date')
@@ -428,11 +426,38 @@ class ElectronicService
             ->toArray();
     }
 
-    private function formatSlides(LedBookingItem $item,?int $screenId = null)
+    private function formatDesigns(LedBookingItem $item,?int $screenId = null): array
     {
         $slides = $item->slides;
 
-        if ($screenId !== null) {
+        if (
+            $screenId !== null
+            && $item->led_network_id !== null
+        ) {
+            $slides = $slides->where(
+                'led_screen_id',
+                $screenId
+            );
+        }
+
+        return $slides
+            ->map(
+                fn (LedBookingSlide $slide) =>
+                    $slide->design?->name
+            )
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+    }
+
+    private function formatSlides(LedBookingItem $item, ?int $screenId = null)
+    {
+        $slides = $item->slides;
+        if (
+            $screenId !== null
+            && $item->led_network_id !== null
+        ) {
             $slides = $slides->where(
                 'led_screen_id',
                 $screenId
@@ -443,11 +468,8 @@ class ElectronicService
             ->sortBy('slide_number')
             ->map(
                 fn (LedBookingSlide $slide) => [
-                    'slide_number' =>
-                        (int) $slide->slide_number,
-
-                    'design_name' =>
-                        $slide->design?->name,
+                    'slide_number' => (int) $slide->slide_number,
+                    'design_name' => $slide->design?->name,
                 ]
             )
             ->values()
