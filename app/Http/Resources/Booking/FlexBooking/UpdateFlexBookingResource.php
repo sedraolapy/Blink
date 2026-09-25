@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources\Booking\FlexBooking;
 
-use App\Enums\BookingServiceTypeEnum;
 use App\Enums\BookingTypeEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -21,9 +20,21 @@ class UpdateFlexBookingResource extends JsonResource
                 'id' => $booking->id,
                 'status' => $booking->status,
                 'advertiser_type' => $bookingType,
-                'types' => [
-                    BookingServiceTypeEnum::FLEX->value,
-                ],
+                'types' => collect([
+                    $booking->flexBooking ? 'flex' : null,
+                    $booking->ledBooking ? 'electronic' : null,
+
+                    ...(
+                        $booking->externalBooking
+                            ? $booking->externalBooking->types
+                                ->pluck('type')
+                                ->map(fn ($type) => $type->value ?? $type)
+                                ->toArray()
+                            : []
+                    ),
+                ])
+                    ->filter()
+                    ->values(),
             ],
 
             'flex_booking' => [

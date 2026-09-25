@@ -459,7 +459,7 @@ class ElectronicBookingService
         $booking->load([
             'flexBooking',
             'ledBooking',
-            'externalBooking',
+            'externalBooking.types',
         ]);
 
         $ledBooking->refresh();

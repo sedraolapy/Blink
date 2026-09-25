@@ -3,19 +3,48 @@
 namespace App\Http\Requests\Booking\ElectronicBooking;
 
 use App\Enums\PermissionEnum;
+use App\Models\Booking;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ElectronicAssetsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can(
-            PermissionEnum::CREATE_SCREEN_BOOKING->value
-        ) ?? false;
+        $user = $this->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        $bookingId = $this->input('booking_id');
+
+        if (!$bookingId) {
+            return $user->can(
+                PermissionEnum::CREATE_SCREEN_BOOKING->value
+            );
+        }
+
+        $hasElectronicBooking = Booking::query()
+            ->whereKey($bookingId)
+            ->whereHas('ledBooking')
+            ->exists();
+
+        return $user->can(
+            $hasElectronicBooking
+                ? PermissionEnum::UPDATE_BOOKING->value
+                : PermissionEnum::CREATE_SCREEN_BOOKING->value
+        );
     }
+
     public function rules(): array
     {
         return [
+            'booking_id' => [
+                'nullable',
+                'integer',
+                'exists:bookings,id',
+            ],
+
             'governorate_id' => [
                 'required',
                 'integer',

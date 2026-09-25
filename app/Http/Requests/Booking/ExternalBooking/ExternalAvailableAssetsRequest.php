@@ -4,6 +4,7 @@ namespace App\Http\Requests\Booking\ExternalBooking;
 
 use App\Enums\ExternalAssetTypeEnum;
 use App\Enums\PermissionEnum;
+use App\Models\Booking;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -11,11 +12,30 @@ class ExternalAvailableAssetsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $permission = $this->filled('booking_id')
-            ? PermissionEnum::UPDATE_BOOKING
-            : PermissionEnum::CREATE_EXTERNAL_BOOKING;
+        $user = $this->user();
 
-        return $this->user()?->can($permission->value) ?? false;
+        if (!$user) {
+            return false;
+        }
+
+        $bookingId = $this->input('booking_id');
+
+        if (!$bookingId) {
+            return $user->can(
+                PermissionEnum::CREATE_EXTERNAL_BOOKING->value
+            );
+        }
+
+        $hasExternalBooking = Booking::query()
+            ->whereKey($bookingId)
+            ->whereHas('externalBooking')
+            ->exists();
+
+        return $user->can(
+            $hasExternalBooking
+                ? PermissionEnum::UPDATE_BOOKING->value
+                : PermissionEnum::CREATE_EXTERNAL_BOOKING->value
+        );
     }
 
     public function rules(): array
@@ -104,5 +124,5 @@ class ExternalAvailableAssetsRequest extends FormRequest
             'search' => __('validation.attributes.search'),
         ];
     }
-    
+
 }

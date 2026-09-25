@@ -28,7 +28,15 @@ class StoreElectronicBookingResource extends JsonResource
         }
 
         if ($booking->externalBooking) {
-            $types[] = 'external';
+            $externalTypes = $booking->externalBooking->types
+                ->pluck('type')
+                ->map(fn ($type) => $type->value ?? $type)
+                ->toArray();
+
+            $types = [
+                ...$types,
+                ...$externalTypes,
+            ];
         }
 
         $items = $electronicBooking->periods

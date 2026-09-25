@@ -449,6 +449,12 @@ class FlexBookingService
 
     private function buildResult(Booking $booking,FlexBooking $flexBooking,int $periodsCount,int $itemsCount,int $designsCount)
     {
+        $booking->refresh()->load([
+            'flexBooking',
+            'ledBooking',
+            'externalBooking.types',
+        ]);
+
         return [
             'booking' => $booking->refresh(),
             'flex_booking' => $flexBooking->refresh(),
