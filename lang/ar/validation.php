@@ -106,6 +106,7 @@ return [
             'external_type_already_exists' => 'هذا النوع من الحجز الخارجي موجود مسبقاً ضمن الحجز.',
             'design_name_not_found' =>  'التصميم المحدد غير موجود ضمن قائمة التصاميم.',
             'external_asset_already_booked' => 'إحدى اللوحات الخارجية المحددة محجوزة مسبقًا خلال الفترة المحددة.',
+            'external_type_periods_overlap' => 'لا يمكن أن تتداخل فترات نفس نوع الحجز الخارجي مع بعضها.',
         ],
 
         'electronic' => [

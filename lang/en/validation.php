@@ -90,6 +90,7 @@ return [
             'external_type_already_exists' => 'This outdoor booking type already exists for this booking.',
             'design_name_not_found' => 'The selected design does not exist in the designs list.',
             'external_asset_already_booked' => 'One or more selected external assets are already booked for the selected period.',
+            'external_type_periods_overlap' => 'Periods for the same external booking type must not overlap.',
     ],
 
     'electronic' => [
