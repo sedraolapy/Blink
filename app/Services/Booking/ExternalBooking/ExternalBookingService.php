@@ -167,6 +167,90 @@ class ExternalBookingService
         ];
     }
 
+    private function lockAndValidateAvailableAssets(array $periods,int $bookingId)
+    {
+        $assetIds = collect($periods)
+            ->flatMap(
+                fn (array $period) =>
+                    collect($period['items'])
+                        ->pluck('asset_id')
+            )
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->sort()
+            ->values();
+
+        ExternalAsset::query()
+            ->whereIn('id', $assetIds)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get(['id']);
+
+        $conflict = ExternalBookingItem::query()
+            ->whereIn('status', [
+                BookingItemStatusEnum::BOOKED->value,
+                BookingItemStatusEnum::UNCONFIRMED->value,
+            ])
+            ->where(function ($query) use ($periods) {
+                foreach ($periods as $period) {
+                    $periodAssetIds = collect($period['items'])
+                        ->pluck('asset_id')
+                        ->map(fn ($id) => (int) $id)
+                        ->unique()
+                        ->values();
+
+                    $query->orWhere(
+                        function ($sub) use (
+                            $period,
+                            $periodAssetIds
+                        ) {
+                            $sub
+                                ->whereIn(
+                                    'external_asset_id',
+                                    $periodAssetIds
+                                )
+                                ->whereHas(
+                                    'period',
+                                    function ($periodQuery) use ($period) {
+                                        $periodQuery
+                                            ->whereDate(
+                                                'start_date',
+                                                '<=',
+                                                $period['end_date']
+                                            )
+                                            ->whereDate(
+                                                'end_date',
+                                                '>=',
+                                                $period['start_date']
+                                            );
+                                    }
+                                );
+                        }
+                    );
+                }
+            })
+            ->whereHas(
+                'period.externalBookingType.externalBooking',
+                fn ($query) =>
+                    $query->where(
+                        'booking_id',
+                        '!=',
+                        $bookingId
+                    )
+            )
+            ->lockForUpdate()
+            ->first();
+
+        if ($conflict) {
+            throw ValidationException::withMessages([
+                'periods' => [
+                    __('validation.custom.external_asset_already_booked'),
+                ],
+            ]);
+        }
+    }
+
+
     public function store(array $data)
     {
         return DB::transaction(function () use ($data) {
@@ -200,6 +284,11 @@ class ExternalBookingService
                     ],
                 ]);
             }
+
+            $this->lockAndValidateAvailableAssets(
+                $data['periods'],
+                $booking->id
+            );
 
             $type = $externalBooking->types()->create([
                 'type' => $data['type'],
@@ -250,7 +339,7 @@ class ExternalBookingService
             ]);
         });
     }
-    
+
     public function show(int $bookingId,ExternalAssetTypeEnum $type)
     {
         return ExternalBookingType::query()
@@ -281,8 +370,12 @@ class ExternalBookingService
                 ->with('externalBooking.booking')
                 ->firstOrFail();
 
-            $externalBookingType->periods()->delete();
+            $this->lockAndValidateAvailableAssets(
+                $data['periods'],
+                $bookingId
+            );
 
+            $externalBookingType->periods()->delete();
             $externalBookingType->designs()->delete();
 
             foreach ($data['designs'] as $designName) {

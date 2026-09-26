@@ -38,16 +38,18 @@ class ShowBookingResource extends JsonResource
         }
 
         if ($this->externalBooking) {
-            $types[] = [
-                'type' => 'external',
-                'booking_type_id' => $this->externalBooking->id,
-                'date' => $this->externalBooking->created_at?->toDateString(),
+            foreach ($this->externalBooking->types as $externalType) {
+                $types[] = [
+                    'type' => $externalType->type->value,
+                    'booking_type_id' => $this->externalBooking->id,
+                    'date' => $this->externalBooking->created_at?->toDateString(),
 
-                'orders' => [
-                    'installation' => (bool) $this->externalBooking->installation_order,
-                    'extension' => (bool) $this->externalBooking->extension_order,
-                ],
-            ];
+                    'orders' => [
+                        'installation' => (bool) $this->externalBooking->installation_order,
+                        'extension' => (bool) $this->externalBooking->extension_order,
+                    ],
+                ];
+            }
         }
 
         return [

@@ -104,8 +104,8 @@ return [
                 'max' => 'يجب ألا يتجاوز :attribute 255 محرفًا.',
             ],
             'external_type_already_exists' => 'هذا النوع من الحجز الخارجي موجود مسبقاً ضمن الحجز.',
-
             'design_name_not_found' =>  'التصميم المحدد غير موجود ضمن قائمة التصاميم.',
+            'external_asset_already_booked' => 'إحدى اللوحات الخارجية المحددة محجوزة مسبقًا خلال الفترة المحددة.',
         ],
 
         'electronic' => [
