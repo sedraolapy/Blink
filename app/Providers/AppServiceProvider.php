@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Observers\BookingObserver;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use App\Services\WorkingYear\WorkingYearContext;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,7 +16,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->scoped(
+            WorkingYearContext::class,
+            fn () => new WorkingYearContext()
+        );
     }
 
     /**

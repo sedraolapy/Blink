@@ -117,14 +117,12 @@ class BookingFactory extends Factory
 
     public function withFlex(
         BookingItemStatusEnum $status,
-        int $assetOffset = 0,
-        ?int $year = null
+        int $assetOffset = 0
     ): static {
         return $this->afterCreating(
             function (Booking $booking) use (
                 $status,
-                $assetOffset,
-                $year
+                $assetOffset
             ) {
                 $billboard = FlexBillboard::query()
                     ->orderBy('id')
@@ -145,9 +143,6 @@ class BookingFactory extends Factory
 
                     'advertising_period_id' =>
                         $advertisingPeriodId,
-
-                    'year' =>
-                        $year ?? now()->year,
                 ]);
 
                 FlexBookingItem::query()->create([
@@ -158,7 +153,6 @@ class BookingFactory extends Factory
                         $billboard->id,
 
                     'design_id' => null,
-
 
                     'has_dykat' => false,
                     'is_gift' => false,

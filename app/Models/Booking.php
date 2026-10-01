@@ -15,6 +15,7 @@ class Booking extends Model
     protected $fillable = [
         'customer_id',
         'booking_type',
+        'year',
         'installation_order',
         'extension_order',
         'operation_order',
@@ -25,6 +26,7 @@ class Booking extends Model
         return [
             'booking_type' => BookingTypeEnum::class,
             'status' => BookingStatusEnum::class,
+            'year' => 'integer',
 
             'installation_order' => 'boolean',
             'extension_order' => 'boolean',

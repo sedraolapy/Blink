@@ -5,24 +5,45 @@ namespace App\Services\Customer;
 use App\Enums\SubscriptionTypeEnum;
 use App\Models\Booking;
 use App\Models\Customer;
+use App\Services\WorkingYear\WorkingYearContext;
+use Illuminate\Support\Facades\DB;
 
 class CustomerService
 {
+    public function __construct(
+        private readonly WorkingYearContext $workingYearContext
+    ) {
+    }
+
     public function index(array $filters): array
     {
+        $year = $this->workingYearContext->get();
+
         $query = Customer::query()
             ->search($filters['search'] ?? null)
             ->subscriptionType(
-                $filters['subscription_type'] ?? null
+                $filters['subscription_type'] ?? null,
+                $year
             )
             ->latestContractStatus(
-                $filters['contract_status'] ?? null
+                $filters['contract_status'] ?? null,
+                $year
             );
 
         $totalCustomers = (clone $query)->count();
 
         $customers = $query
-            ->with('latestContract')
+            ->with([
+                'subscriptions' => fn ($query) =>
+                    $query->where('year', $year),
+
+                'latestContract' => fn ($query) =>
+                    $query->whereHas(
+                        'booking',
+                        fn ($bookingQuery) =>
+                            $bookingQuery->where('year', $year)
+                    ),
+            ])
             ->orderByDesc('id')
             ->paginate(24);
 
@@ -37,32 +58,59 @@ class CustomerService
 
     public function create(array $data)
     {
-        $data['subscription_type'] = SubscriptionTypeEnum::BRONZE->value;
+        return DB::transaction(function () use ($data) {
+            $customer = Customer::query()->create($data);
 
-        return Customer::query()->create($data);
+            $customer->subscriptions()->create([
+                'year' => now()->year,
+                'subscription_type' => SubscriptionTypeEnum::BRONZE->value,
+            ]);
+
+            return $customer->load([
+                'subscriptions' => fn ($query) => $query->where('year', now()->year),
+            ]);
+        });
     }
 
     public function show(int $id)
     {
+        $year = $this->workingYearContext->get();
+
         return Customer::query()
-            ->with('latestContract')
-            ->withCount('bookings')
+            ->with([
+                'subscriptions' => fn ($query) =>
+                    $query->where('year', $year),
+
+                'latestContract' => fn ($query) =>
+                    $query->whereHas(
+                        'booking',
+                        fn ($bookingQuery) =>
+                            $bookingQuery->where('year', $year)
+                    ),
+            ])
+            ->withCount([
+                'bookings' => fn ($query) =>
+                    $query->where('year', $year),
+            ])
             ->findOrFail($id);
     }
 
-    public function update(Customer $customer,array $data)
+    public function update(Customer $customer, array $data)
     {
         $customer->update($data);
 
         return $customer->refresh();
     }
 
-    public function bookings(int $customerId,array $filters)
+    public function bookings(int $customerId, array $filters)
     {
+        $year = $this->workingYearContext->get();
+
         Customer::query()->findOrFail($customerId);
 
         return Booking::query()
             ->where('customer_id', $customerId)
+            ->where('year', $year)
             ->dateRange(
                 $filters['from_date'] ?? null,
                 $filters['to_date'] ?? null

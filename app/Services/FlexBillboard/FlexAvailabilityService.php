@@ -7,11 +7,15 @@ use App\Enums\BookingStatusEnum;
 use App\Models\AdvertisingPeriod;
 use App\Models\FlexBillboard;
 use App\Services\AdvertisingPeriod\AdvertisingPeriodService;
+use App\Services\WorkingYear\WorkingYearContext;
 use Illuminate\Database\Eloquent\Builder;
 
 class FlexAvailabilityService
 {
-    public function __construct(private readonly AdvertisingPeriodService $advertisingPeriodService) {}
+    public function __construct(
+        private readonly AdvertisingPeriodService $advertisingPeriodService,
+        private readonly WorkingYearContext $workingYearContext
+        ) {}
 
     public function index(array $filters): array
     {
@@ -19,7 +23,7 @@ class FlexAvailabilityService
             ? (int) $filters['period_id']
             : $this->advertisingPeriodService->getCurrentPeriodId();
 
-        $year = now()->year;
+        $year = $this->workingYearContext->get();
 
         $baseQuery = FlexBillboard::query()
             ->search($filters['search'] ?? null)
@@ -197,32 +201,25 @@ class FlexAvailabilityService
     {
         $query->whereDoesntHave(
             'bookingItems',
-            function (Builder $query) use (
-                $periodId,
-                $year
-            ) {
+            function (Builder $query) use ($periodId,$year)
+            {
                 $query->whereHas(
                     'period',
-                    function (Builder $query) use (
-                        $periodId,
-                        $year
-                    ) {
+                    function (Builder $query) use ($periodId,$year)
+                    {
                         $query
-                            ->where(
-                                'advertising_period_id',
-                                $periodId
-                            )
-                            ->where('year', $year)
+                            ->where('advertising_period_id',$periodId)
                             ->whereHas(
                                 'flexBooking.booking',
                                 fn (Builder $query) =>
-                                    $query->whereIn(
-                                        'status',
-                                        [
-                                            BookingStatusEnum::CONFIRMED->value,
-                                            BookingStatusEnum::UNCONFIRMED->value,
-                                        ]
-                                    )
+                                    $query
+                                        ->where('year', $year)
+                                        ->whereIn('status',
+                                            [
+                                                BookingStatusEnum::CONFIRMED->value,
+                                                BookingStatusEnum::UNCONFIRMED->value,
+                                            ]
+                                        )
                             );
                     }
                 );
@@ -248,24 +245,15 @@ class FlexAvailabilityService
     {
         return $query->whereHas(
             'period',
-            function (Builder $query) use (
-                $periodId,
-                $year,
-                $status
-            ) {
+            function (Builder $query) use ($periodId,$year,$status)
+            {
                 $query
-                    ->where(
-                        'advertising_period_id',
-                        $periodId
-                    )
-                    ->where('year', $year)
+                    ->where('advertising_period_id',$periodId)
                     ->whereHas(
                         'flexBooking.booking',
-                        fn (Builder $query) =>
-                            $query->where(
-                                'status',
-                                $status->value
-                            )
+                        fn (Builder $query) => $query
+                                ->where('year', $year)
+                                ->where('status',$status->value)
                     );
             }
         );
@@ -273,25 +261,28 @@ class FlexAvailabilityService
 
     public function show(int $id): array
     {
-        $year = now()->year;
+        $year = $this->workingYearContext->get();
 
-        $currentPeriodId =
-            $this->advertisingPeriodService
-                ->getCurrentPeriodId();
+        $currentPeriodId = $year === now()->year
+            ? $this->advertisingPeriodService->getCurrentPeriodId()
+            : null;
 
         $billboard = FlexBillboard::query()
             ->with([
                 'area.governorate',
-
                 'bookingItems' => function ($query) use ($year) {
                     $query
                         ->whereHas(
-                            'period',
+                            'period.flexBooking.booking',
                             fn (Builder $query) =>
-                                $query->where(
-                                    'year',
-                                    $year
-                                )
+                                $query
+                                    ->where('year', $year)
+                                    ->whereIn('status',
+                                        [
+                                            BookingStatusEnum::CONFIRMED->value,
+                                            BookingStatusEnum::UNCONFIRMED->value,
+                                        ]
+                                    )
                         )
                         ->with([
                             'design',
@@ -302,71 +293,48 @@ class FlexAvailabilityService
             ])
             ->findOrFail($id);
 
-        $currentPeriodItems = $billboard
-            ->bookingItems
-            ->filter(
-                fn ($item) =>
-                    (int) $item
-                        ->period
-                        ->advertising_period_id
-                    === $currentPeriodId
-            );
+        $currentPeriodItems = $currentPeriodId
+            ? $billboard
+                ->bookingItems
+                ->filter(
+                    fn ($item) =>
+                        (int) $item
+                            ->period
+                            ->advertising_period_id
+                        === $currentPeriodId
+                )
+            : collect();
 
         $hasConfirmedBooking = $currentPeriodItems
             ->contains(
                 fn ($item) =>
-                    $item
-                        ->period
-                        ->flexBooking
-                        ->booking
-                        ->status
-                    === BookingStatusEnum::CONFIRMED
+                    $item->period->flexBooking->booking->status === BookingStatusEnum::CONFIRMED
             );
 
         $hasUnconfirmedBooking = $currentPeriodItems
             ->contains(
                 fn ($item) =>
-                    $item
-                        ->period
-                        ->flexBooking
-                        ->booking
-                        ->status
-                    === BookingStatusEnum::UNCONFIRMED
+                    $item->period->flexBooking->booking->status === BookingStatusEnum::UNCONFIRMED
             );
 
         $billboard->flex_status = match (true) {
-            $hasConfirmedBooking =>
-                AssetAvailabilityStatusEnum::BOOKED->value,
-
-            $hasUnconfirmedBooking =>
-                AssetAvailabilityStatusEnum::UNCONFIRMED->value,
-
-            default =>
-                AssetAvailabilityStatusEnum::AVAILABLE->value,
+            $hasConfirmedBooking => AssetAvailabilityStatusEnum::BOOKED->value,
+            $hasUnconfirmedBooking => AssetAvailabilityStatusEnum::UNCONFIRMED->value,
+            default => AssetAvailabilityStatusEnum::AVAILABLE->value,
         };
 
         $confirmedItems = $billboard
             ->bookingItems
             ->filter(
                 fn ($item) =>
-                    $item
-                        ->period
-                        ->flexBooking
-                        ->booking
-                        ->status
-                    === BookingStatusEnum::CONFIRMED
+                    $item->period->flexBooking->booking->status === BookingStatusEnum::CONFIRMED
             );
 
         $unconfirmedItems = $billboard
             ->bookingItems
             ->filter(
                 fn ($item) =>
-                    $item
-                        ->period
-                        ->flexBooking
-                        ->booking
-                        ->status
-                    === BookingStatusEnum::UNCONFIRMED
+                    $item->period->flexBooking->booking->status === BookingStatusEnum::UNCONFIRMED
             );
 
         $reservedPeriodIds = $billboard
@@ -382,16 +350,15 @@ class FlexAvailabilityService
                 'number',
             ])
             ->map(function ($period) use ($reservedPeriodIds) {
-                $period->available = ! $reservedPeriodIds->contains(
-                    $period->id
-                );
+                $period->available =
+                    ! $reservedPeriodIds->contains($period->id);
 
                 return $period;
             });
 
         return [
             'billboard' => $billboard,
-            'confirmed_bookings' =>$this->formatBookings($confirmedItems),
+            'confirmed_bookings' => $this->formatBookings($confirmedItems),
             'unconfirmed_bookings' => $this->formatBookings($unconfirmedItems),
             'periods' => $periods,
         ];

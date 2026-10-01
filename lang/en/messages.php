@@ -65,4 +65,7 @@ return [
         'updated' => 'Outdoor booking updated successfully.',
     ],
 
+    'working_year_required' => 'The working year is required.',
+    'working_year_not_available' => 'The selected working year is not available for booking.',
+    'working_year_not_initialized' => 'The working year has not been initialized.',
 ];

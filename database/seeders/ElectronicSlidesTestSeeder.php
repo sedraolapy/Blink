@@ -4,8 +4,10 @@ namespace Database\Seeders;
 
 use App\Enums\BookingStatusEnum;
 use App\Enums\BookingTypeEnum;
+use App\Enums\SubscriptionTypeEnum;
 use App\Models\Booking;
 use App\Models\Customer;
+use App\Models\CustomerSubscription;
 use App\Models\LedBooking;
 use App\Models\LedBookingItem;
 use App\Models\LedBookingPeriod;
@@ -21,6 +23,8 @@ class ElectronicSlidesTestSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function () {
+            $year = 2026;
+
             $customer = Customer::query()->updateOrCreate(
                 [
                     'phone' => '0999222222',
@@ -30,7 +34,17 @@ class ElectronicSlidesTestSeeder extends Seeder
                         'ar' => 'زبون اختبار سلايدات الإلكتروني',
                         'en' => 'Electronic Slides Test Customer',
                     ],
-                    'subscription_type' => 'bronze',
+                ]
+            );
+
+            CustomerSubscription::query()->updateOrCreate(
+                [
+                    'customer_id' => $customer->id,
+                    'year' => $year,
+                ],
+                [
+                    'subscription_type' =>
+                        SubscriptionTypeEnum::BRONZE->value,
                 ]
             );
 
@@ -64,10 +78,16 @@ class ElectronicSlidesTestSeeder extends Seeder
             /*
              * Confirmed booking
              */
-            $confirmedBooking = Booking::query()->create([
+
+            $confirmedBooking = Booking::query()->forceCreate([
                 'customer_id' => $customer->id,
-                'booking_type' => BookingTypeEnum::LOCAL->value,
-                'status' => BookingStatusEnum::CONFIRMED->value,
+                'year' => $year,
+
+                'booking_type' =>
+                    BookingTypeEnum::LOCAL->value,
+
+                'status' =>
+                    BookingStatusEnum::CONFIRMED->value,
 
                 'installation_order' => false,
                 'extension_order' => false,
@@ -104,6 +124,7 @@ class ElectronicSlidesTestSeeder extends Seeder
             /*
              * Confirmed standalone screen
              */
+
             $standalonePeriod =
                 LedBookingPeriod::query()->create([
                     'led_booking_id' =>
@@ -153,6 +174,7 @@ class ElectronicSlidesTestSeeder extends Seeder
             /*
              * Confirmed network
              */
+
             $networkPeriod =
                 LedBookingPeriod::query()->create([
                     'led_booking_id' =>
@@ -233,9 +255,12 @@ class ElectronicSlidesTestSeeder extends Seeder
             /*
              * Unconfirmed booking
              */
+
             $unconfirmedBooking =
-                Booking::query()->create([
+                Booking::query()->forceCreate([
                     'customer_id' => $customer->id,
+                    'year' => $year,
+
                     'booking_type' =>
                         BookingTypeEnum::LOCAL->value,
 
@@ -272,6 +297,7 @@ class ElectronicSlidesTestSeeder extends Seeder
             /*
              * Unconfirmed standalone
              */
+
             $unconfirmedStandalonePeriod =
                 LedBookingPeriod::query()->create([
                     'led_booking_id' =>
@@ -305,6 +331,7 @@ class ElectronicSlidesTestSeeder extends Seeder
             /*
              * Unconfirmed network
              */
+
             $unconfirmedNetworkPeriod =
                 LedBookingPeriod::query()->create([
                     'led_booking_id' =>
@@ -366,14 +393,11 @@ class ElectronicSlidesTestSeeder extends Seeder
         int $slideNumber
     ): void {
         LedBookingSlide::query()->create([
-            'led_booking_item_id' =>
-                $itemId,
+            'led_booking_item_id' => $itemId,
 
-            'design_id' =>
-                $designId,
+            'design_id' => $designId,
 
-            'slide_number' =>
-                $slideNumber,
+            'slide_number' => $slideNumber,
         ]);
     }
 }

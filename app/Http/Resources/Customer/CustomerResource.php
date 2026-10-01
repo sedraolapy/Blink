@@ -7,18 +7,18 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CustomerResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
             'id' => $this->id,
             'name' => $this->name,
             'phone' => $this->phone,
-            'subscription_type' => $this->subscription_type,
+
+            'subscription_type' => $this->subscriptions
+                ->first()
+                ?->subscription_type
+                ?->value,
+
             'contract_status' => $this->latestContract?->status,
         ];
     }

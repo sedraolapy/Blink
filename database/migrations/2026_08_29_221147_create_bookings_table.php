@@ -19,6 +19,8 @@ return new class extends Migration
                 ->constrained('customers')
                 ->cascadeOnDelete();
 
+            $table->unsignedSmallInteger('year');
+
             $table->string('booking_type');
             $table->string('status')->default(BookingStatusEnum::UNCONFIRMED->value);
 

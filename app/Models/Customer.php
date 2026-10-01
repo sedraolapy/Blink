@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\ContractStatusEnum;
 use App\Enums\SubscriptionTypeEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,23 +17,21 @@ class Customer extends Model
     protected $fillable = [
         'name',
         'phone',
-        'subscription_type',
     ];
 
     public array $translatable = [
         'name',
     ];
 
-    protected function casts()
-    {
-        return [
-            'subscription_type' => SubscriptionTypeEnum::class,
-        ];
-    }
 
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(CustomerSubscription::class);
     }
 
     public function contracts(): HasManyThrough
@@ -79,40 +76,51 @@ class Customer extends Model
         );
     }
 
-    public function scopeSubscriptionType(Builder $query, SubscriptionTypeEnum|string|null $subscriptionType)
+    public function scopeSubscriptionType(Builder $query,SubscriptionTypeEnum|string|null $subscriptionType,int $year)
     {
         if (! $subscriptionType) {
             return $query;
         }
 
-        $value = $subscriptionType
-            instanceof SubscriptionTypeEnum
-                ? $subscriptionType->value
-                : $subscriptionType;
+        $value = $subscriptionType instanceof SubscriptionTypeEnum
+            ? $subscriptionType->value
+            : $subscriptionType;
 
-        return $query->where('subscription_type',$value);
+        return $query->whereHas(
+            'subscriptions',
+            fn (Builder $query) =>
+                $query
+                    ->where('year', $year)
+                    ->where('subscription_type', $value)
+        );
     }
 
-    public function scopeLatestContractStatus(Builder $query,?string $status)
+    public function scopeLatestContractStatus(Builder $query,?string $status,int $year)
     {
         if (! $status) {
             return $query;
         }
-    
+
         $latestContractStatus = Contract::query()
             ->select('contracts.status')
             ->whereHas(
                 'booking',
                 fn (Builder $bookingQuery) =>
-                    $bookingQuery->whereColumn(
-                        'bookings.customer_id',
-                        'customers.id'
-                    )
+                    $bookingQuery
+                        ->whereColumn(
+                            'bookings.customer_id',
+                            'customers.id'
+                        )
+                        ->where('bookings.year', $year)
             )
             ->orderByDesc('contracts.created_at')
             ->orderByDesc('contracts.id')
             ->limit(1);
-    
-        return $query->where($latestContractStatus,'=',$status);
+
+        return $query->where(
+            $latestContractStatus,
+            '=',
+            $status
+        );
     }
 }

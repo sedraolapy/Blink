@@ -7,33 +7,26 @@ use Illuminate\Console\Command;
 
 class UpdateCustomerSubscriptions extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'customers:update-subscriptions';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Update customer subscription types based on booking items ranking';
+    protected $description =
+        'Update customer subscription types for the current year';
 
-    public function __construct(private readonly CustomerSubscriptionService $service) 
-    {
+    public function __construct(
+        private readonly CustomerSubscriptionService $service
+    ) {
         parent::__construct();
     }
 
-
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function handle(): int
     {
-        $this->service->assignSubscriptionTypes();
-        $this->info('Customer subscription types updated successfully.');
+        $year = now()->year;
+
+        $this->service->assignSubscriptionTypes($year);
+
+        $this->info(
+            "Customer subscription types updated successfully for {$year}."
+        );
 
         return self::SUCCESS;
     }

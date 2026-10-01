@@ -12,7 +12,6 @@ class FlexBookingPeriod extends Model
     protected $fillable = [
         'flex_booking_id',
         'advertising_period_id',
-        'year',
     ];
 
     public function flexBooking()

@@ -1,8 +1,8 @@
 <?php
 
-use App\Enums\SubscriptionTypeEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,12 +12,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customers', function (Blueprint $table) {
+        Schema::create('working_years', function (Blueprint $table) {
             $table->id();
-            $table->json('name')->nullable();
-            $table->string('phone', 50)->nullable();
+
+            $table->unsignedSmallInteger('year')->unique();
+
             $table->timestamps();
         });
+
+        DB::table('working_years')->insert([
+            'year' => now()->year,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     /**
@@ -25,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customers');
+        Schema::dropIfExists('working_years');
     }
 };

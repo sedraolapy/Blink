@@ -8,12 +8,13 @@ use App\Models\Customer;
 
 class CustomerSubscriptionService
 {
-    public function getCustomersRanking()
+    public function getCustomersRanking(int $year)
     {
         $customers = Customer::query()
             ->with([
-                'bookings' => function ($query) {
+                'bookings' => function ($query) use ($year) {
                     $query
+                        ->where('year', $year)
                         ->where(
                             'status',
                             BookingStatusEnum::CONFIRMED->value
@@ -28,7 +29,6 @@ class CustomerSubscriptionService
             ->get([
                 'id',
                 'name',
-                'subscription_type',
             ]);
 
         return $customers
@@ -64,9 +64,9 @@ class CustomerSubscriptionService
             ->values();
     }
 
-    public function assignSubscriptionTypes()
+    public function assignSubscriptionTypes(int $year): void
     {
-        $ranking = $this->getCustomersRanking();
+        $ranking = $this->getCustomersRanking($year);
 
         $total = $ranking->count();
 
@@ -88,7 +88,8 @@ class CustomerSubscriptionService
                 int $index
             ) use (
                 $goldCount,
-                $silverCount
+                $silverCount,
+                $year
             ) {
                 $subscriptionType = match (true) {
                     $index < $goldCount =>
@@ -103,10 +104,17 @@ class CustomerSubscriptionService
                         SubscriptionTypeEnum::BRONZE,
                 };
 
-                $rankedCustomer['customer']->update([
-                    'subscription_type' =>
-                        $subscriptionType->value,
-                ]);
+                $rankedCustomer['customer']
+                    ->subscriptions()
+                    ->updateOrCreate(
+                        [
+                            'year' => $year,
+                        ],
+                        [
+                            'subscription_type' =>
+                                $subscriptionType->value,
+                        ]
+                    );
             }
         );
     }

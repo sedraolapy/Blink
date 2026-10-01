@@ -21,11 +21,9 @@ return new class extends Migration
             $table->foreignId('advertising_period_id')
                 ->constrained('advertising_periods')
                 ->restrictOnDelete();
-
-            $table->unsignedSmallInteger('year');
             $table->timestamps();
 
-            $table->unique(['flex_booking_id', 'advertising_period_id', 'year'],'flex_booking_period_unique');
+            $table->unique(['flex_booking_id', 'advertising_period_id'],'flex_booking_period_unique');
         });
     }
 

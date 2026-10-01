@@ -65,4 +65,8 @@ return [
         'show' => 'تم جلب تفاصيل الحجز الخارجي بنجاح.',
         'updated' => 'تم تحديث الحجز الخارجي بنجاح.',
     ],
+
+    'working_year_required' => 'سنة العمل مطلوبة.',
+    'working_year_not_available' => 'سنة العمل المحددة غير متاحة للحجز.',
+    'working_year_not_initialized' => 'لم يتم تهيئة سنة العمل.',
 ];

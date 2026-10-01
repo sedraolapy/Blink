@@ -5,8 +5,10 @@ namespace Database\Seeders;
 use App\Enums\BookingItemStatusEnum;
 use App\Enums\BookingStatusEnum;
 use App\Enums\BookingTypeEnum;
+use App\Enums\SubscriptionTypeEnum;
 use App\Models\Booking;
 use App\Models\Customer;
+use App\Models\CustomerSubscription;
 use App\Models\ExternalAsset;
 use App\Models\ExternalBooking;
 use App\Models\ExternalBookingItem;
@@ -21,6 +23,8 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function () {
+            $confirmedYear = 2026;
+            $unconfirmedYear = 2027;
 
             /*
              * ========================================
@@ -28,7 +32,8 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
              * ========================================
              */
 
-            $asset = ExternalAsset::query()->findOrFail(1);
+            $asset = ExternalAsset::query()
+                ->findOrFail(1);
 
             $type = $asset->type instanceof \BackedEnum
                 ? $asset->type->value
@@ -49,7 +54,34 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                         'ar' => 'زبون اختبار الفترات الخارجية',
                         'en' => 'Outdoor Periods Test Customer',
                     ],
-                    'subscription_type' => 'bronze',
+                ]
+            );
+
+            /*
+             * ========================================
+             * Customer Subscriptions
+             * ========================================
+             */
+
+            CustomerSubscription::query()->updateOrCreate(
+                [
+                    'customer_id' => $customer->id,
+                    'year' => $confirmedYear,
+                ],
+                [
+                    'subscription_type' =>
+                        SubscriptionTypeEnum::BRONZE->value,
+                ]
+            );
+
+            CustomerSubscription::query()->updateOrCreate(
+                [
+                    'customer_id' => $customer->id,
+                    'year' => $unconfirmedYear,
+                ],
+                [
+                    'subscription_type' =>
+                        SubscriptionTypeEnum::BRONZE->value,
                 ]
             );
 
@@ -67,20 +99,28 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
              * ========================================
              * CONFIRMED BOOKING
              *
+             * Year: 2026
              * 3 Periods
              * Different design for each period
              * ========================================
              */
 
-            $confirmedBooking = Booking::query()->create([
-                'customer_id' => $customer->id,
-                'booking_type' => BookingTypeEnum::FOREIGN->value,
-                'status' => BookingStatusEnum::CONFIRMED->value,
+            $confirmedBooking = Booking::query()
+                ->forceCreate([
+                    'customer_id' => $customer->id,
 
-                'installation_order' => false,
-                'extension_order' => false,
-                'operation_order' => false,
-            ]);
+                    'year' => $confirmedYear,
+
+                    'booking_type' =>
+                        BookingTypeEnum::FOREIGN->value,
+
+                    'status' =>
+                        BookingStatusEnum::CONFIRMED->value,
+
+                    'installation_order' => false,
+                    'extension_order' => false,
+                    'operation_order' => false,
+                ]);
 
             $confirmedExternalBooking =
                 ExternalBooking::query()->create([
@@ -104,7 +144,8 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                     'external_booking_type_id' =>
                         $confirmedType->id,
 
-                    'name' => 'تصميم الحملة الأولى',
+                    'name' =>
+                        'تصميم الحملة الأولى',
                 ]);
 
             $confirmedDesign2 =
@@ -112,7 +153,8 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                     'external_booking_type_id' =>
                         $confirmedType->id,
 
-                    'name' => 'تصميم الحملة الثانية',
+                    'name' =>
+                        'تصميم الحملة الثانية',
                 ]);
 
             $confirmedDesign3 =
@@ -120,7 +162,8 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
                     'external_booking_type_id' =>
                         $confirmedType->id,
 
-                    'name' => 'تصميم الحملة الثالثة',
+                    'name' =>
+                        'تصميم الحملة الثالثة',
                 ]);
 
             /*
@@ -208,16 +251,23 @@ class OutdoorMultiplePeriodsTestSeeder extends Seeder
              * ========================================
              * UNCONFIRMED BOOKING
              *
+             * Year: 2027
              * 2 Periods
              * Different design for each period
              * ========================================
              */
 
-            $unconfirmedBooking =
-                Booking::query()->create([
+            $unconfirmedBooking = Booking::query()
+                ->forceCreate([
                     'customer_id' => $customer->id,
-                    'booking_type' => BookingTypeEnum::FOREIGN->value,
-                    'status' => BookingStatusEnum::UNCONFIRMED->value,
+
+                    'year' => $unconfirmedYear,
+
+                    'booking_type' =>
+                        BookingTypeEnum::FOREIGN->value,
+
+                    'status' =>
+                        BookingStatusEnum::UNCONFIRMED->value,
 
                     'installation_order' => false,
                     'extension_order' => false,
