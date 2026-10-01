@@ -88,7 +88,14 @@ class StoreExternalBookingRequest extends FormRequest
             'periods.*.items.*.asset_id' => [
                 'required',
                 'integer',
-                'exists:external_assets,id',
+                Rule::exists('external_assets','id')
+                    ->where(
+                        fn ($query) =>
+                            $query->where(
+                                'type',
+                                $this->input('type')
+                            )
+                    ),
             ],
 
             'periods.*.items.*.is_gift' => [
