@@ -91,6 +91,7 @@ return [
             'design_name_not_found' => 'The selected design does not exist in the designs list.',
             'external_asset_already_booked' => 'One or more selected external assets are already booked for the selected period.',
             'external_type_periods_overlap' => 'Periods for the same external booking type must not overlap.',
+            'external_periods_outside_working_year' => 'All outdoor booking period dates must be within the selected working year (:year).',
     ],
 
     'electronic' => [

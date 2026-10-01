@@ -6,10 +6,14 @@ use App\Enums\AssetAvailabilityStatusEnum;
 use App\Enums\BookingStatusEnum;
 use App\Enums\ExternalAssetTypeEnum;
 use App\Models\ExternalAsset;
+use App\Services\WorkingYear\WorkingYearContext;
 use Illuminate\Database\Eloquent\Builder;
 
 class OutdoorService
 {
+    public function __construct(private readonly WorkingYearContext $workingYearContext)
+    {}
+
     public function index(ExternalAssetTypeEnum $type,array $filters)
     {
         $today = now()->toDateString();
@@ -171,33 +175,30 @@ class OutdoorService
 
     private function applyAvailableFilter(Builder $query,string $today)
     {
+        $year = $this->workingYearContext->get();
+
         $query->whereDoesntHave(
             'bookingItems',
-            function (Builder $query) use ($today) {
+            function (Builder $query) use ($today,$year)
+            {
                 $query->whereHas(
                     'period',
-                    function (Builder $query) use ($today) {
+                    function (Builder $query) use ($today,$year)
+                    {
                         $query
-                            ->whereDate(
-                                'start_date',
-                                '<=',
-                                $today
-                            )
-                            ->whereDate(
-                                'end_date',
-                                '>=',
-                                $today
-                            )
+                            ->whereDate('start_date','<=', $today)
+                            ->whereDate('end_date', '>=', $today)
                             ->whereHas(
                                 'externalBookingType.externalBooking.booking',
                                 fn (Builder $query) =>
-                                    $query->whereIn(
-                                        'status',
-                                        [
-                                            BookingStatusEnum::CONFIRMED->value,
-                                            BookingStatusEnum::UNCONFIRMED->value,
-                                        ]
-                                    )
+                                    $query
+                                        ->where('year',$year)
+                                        ->whereIn('status',
+                                            [
+                                                BookingStatusEnum::CONFIRMED->value,
+                                                BookingStatusEnum::UNCONFIRMED->value,
+                                            ]
+                                        )
                             );
                     }
                 );
@@ -220,30 +221,24 @@ class OutdoorService
 
     private function applyItemBookingStatusConstraint(Builder $query,string $today,BookingStatusEnum $status)
     {
+        $year = $this->workingYearContext->get();
+
         return $query->whereHas(
             'period',
             function (Builder $query) use (
                 $today,
-                $status
+                $status,
+                $year
             ) {
                 $query
-                    ->whereDate(
-                        'start_date',
-                        '<=',
-                        $today
-                    )
-                    ->whereDate(
-                        'end_date',
-                        '>=',
-                        $today
-                    )
+                    ->whereDate('start_date','<=',$today)
+                    ->whereDate('end_date','>=',$today)
                     ->whereHas(
                         'externalBookingType.externalBooking.booking',
                         fn (Builder $query) =>
-                            $query->where(
-                                'status',
-                                $status->value
-                            )
+                            $query
+                                ->where('year',$year)
+                                ->where('status',$status->value)
                     );
             }
         );
@@ -251,15 +246,23 @@ class OutdoorService
 
     public function show(int $id)
     {
+        $year = $this->workingYearContext->get();
+
         $asset = ExternalAsset::query()
             ->with([
                 'area.governorate',
 
-                'bookingItems' => function ($query) {
-                    $query->with([
-                        'design',
-                        'period.externalBookingType.externalBooking.booking.customer',
-                    ]);
+                'bookingItems' => function ($query) use ($year) {
+                    $query
+                        ->whereHas(
+                            'period.externalBookingType.externalBooking.booking',
+                            fn ($query) =>
+                                $query->where('year',$year)
+                        )
+                        ->with([
+                            'design',
+                            'period.externalBookingType.externalBooking.booking.customer',
+                        ]);
                 },
             ])
             ->findOrFail($id);
@@ -292,21 +295,9 @@ class OutdoorService
 
         return [
             'asset' => $asset,
-
-            'confirmed_bookings' =>
-                $this->formatBookings(
-                    $confirmedItems
-                ),
-
-            'unconfirmed_bookings' =>
-                $this->formatBookings(
-                    $unconfirmedItems
-                ),
-
-            'unavailable_ranges' =>
-                $this->formatUnavailableRanges(
-                    $confirmedItems
-                ),
+            'confirmed_bookings' => $this->formatBookings($confirmedItems),
+            'unconfirmed_bookings' => $this->formatBookings($unconfirmedItems),
+            'unavailable_ranges' => $this->formatUnavailableRanges($confirmedItems->concat( $unconfirmedItems)),
         ];
     }
 

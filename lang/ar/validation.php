@@ -107,6 +107,7 @@ return [
             'design_name_not_found' =>  'التصميم المحدد غير موجود ضمن قائمة التصاميم.',
             'external_asset_already_booked' => 'إحدى اللوحات الخارجية المحددة محجوزة مسبقًا خلال الفترة المحددة.',
             'external_type_periods_overlap' => 'لا يمكن أن تتداخل فترات نفس نوع الحجز الخارجي مع بعضها.',
+            'external_periods_outside_working_year' => 'يجب أن تكون تواريخ جميع فترات الحجز الخارجي ضمن سنة العمل المحددة (:year).',
         ],
 
         'electronic' => [

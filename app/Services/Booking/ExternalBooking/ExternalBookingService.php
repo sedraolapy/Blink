@@ -10,20 +10,31 @@ use App\Models\ExternalBooking;
 use App\Models\ExternalBookingItem;
 use App\Models\ExternalBookingType;
 use App\Models\Governorate;
+use App\Services\WorkingYear\WorkingYearContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ExternalBookingService
 {
+    public function __construct(private readonly WorkingYearContext $workingYearContext)
+    {}
+
     public function getAvailableAssets(array $data): array
     {
-
+        $year = $this->workingYearContext->get();
+        $this->validatePeriodsWithinWorkingYear($data['periods'], $year);
         $this->validatePeriodsDoNotOverlap($data['periods']);
 
         $bookingId = isset($data['booking_id'])
             ? (int) $data['booking_id']
             : null;
+
+        if ($bookingId !== null) {
+            Booking::query()
+                ->where('year',$year)
+                ->findOrFail($bookingId);
+        }
 
         $type = ExternalAssetTypeEnum::from($data['type']);
         $governorateId = (int) $data['governorate_id'];
@@ -49,7 +60,8 @@ class ExternalBookingService
             function ($period) use (
                 $assets,
                 $bookingId,
-                $type
+                $type,
+                $year
             ) {
                 $occupied = ExternalBookingItem::query()
                     ->whereIn('status', [
@@ -61,6 +73,11 @@ class ExternalBookingService
                         function ($query) use ($type) {
                             $query->where('type',$type->value);
                         }
+                    )
+                    ->whereHas(
+                        'period.externalBookingType.externalBooking.booking',
+                        fn ($query) =>
+                            $query->where('year',$year)
                     )
                     ->whereHas(
                         'period',
@@ -145,21 +162,54 @@ class ExternalBookingService
         ];
     }
 
+    private function validatePeriodsWithinWorkingYear(array $periods,int $year): void
+    {
+        foreach ($periods as $index => $period) {
+            $startDate = CarbonImmutable::parse(
+                $period['start_date']
+            );
+
+            $endDate = CarbonImmutable::parse(
+                $period['end_date']
+            );
+
+            if (
+                $startDate->year !== $year
+                || $endDate->year !== $year
+            ) {
+                throw ValidationException::withMessages([
+                    "periods.{$index}" => [
+                        __(
+                            'validation.custom.external_periods_outside_working_year',
+                            [
+                                'year' => $year,
+                            ]
+                        ),
+                    ],
+                ]);
+            }
+        }
+    }
+
     public function store(array $data)
     {
         return DB::transaction(
             function () use ($data) {
-                if (
-                    ! empty(
-                        $data['booking_id']
-                    )
-                ) {
+                $year = $this->workingYearContext->get();
+
+                $this->validatePeriodsWithinWorkingYear($data['periods'],$year);
+
+                if (! empty($data['booking_id'])) {
                     $booking = Booking::query()
-                        ->findOrFail($data['booking_id'] );
+                        ->where('year',$year)
+                        ->findOrFail(
+                            $data['booking_id']
+                        );
                 } else {
                     $booking = Booking::query()
                         ->create([
                             'customer_id' => $data['customer_id'],
+                            'year' => $year,
                             'booking_type' => $data['advertiser_type'],
                         ]);
                 }
@@ -246,20 +296,32 @@ class ExternalBookingService
 
     public function show(int $bookingId,ExternalAssetTypeEnum $type)
     {
+        $year = $this->workingYearContext->get();
+
         return ExternalBookingType::query()
-            ->where('type', $type->value)
-            ->whereHas('externalBooking', fn ($query) => $query->where('booking_id', $bookingId))
+            ->where('type',$type->value)
+            ->whereHas(
+                'externalBooking.booking',
+                fn ($query) =>
+                    $query
+                        ->where('id',$bookingId)
+                        ->where('year',$year)
+            )
             ->with([
                 'designs',
-                'periods' => fn ($query) => $query->orderBy('id'),
-                'periods.items' => fn ($query) => $query->orderBy('id'),
+                'periods' =>
+                    fn ($query) =>
+                        $query->orderBy('id'),
+                'periods.items' =>
+                    fn ($query) =>
+                        $query->orderBy('id'),
                 'periods.items.design',
                 'periods.items.asset.area.governorate',
             ])
             ->firstOrFail();
     }
 
-    public function update(int $bookingId, ExternalAssetTypeEnum $type,array $data)
+    public function update(int $bookingId,ExternalAssetTypeEnum $type,array $data)
     {
         return DB::transaction(
             function () use (
@@ -267,15 +329,24 @@ class ExternalBookingService
                 $type,
                 $data
             ) {
+                $year = $this->workingYearContext->get();
+                $this->validatePeriodsWithinWorkingYear($data['periods'],$year);
+
                 $externalBookingType =
                     ExternalBookingType::query()
-                        ->where('type', $type->value)
-                        ->whereHas('externalBooking', fn ($query) =>$query->where('booking_id',$bookingId))
+                        ->where('type',$type->value)
+                        ->whereHas(
+                            'externalBooking.booking',
+                            fn ($query) =>
+                                $query
+                                    ->where('id',$bookingId)
+                                    ->where('year',$year)
+                        )
                         ->with('externalBooking.booking')
                         ->firstOrFail();
 
                 $this->validatePeriodsDoNotOverlap($data['periods']);
-                $this->lockAndValidateAvailableAssets($data['periods'], $bookingId);
+                $this->lockAndValidateAvailableAssets($data['periods'],$bookingId);
 
                 $externalBookingType
                     ->periods()
@@ -371,6 +442,8 @@ class ExternalBookingService
 
     private function lockAndValidateAvailableAssets(array $periods,int $bookingId)
     {
+        $year = $this->workingYearContext->get();
+
         $assetIds = collect($periods)
             ->flatMap(fn (array $period) =>collect($period['items'])->pluck('asset_id'))
             ->map(fn ($id) =>(int) $id)
@@ -433,7 +506,12 @@ class ExternalBookingService
                 )
                 ->whereHas(
                     'period.externalBookingType.externalBooking',
-                    fn ($query) => $query->where('booking_id','!=',$bookingId)
+                    function ($query) use ($bookingId, $year)
+                    {
+                        $query
+                            ->where('booking_id','!=',$bookingId)
+                            ->whereHas('booking',fn ($query) => $query->where('year',$year));
+                    }
                 )
                 ->lockForUpdate()
                 ->first();
