@@ -8,11 +8,15 @@ use App\Models\LedBookingItem;
 use App\Models\LedBookingSlide;
 use App\Models\LedNetwork;
 use App\Models\LedScreen;
+use App\Services\WorkingYear\WorkingYearContext;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ElectronicService
 {
+    public function __construct(private readonly WorkingYearContext $workingYearContext)
+    {}
+
     public function index(array $filters): array
     {
         $search = $filters['search'] ?? null;
@@ -99,6 +103,8 @@ class ElectronicService
 
     private function getSummary(array $filters): array
     {
+        $year = $this->workingYearContext->get();
+
         $search = $filters['search'] ?? null;
 
         $governorateId = isset($filters['governorate_id'])
@@ -138,7 +144,8 @@ class ElectronicService
             ->where(
                 'bookings.status',
                 BookingStatusEnum::CONFIRMED->value
-            );
+            )
+            ->where('bookings.year',$year);
 
         $unconfirmedBookingsQuery = LedBooking::query()
             ->join(
@@ -162,7 +169,8 @@ class ElectronicService
             ->where(
                 'bookings.status',
                 BookingStatusEnum::UNCONFIRMED->value
-            );
+            )
+            ->where('bookings.year',$year);
 
         if ($hasAssetFilters) {
             $screenIdsQuery = LedScreen::query()
@@ -210,15 +218,23 @@ class ElectronicService
 
     public function showScreen(int $id): array
     {
+        $year = $this->workingYearContext->get();
+
         $screen = LedScreen::query()
             ->with([
                 'area.governorate',
 
-                'bookingItems' => function ($query) {
-                    $query->with([
-                        'slides.design',
-                        'period.ledBooking.booking.customer',
-                    ]);
+                'bookingItems' => function ($query) use ($year) {
+                    $query
+                        ->whereHas(
+                            'period.ledBooking.booking',
+                            fn ($query) =>
+                                $query->where('year',$year)
+                        )
+                        ->with([
+                            'slides.design',
+                            'period.ledBooking.booking.customer',
+                        ]);
                 },
             ])
             ->findOrFail($id);
@@ -249,18 +265,8 @@ class ElectronicService
 
         return [
             'screen' => $screen,
-
-            'confirmed_bookings' =>
-                $this->formatScreenBookings(
-                    $confirmedItems,
-                    $screen
-                ),
-
-            'unconfirmed_bookings' =>
-                $this->formatScreenBookings(
-                    $unconfirmedItems,
-                    $screen
-                ),
+            'confirmed_bookings' => $this->formatScreenBookings($confirmedItems,$screen),
+            'unconfirmed_bookings' => $this->formatScreenBookings($unconfirmedItems,$screen),
         ];
     }
 
@@ -321,15 +327,23 @@ class ElectronicService
 
     public function showNetwork(int $id)
     {
+        $year = $this->workingYearContext->get();
+
         $network = LedNetwork::query()
             ->with([
                 'screens.area.governorate',
 
-                'bookingItems' => function ($query) {
-                    $query->with([
-                        'slides.design',
-                        'period.ledBooking.booking.customer',
-                    ]);
+                'bookingItems' => function ($query) use ($year) {
+                    $query
+                        ->whereHas(
+                            'period.ledBooking.booking',
+                            fn ($query) =>
+                                $query->where('year',$year)
+                        )
+                        ->with([
+                            'slides.design',
+                            'period.ledBooking.booking.customer',
+                        ]);
                 },
             ])
             ->withCount('screens')

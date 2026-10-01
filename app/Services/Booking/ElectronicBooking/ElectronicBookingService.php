@@ -11,11 +11,16 @@ use App\Models\LedBookingSlide;
 use App\Models\LedDesign;
 use App\Models\LedNetwork;
 use App\Models\LedScreen;
+use App\Services\WorkingYear\WorkingYearContext;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ElectronicBookingService
 {
+    public function __construct(private readonly WorkingYearContext $workingYearContext)
+    {}
+
     public function store(array $data): array
     {
         return DB::transaction(function () use ($data) {
@@ -103,7 +108,10 @@ class ElectronicBookingService
                 $bookingId,
                 $data
             ) {
+                $year = $this->workingYearContext->get();
+
                 $booking = Booking::query()
+                    ->where('year',$year)
                     ->lockForUpdate()
                     ->findOrFail($bookingId);
 
@@ -563,9 +571,11 @@ class ElectronicBookingService
 
     private function resolveBooking(array $data)
     {
+        $year = $this->workingYearContext->get();
 
         if (! empty($data['booking_id'])) {
             $booking = Booking::query()
+                ->where('year',$year)
                 ->lockForUpdate()
                 ->findOrFail(
                     $data['booking_id']
@@ -587,6 +597,7 @@ class ElectronicBookingService
 
         return Booking::create([
             'customer_id' => $data['customer_id'],
+            'year' => $year,
             'booking_type' => $data['advertiser_type'],
             'status' => BookingStatusEnum::UNCONFIRMED->value,
         ]);
@@ -632,12 +643,36 @@ class ElectronicBookingService
 
     private function preparePeriods(array $periods)
     {
+        $year = $this->workingYearContext->get();
+
         $prepared = [];
 
         foreach (
             $periods
             as $periodIndex => $period
         ) {
+            $startDate = Carbon::parse(
+                $period['start_date']
+            );
+
+            $endDate = Carbon::parse(
+                $period['end_date']
+            );
+
+            if (
+                $startDate->year !== $year
+                || $endDate->year !== $year
+            ) {
+                throw ValidationException::withMessages([
+                    "periods.{$periodIndex}" => __(
+                        'validation.electronic_booking.periods.outside_working_year',
+                        [
+                            'year' => $year,
+                        ]
+                    ),
+                ]);
+            }
+
             $items = [];
 
             foreach (
@@ -650,10 +685,17 @@ class ElectronicBookingService
                 );
 
                 $items[] = [
-                    'screen_id' => (int) $screen['screen_id'],
-                    'network_id' => null,
-                    'is_gift' => (bool) $screen['is_gift'],
-                    'slides' => $screen['slides'],
+                    'screen_id' =>
+                        (int) $screen['screen_id'],
+
+                    'network_id' =>
+                        null,
+
+                    'is_gift' =>
+                        (bool) $screen['is_gift'],
+
+                    'slides' =>
+                        $screen['slides'],
                 ];
             }
 
@@ -671,10 +713,17 @@ class ElectronicBookingService
                     );
 
                     $items[] = [
-                        'screen_id' => (int) $screen['screen_id'],
-                        'network_id' => (int) $network['network_id'],
-                        'is_gift' => (bool) $network['is_gift'],
-                        'slides' => $screen['slides'],
+                        'screen_id' =>
+                            (int) $screen['screen_id'],
+
+                        'network_id' =>
+                            (int) $network['network_id'],
+
+                        'is_gift' =>
+                            (bool) $network['is_gift'],
+
+                        'slides' =>
+                            $screen['slides'],
                     ];
                 }
             }
@@ -704,9 +753,14 @@ class ElectronicBookingService
             }
 
             $prepared[] = [
-                'start_date' =>$period['start_date'],
-                'end_date' => $period['end_date'],
-                'items' => $items,
+                'start_date' =>
+                    $period['start_date'],
+
+                'end_date' =>
+                    $period['end_date'],
+
+                'items' =>
+                    $items,
             ];
         }
 
@@ -802,17 +856,26 @@ class ElectronicBookingService
 
     public function show(int $bookingId)
     {
+        $year = $this->workingYearContext->get();
+
         return LedBooking::query()
-            ->where('booking_id', $bookingId)
+            ->where('booking_id',$bookingId)
+            ->whereHas(
+                'booking',
+                fn ($query) =>
+                    $query->where('year',$year)
+            )
             ->with([
                 'designs' => fn ($query) => $query->orderBy('id'),
                 'periods' => fn ($query) => $query->orderBy('id'),
                 'periods.items' => fn ($query) => $query->orderBy('id'),
-                'periods.items.slides' => fn ($query) => $query->orderBy('slide_number'),
+                'periods.items.slides' => fn ($query) =>
+                    $query->orderBy('slide_number'),
                 'periods.items.slides.design',
                 'periods.items.screen.area.governorate',
                 'periods.items.network.screens.area.governorate',
             ])
             ->firstOrFail();
     }
+
 }

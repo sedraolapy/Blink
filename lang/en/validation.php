@@ -211,6 +211,8 @@ return [
 
             'overlap' =>
                 'The same screen cannot be booked in overlapping periods within the same request.',
+
+            'outside_working_year' => 'All period dates must be within the selected working year (:year).',
         ],
 
         'end_date' => [

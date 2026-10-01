@@ -54,6 +54,7 @@ return [
         'store_success' => 'Electronic screen booking saved successfully.',
         'update_success' => 'Electronic screen booking updated successfully.',
         'show' => 'Electronic booking details retrieved successfully.',
+        
     ],
 
     'not_found' => 'The requested resource was not found.',
