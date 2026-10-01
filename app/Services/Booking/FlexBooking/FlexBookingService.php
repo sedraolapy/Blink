@@ -9,12 +9,16 @@ use App\Models\FlexBooking;
 use App\Models\FlexBookingItem;
 use App\Models\FlexBookingPeriod;
 use App\Models\FlexDesign;
+use App\Services\WorkingYear\WorkingYearContext;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class FlexBookingService
 {
+    public function __construct(private readonly WorkingYearContext $workingYearContext)
+    {}
+
     public function store(array $data): array
     {
         return DB::transaction(function () use ($data) {
@@ -57,21 +61,30 @@ class FlexBookingService
     {
         return DB::transaction(function () use ($bookingId,$data)
         {
+            $year = $this->workingYearContext->get();
+
             $booking = Booking::query()
+                ->where('year',$year)
                 ->lockForUpdate()
                 ->findOrFail($bookingId);
 
             $flexBooking = FlexBooking::query()
-                ->where('booking_id', $booking->id)
+                ->where('booking_id',$booking->id)
                 ->lockForUpdate()
                 ->firstOrFail();
 
             [
                 'requested_items' => $requestedItems,
                 'billboards' => $billboards,
-            ] = $this->prepareItems($data['periods'],$booking->id);
+            ] = $this->prepareItems(
+                $data['periods'],
+                $booking->id
+            );
 
-            $designs = $this->syncDesigns($flexBooking,$data['designs']);
+            $designs = $this->syncDesigns(
+                $flexBooking,
+                $data['designs']
+            );
 
             $this->syncPeriodsAndItems(
                 $flexBooking,
@@ -80,7 +93,10 @@ class FlexBookingService
                 $designs
             );
 
-            $this->deleteUnusedDesigns($flexBooking,$data['designs']);
+            $this->deleteUnusedDesigns(
+                $flexBooking,
+                $data['designs']
+            );
 
             return $this->buildResult(
                 $booking,
@@ -94,8 +110,11 @@ class FlexBookingService
 
     private function resolveBooking(array $data): Booking
     {
+        $year = $this->workingYearContext->get();
+
         if (! empty($data['booking_id'])) {
             $booking = Booking::query()
+                ->where('year',$year)
                 ->findOrFail($data['booking_id']);
 
             if (
@@ -116,6 +135,7 @@ class FlexBookingService
 
         return Booking::query()->create([
             'customer_id' => $data['customer_id'],
+            'year' => $year,
             'booking_type' => $data['advertiser_type'],
             'status' => BookingStatusEnum::UNCONFIRMED->value,
             'installation_order' => false,
@@ -144,6 +164,8 @@ class FlexBookingService
     private function prepareItems(array $periods,int $bookingId)
     {
         $this->ensureNoDuplicateItems($periods);
+        $this->ensureSameAssetsAcrossPeriods($periods);
+
         $requestedItems = $this->getRequestedItems($periods);
         $billboards = $this->lockBillboards($requestedItems);
         $this->ensureAssetsAreAvailable($periods,$bookingId);
@@ -152,6 +174,33 @@ class FlexBookingService
             'requested_items' => $requestedItems,
             'billboards' => $billboards,
         ];
+    }
+
+    private function ensureSameAssetsAcrossPeriods(array $periods): void
+    {
+        $firstPeriodFlexIds = collect($periods[0]['items'])
+            ->pluck('flex_id')
+            ->map(fn ($id) => (int) $id)
+            ->sort()
+            ->values();
+
+        foreach ($periods as $periodData) {
+            $flexIds = collect($periodData['items'])
+                ->pluck('flex_id')
+                ->map(fn ($id) => (int) $id)
+                ->sort()
+                ->values();
+
+            if ($flexIds->all() === $firstPeriodFlexIds->all()) {
+                continue;
+            }
+
+            throw ValidationException::withMessages([
+                'periods' => [
+                    __('messages.flex_booking.assets_must_match_across_periods'),
+                ],
+            ]);
+        }
     }
 
     private function ensureNoDuplicateItems(array $periods)
@@ -213,11 +262,12 @@ class FlexBookingService
 
     private function ensureAssetsAreAvailable(array $periods,int $bookingId)
     {
-        $year = now()->year;
+        $year = $this->workingYearContext->get();
 
         foreach ($periods as $periodData)
         {
             $periodId = (int) $periodData['period_id'];
+
             $billboardIds = collect($periodData['items'])
                 ->pluck('flex_id')
                 ->map(fn ($id) => (int) $id)
@@ -226,15 +276,19 @@ class FlexBookingService
 
             $hasConflict = FlexBookingItem::query()
                 ->whereIn('flex_billboard_id',$billboardIds)
-                ->whereHas('period',fn ($query) =>
-                        $query
-                            ->where('advertising_period_id',$periodId)
-                            ->where('year',$year)
+                ->whereHas(
+                    'period',
+                    fn ($query) =>
+                        $query->where(
+                            'advertising_period_id',
+                            $periodId
+                        )
                 )
                 ->whereHas(
                     'period.flexBooking.booking',
                     fn ($query) =>
                         $query
+                            ->where('year',$year)
                             ->where('id','!=',$bookingId)
                             ->whereIn(
                                 'status',
@@ -278,13 +332,10 @@ class FlexBookingService
 
     private function createPeriodsAndItems(FlexBooking $flexBooking,array $periods,Collection $billboards,Collection $designs)
     {
-        $year = now()->year;
-
         foreach ($periods as $periodData) {
             $period = FlexBookingPeriod::query()->create([
                 'flex_booking_id' => $flexBooking->id,
                 'advertising_period_id' => $periodData['period_id'],
-                'year' => $year,
             ]);
 
             foreach ($periodData['items'] as $itemData) {
@@ -325,8 +376,6 @@ class FlexBookingService
 
     private function syncPeriodsAndItems(FlexBooking $flexBooking,array $periods,Collection $billboards,Collection $designs)
     {
-        $year = now()->year;
-
         $requestedPeriodIds = collect($periods)
             ->pluck('period_id')
             ->map(fn ($id) => (int) $id)
@@ -334,24 +383,25 @@ class FlexBookingService
 
         $existingPeriods = FlexBookingPeriod::query()
             ->where('flex_booking_id',$flexBooking->id)
-            ->where('year', $year)
             ->with('bookingItems')
             ->get()
             ->keyBy('advertising_period_id');
 
         foreach ($periods as $periodData)
         {
-            $periodId =(int) $periodData['period_id'];
+            $periodId = (int) $periodData['period_id'];
             $period = $existingPeriods->get($periodId);
 
             if (! $period) {
                 $period = FlexBookingPeriod::query()->create([
                     'flex_booking_id' => $flexBooking->id,
                     'advertising_period_id' => $periodId,
-                    'year' => $year,
                 ]);
 
-                $period->setRelation('bookingItems',collect());
+                $period->setRelation(
+                    'bookingItems',
+                    collect()
+                );
             }
 
             $this->syncPeriodItems(
@@ -364,11 +414,12 @@ class FlexBookingService
 
         FlexBookingPeriod::query()
             ->where('flex_booking_id',$flexBooking->id)
-            ->where('year', $year)
-            ->whereNotIn('advertising_period_id',$requestedPeriodIds)
+            ->whereNotIn(
+                'advertising_period_id',
+                $requestedPeriodIds
+            )
             ->delete();
     }
-
     private function syncPeriodItems(FlexBookingPeriod $period,array $items,Collection $billboards,Collection $designs)
     {
         $existingItems = $period
@@ -466,8 +517,15 @@ class FlexBookingService
 
     public function show(int $bookingId): FlexBooking
     {
+        $year = $this->workingYearContext->get();
+
         return FlexBooking::query()
-            ->where('booking_id', $bookingId)
+            ->where('booking_id',$bookingId)
+            ->whereHas(
+                'booking',
+                fn ($query) =>
+                    $query->where('year',$year)
+            )
             ->with([
                 'designs' => fn ($query) => $query->orderBy('id'),
                 'periods.advertisingPeriod',

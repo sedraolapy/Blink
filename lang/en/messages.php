@@ -38,6 +38,7 @@ return [
         'updated' => 'Flex booking updated successfully.',
         'duplicate_assets' => 'The same flex billboard cannot be selected more than once within the same period.',
         'show' => 'Flex booking retrieved successfully.',
+        'assets_must_match_across_periods' => 'Flex billboards must be the same across all selected periods.',
     ],
 
     'booking' => [
@@ -68,4 +69,6 @@ return [
     'working_year_required' => 'The working year is required.',
     'working_year_not_available' => 'The selected working year is not available for booking.',
     'working_year_not_initialized' => 'The working year has not been initialized.',
+    'working_year_read_only' => 'Past working years are read-only.',
+
 ];

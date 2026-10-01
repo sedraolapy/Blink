@@ -9,12 +9,18 @@ use App\Models\FlexBooking;
 use App\Models\FlexBookingItem;
 use App\Models\FlexBookingPeriod;
 use App\Models\Governorate;
+use App\Services\WorkingYear\WorkingYearContext;
 use Illuminate\Support\Collection;
 
 class FlexBookingOptionsService
 {
+    public function __construct(private readonly WorkingYearContext $workingYearContext)
+    {}
+
     public function getPeriods(?int $bookingId = null)
     {
+        $year = $this->workingYearContext->get();
+
         $periods = AdvertisingPeriod::query()
             ->select([
                 'id',
@@ -34,14 +40,15 @@ class FlexBookingOptionsService
             ->get();
 
         $selectedPeriodIds = $bookingId !== null
-            ? $this->getSelectedPeriodIds($bookingId)
+            ? $this->getSelectedPeriodIds($bookingId,$year)
             : collect();
 
         $totalBillboards = FlexBillboard::query()->count();
 
         $occupiedCounts = $this->getOccupiedCounts(
             $periods->pluck('id'),
-            $bookingId
+            $bookingId,
+            $year
         );
 
         $periods->each(
@@ -105,10 +112,16 @@ class FlexBookingOptionsService
         return $periods;
     }
 
-    private function getSelectedPeriodIds(int $bookingId)
+    private function getSelectedPeriodIds(int $bookingId,int $year)
     {
         $flexBookingId = FlexBooking::query()
-            ->where('booking_id', $bookingId)
+            ->whereHas(
+                'booking',
+                fn ($query) =>
+                    $query
+                        ->where('id',$bookingId)
+                        ->where('year',$year)
+            )
             ->value('id');
 
         if ($flexBookingId === null) {
@@ -116,25 +129,21 @@ class FlexBookingOptionsService
         }
 
         return FlexBookingPeriod::query()
-            ->where(
-                'flex_booking_id',
-                $flexBookingId
-            )
-            ->where('year', now()->year)
+            ->where('flex_booking_id',$flexBookingId)
             ->pluck('advertising_period_id');
     }
 
-    private function getOccupiedCounts(Collection $periodIds,?int $bookingId)
+    private function getOccupiedCounts(Collection $periodIds,?int $bookingId,int $year)
     {
         return FlexBookingItem::query()
             ->whereHas(
                 'period',
                 function ($query) use (
                     $periodIds,
-                    $bookingId
+                    $bookingId,
+                    $year
                 ) {
                     $query
-                        ->where('year', now()->year)
                         ->whereIn(
                             'advertising_period_id',
                             $periodIds
@@ -155,13 +164,15 @@ class FlexBookingOptionsService
                         ->whereHas(
                             'flexBooking.booking',
                             fn ($query) =>
-                                $query->whereIn(
-                                    'status',
-                                    [
-                                        BookingStatusEnum::CONFIRMED->value,
-                                        BookingStatusEnum::UNCONFIRMED->value,
-                                    ]
-                                )
+                                $query
+                                    ->where('year',$year)
+                                    ->whereIn(
+                                        'status',
+                                        [
+                                            BookingStatusEnum::CONFIRMED->value,
+                                            BookingStatusEnum::UNCONFIRMED->value,
+                                        ]
+                                    )
                         );
                 }
             )
@@ -210,22 +221,58 @@ class FlexBookingOptionsService
             ->unique()
             ->values();
 
-        $year = now()->year;
+        $year = $this->workingYearContext->get();
 
         $governorate = Governorate::query()
             ->findOrFail($governorateId);
 
-        $periods = AdvertisingPeriod::query()
-            ->whereIn('id', $periodIds)
-            ->orderBy('number')
-            ->get([
-                'id',
-                'number',
-            ]);
-
-        $billboards = FlexBillboard::query()
+        $items = FlexBillboard::query()
             ->governorate($governorateId)
             ->search($data['search'] ?? null)
+            ->whereDoesntHave(
+                'bookingItems',
+                function ($query) use (
+                    $periodIds,
+                    $year,
+                    $bookingId
+                ) {
+                    $query
+                        ->whereHas(
+                            'period',
+                            fn ($query) =>
+                                $query->whereIn(
+                                    'advertising_period_id',
+                                    $periodIds
+                                )
+                        )
+                        ->whereHas(
+                            'period.flexBooking.booking',
+                            function ($query) use (
+                                $year,
+                                $bookingId
+                            ) {
+                                $query
+                                    ->where('year',$year)
+                                    ->whereIn(
+                                        'status',
+                                        [
+                                            BookingStatusEnum::CONFIRMED->value,
+                                            BookingStatusEnum::UNCONFIRMED->value,
+                                        ]
+                                    )
+                                    ->when(
+                                        $bookingId !== null,
+                                        fn ($query) =>
+                                            $query->where(
+                                                'id',
+                                                '!=',
+                                                $bookingId
+                                            )
+                                    );
+                            }
+                        );
+                }
+            )
             ->with([
                 'area:id,governorate_id,name',
             ])
@@ -239,138 +286,9 @@ class FlexBookingOptionsService
                 'height',
             ]);
 
-        $occupiedByPeriod = FlexBookingItem::query()
-            ->whereHas(
-                'period',
-                fn ($query) =>
-                    $query
-                        ->where('year', $year)
-                        ->whereIn(
-                            'advertising_period_id',
-                            $periodIds
-                        )
-            )
-            ->whereHas(
-                'period.flexBooking.booking',
-                function ($query) use ($bookingId) {
-                    $query
-                        ->whereIn(
-                            'status',
-                            [
-                                BookingStatusEnum::CONFIRMED->value,
-                                BookingStatusEnum::UNCONFIRMED->value,
-                            ]
-                        )
-                        ->when(
-                            $bookingId !== null,
-                            fn ($query) =>
-                                $query->where(
-                                    'id',
-                                    '!=',
-                                    $bookingId
-                                )
-                        );
-                }
-            )
-            ->with([
-                'period:id,advertising_period_id',
-            ])
-            ->get([
-                'id',
-                'flex_booking_period_id',
-                'flex_billboard_id',
-            ])
-            ->groupBy(
-                fn (FlexBookingItem $item) =>
-                    $item->period->advertising_period_id
-            )
-            ->map(
-                fn ($items) =>
-                    $items
-                        ->pluck('flex_billboard_id')
-                        ->unique()
-            );
-
-            $selectedByPeriod = collect();
-
-            if ($bookingId !== null) {
-                $selectedByPeriod = FlexBookingItem::query()
-                    ->whereHas(
-                        'period',
-                        fn ($query) =>
-                            $query
-                                ->where('year', $year)
-                                ->whereIn(
-                                    'advertising_period_id',
-                                    $periodIds
-                                )
-                    )
-                    ->whereHas(
-                        'period.flexBooking',
-                        fn ($query) =>
-                            $query->where(
-                                'booking_id',
-                                $bookingId
-                            )
-                    )
-                    ->with([
-                        'period:id,advertising_period_id',
-                    ])
-                    ->get([
-                        'id',
-                        'flex_booking_period_id',
-                        'flex_billboard_id',
-                    ])
-                    ->groupBy(
-                        fn (FlexBookingItem $item) =>
-                            $item->period->advertising_period_id
-                    )
-                    ->map(
-                        fn ($items) =>
-                            $items
-                                ->pluck('flex_billboard_id')
-                                ->unique()
-                                ->values()
-                    );
-            }
-
-            $periodsData = $periods->map(
-                function (AdvertisingPeriod $period) use (
-                    $billboards,
-                    $occupiedByPeriod,
-                    $selectedByPeriod
-                ) {
-                    $occupiedBillboardIds = $occupiedByPeriod->get(
-                        $period->id,
-                        collect()
-                    );
-
-                    $selectedBillboardIds = $selectedByPeriod->get(
-                        $period->id,
-                        collect()
-                    );
-
-                    return [
-                        'period' => $period,
-
-                        'selected_billboard_ids' =>
-                            $selectedBillboardIds,
-
-                        'items' => $billboards
-                            ->reject(
-                                fn (FlexBillboard $billboard) =>
-                                    $occupiedBillboardIds->contains(
-                                        $billboard->id
-                                    )
-                            )
-                            ->values(),
-                    ];
-                }
-            );
-
         return [
             'governorate' => $governorate,
-            'periods' => $periodsData,
+            'items' => $items,
         ];
     }
 }

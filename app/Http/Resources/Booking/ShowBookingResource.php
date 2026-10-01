@@ -54,6 +54,7 @@ class ShowBookingResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'year' => $this->year,
             'status' => $this->status->value,
             'advertiser_type' => $this->booking_type->value,
 

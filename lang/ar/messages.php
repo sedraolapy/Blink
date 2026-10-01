@@ -39,6 +39,7 @@ return [
         'updated' => 'تم تعديل حجز الفليكس بنجاح.',
         'duplicate_assets' => 'لا يمكن اختيار لوحة الفليكس نفسها أكثر من مرة ضمن نفس الفترة.',
         'show' => 'تم جلب حجز الفليكس بنجاح.',
+        'assets_must_match_across_periods' => 'يجب أن تكون لوحات الفليكس نفسها في جميع الفترات المختارة.',
     ],
 
     'booking' => [
@@ -69,4 +70,5 @@ return [
     'working_year_required' => 'سنة العمل مطلوبة.',
     'working_year_not_available' => 'سنة العمل المحددة غير متاحة للحجز.',
     'working_year_not_initialized' => 'لم يتم تهيئة سنة العمل.',
+    'working_year_read_only' => 'لا يمكن تعديل البيانات ضمن سنة عمل سابقة.',
 ];

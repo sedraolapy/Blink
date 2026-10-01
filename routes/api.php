@@ -62,27 +62,37 @@ Route::middleware('localization')->group(function () {
             });
 
             // Bookings
-            Route::patch('/bookings/{booking}',[BookingController::class, 'updateAdvertiserType']);
             Route::get('/bookings/{bookingId}',[BookingController::class, 'show']);
 
             // Flex bookings
             Route::get('/booking-options/flex/periods',[FlexBookingOptionsController::class, 'periods']);
             Route::post('/assets-available/flex/options-booking',[FlexBookingOptionsController::class, 'availableAssets']);
-            Route::post('/bookings/flex',[FlexBookingController::class, 'store']);
-            Route::put('/bookings/{bookingId}/flex',[FlexBookingController::class, 'update']);
             Route::get('/bookings/{bookingId}/flex',[FlexBookingController::class, 'show']);
 
             // Electronic bookings
             Route::get('/booking-options/electronic/assets',[ElectronicBookingOptionsController::class, 'assets']);
-            Route::post('/bookings/electronic',[ElectronicBookingController::class, 'store']);
-            Route::put('/bookings/{booking_id}/electronic',[ElectronicBookingController::class, 'update']);
             Route::get('/bookings/{booking_id}/electronic',[ElectronicBookingController::class, 'show']);
 
             // Outdoor bookings
             Route::post('/booking-options/outdoor/available-assets',[ExternalBookingController::class, 'availableAssets']);
-            Route::post('/bookings/outdoor',[ExternalBookingController::class, 'store']);
             Route::get('/bookings/{booking_id}/outdoor/{type}',[ExternalBookingController::class, 'show']);
-            Route::put('/bookings/{booking_id}/outdoor/{type}',[ExternalBookingController::class, 'update']);
+
+            Route::middleware('working.year.writable')->group(function () {
+                // Bookings
+                Route::patch('/bookings/{booking}',[BookingController::class, 'updateAdvertiserType']);
+
+                // Flex bookings
+                Route::post('/bookings/flex',[FlexBookingController::class, 'store']);
+                Route::put('/bookings/{bookingId}/flex',[FlexBookingController::class, 'update']);
+
+                // Electronic bookings
+                Route::post('/bookings/electronic',[ElectronicBookingController::class, 'store']);
+                Route::put('/bookings/{booking_id}/electronic',[ElectronicBookingController::class, 'update']);
+
+                // Outdoor bookings
+                Route::post('/bookings/outdoor',[ExternalBookingController::class, 'store']);
+                Route::put('/bookings/{booking_id}/outdoor/{type}',[ExternalBookingController::class, 'update']);
+            });
         });
     });
 });
