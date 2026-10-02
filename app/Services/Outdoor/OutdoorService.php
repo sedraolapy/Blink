@@ -224,23 +224,11 @@ class OutdoorService
         $year = $this->workingYearContext->get();
 
         return $query->whereHas(
-            'period',
-            function (Builder $query) use (
-                $today,
-                $status,
-                $year
-            ) {
+            'period.externalBookingType.externalBooking.booking',
+            fn (Builder $query) =>
                 $query
-                    ->whereDate('start_date','<=',$today)
-                    ->whereDate('end_date','>=',$today)
-                    ->whereHas(
-                        'externalBookingType.externalBooking.booking',
-                        fn (Builder $query) =>
-                            $query
-                                ->where('year',$year)
-                                ->where('status',$status->value)
-                    );
-            }
+                    ->where('year',$year)
+                    ->where('status',$status->value)
         );
     }
 

@@ -36,32 +36,6 @@ class FlexBillboardInfolist
                 TextEntry::make('height')
                     ->label(__('filament/admin/flex_billboard_resource.height')),
 
-                    TextEntry::make('display_local_price')
-                    ->label(__('filament/admin/led_screen_resource.local_price'))
-                    ->state(function ($record) {
-                        if ($record->network_id && $record->network) {
-                            return $record->network->local_price;
-                        }
-
-                        return $record->local_price;
-                    })
-                    ->numeric()
-                    ->placeholder('-'),
-
-                TextEntry::make('display_foreign_price')
-                    ->label(__('filament/admin/led_screen_resource.foreign_price'))
-                    ->state(function ($record) {
-                        if ($record->network_id && $record->network) {
-                            return $record->network->foreign_price;
-                        }
-
-                        return $record->foreign_price;
-                    })
-                    ->numeric()
-                    ->placeholder('-'),
-                TextEntry::make('created_at')
-                    ->label(__('filament/admin/flex_billboard_resource.created_at'))
-                    ->dateTime(),
 
                 TextEntry::make('updated_at')
                     ->label(__('filament/admin/flex_billboard_resource.updated_at'))

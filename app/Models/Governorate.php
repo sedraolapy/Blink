@@ -34,4 +34,9 @@ class Governorate extends Model
     {
         return $this->hasMany(Area::class);
     }
+
+    public function flexPriceGroup()
+    {
+        return $this->hasOne(FlexPriceGroup::class);
+    }
 }

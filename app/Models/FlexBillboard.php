@@ -23,8 +23,6 @@ class FlexBillboard extends Model implements HasMedia
         'longitude',
         'width',
         'height',
-        'local_price',
-        'foreign_price',
     ];
 
     public array $translatable = [

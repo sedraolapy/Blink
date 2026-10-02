@@ -211,8 +211,8 @@ class ElectronicService
         return [
             'total_screens' => (clone $screensQuery)->count(),
             'networks_count' => (clone $networksQuery)->count(),
-            'confirmed_bookings' => $confirmedBookingsQuery->distinct()->count('led_bookings.id'),
-            'unconfirmed_bookings' => $unconfirmedBookingsQuery->distinct()->count('led_bookings.id'),
+            'confirmed_bookings' => $confirmedBookingsQuery->distinct()->count('items.led_screen_id'),
+            'unconfirmed_bookings' => $unconfirmedBookingsQuery->distinct()->count('items.led_screen_id'),
         ];
     }
 

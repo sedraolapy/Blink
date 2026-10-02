@@ -73,18 +73,6 @@ class FlexBillboardForm
                     ->required()
                     ->minValue(0),
 
-                TextInput::make('local_price')
-                    ->label(__('filament/admin/flex_billboard_resource.local_price'))
-                    ->numeric()
-                    ->required()
-                    ->minValue(0),
-
-                TextInput::make('foreign_price')
-                    ->label(__('filament/admin/flex_billboard_resource.foreign_price'))
-                    ->numeric()
-                    ->required()
-                    ->minValue(0),
-
                 SpatieMediaLibraryFileUpload::make('flex_billboard_video')
                     ->label(__('filament/admin/flex_billboard_resource.video'))
                     ->collection('flex_billboard_video')

@@ -27,9 +27,6 @@ return new class extends Migration
             $table->decimal('width', 10, 2);
             $table->decimal('height', 10, 2);
 
-            $table->decimal('local_price', 12, 2);
-            $table->decimal('foreign_price', 12, 2);
-
             $table->timestamps();
 
             $table->index('area_id');

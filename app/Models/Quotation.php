@@ -9,17 +9,7 @@ class Quotation extends Model
 {
     protected $fillable = [
         'booking_id',
-        'calculated_total',
-        'final_total',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'calculated_total' => 'decimal:2',
-            'final_total' => 'decimal:2',
-        ];
-    }
 
     public function booking(): BelongsTo
     {

@@ -11,15 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('quotations', function (Blueprint $table) {
+        Schema::create('flex_price_groups', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('booking_id')
-            ->unique()
-            ->constrained()
+            $table->foreignId('governorate_id')
+            ->constrained('governorates')
             ->cascadeOnDelete();
 
+            $table->unsignedInteger('billboards_count');
+
+            $table->decimal('local_price', 12, 2);
+            $table->decimal('foreign_price', 12, 2);
+
             $table->timestamps();
+
+            $table->unique('governorate_id');
         });
     }
 
@@ -28,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('quotations');
+        Schema::dropIfExists('flex_price_groups');
     }
 };

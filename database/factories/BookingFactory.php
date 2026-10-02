@@ -71,8 +71,6 @@ class BookingFactory extends Factory
         return $this->afterCreating(function (Booking $booking) {
             Quotation::query()->create([
                 'booking_id' => $booking->id,
-                'calculated_total' => 10_000_000,
-                'final_total' => 9_500_000,
             ]);
         });
     }

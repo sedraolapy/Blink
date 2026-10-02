@@ -29,6 +29,8 @@ class DatabaseSeeder extends Seeder
             BookingApiTestSeeder::class,
             ElectronicSlidesTestSeeder::class,
             OutdoorMultiplePeriodsTestSeeder::class,
+            FlexPriceGroupSeeder::class,
+            MixedWorkingYearsBookingsSeeder::class,
         ]);
 
         Customer::factory()->count(20)->create();
