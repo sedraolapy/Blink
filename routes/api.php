@@ -14,6 +14,7 @@ use App\Http\Controllers\API\FlexBillboard\FlexController;
 use App\Http\Controllers\Api\Governorate\GovernorateController;
 use App\Http\Controllers\Api\Map\MapController;
 use App\Http\Controllers\API\Outdoor\OutdoorController;
+use App\Http\Controllers\API\Quotation\QuotationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -77,6 +78,9 @@ Route::middleware('localization')->group(function () {
             Route::post('/booking-options/outdoor/available-assets',[ExternalBookingController::class, 'availableAssets']);
             Route::get('/bookings/{booking_id}/outdoor/{type}',[ExternalBookingController::class, 'show']);
 
+            // Quotation
+            Route::get('/bookings/{bookingId}/quotation',[QuotationController::class, 'show']);
+
             Route::middleware('working.year.writable')->group(function () {
                 // Bookings
                 Route::patch('/bookings/{booking}',[BookingController::class, 'updateAdvertiserType']);
@@ -92,6 +96,9 @@ Route::middleware('localization')->group(function () {
                 // Outdoor bookings
                 Route::post('/bookings/outdoor',[ExternalBookingController::class, 'store']);
                 Route::put('/bookings/{booking_id}/outdoor/{type}',[ExternalBookingController::class, 'update']);
+
+                // Qoutation
+                Route::post('/bookings/{bookingId}/quotation/issue',[QuotationController::class, 'issue']);
             });
         });
     });

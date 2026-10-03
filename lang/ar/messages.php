@@ -71,4 +71,9 @@ return [
     'working_year_not_available' => 'سنة العمل المحددة غير متاحة للحجز.',
     'working_year_not_initialized' => 'لم يتم تهيئة سنة العمل.',
     'working_year_read_only' => 'لا يمكن تعديل البيانات ضمن سنة عمل سابقة.',
+
+    'quotation' => [
+        'show' => 'تم جلب عرض السعر بنجاح.',
+        'issue' => 'تم إصدار عرض السعر بنجاح.',
+    ],
 ];

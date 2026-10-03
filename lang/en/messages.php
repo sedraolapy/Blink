@@ -54,7 +54,7 @@ return [
         'store_success' => 'Electronic screen booking saved successfully.',
         'update_success' => 'Electronic screen booking updated successfully.',
         'show' => 'Electronic booking details retrieved successfully.',
-        
+
     ],
 
     'not_found' => 'The requested resource was not found.',
@@ -71,5 +71,10 @@ return [
     'working_year_not_available' => 'The selected working year is not available for booking.',
     'working_year_not_initialized' => 'The working year has not been initialized.',
     'working_year_read_only' => 'Past working years are read-only.',
+
+    'quotation' => [
+        'show' => 'Quotation retrieved successfully.',
+        'issue' => 'Quotation issued successfully.',
+    ],
 
 ];
