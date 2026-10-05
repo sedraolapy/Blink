@@ -37,8 +37,6 @@ class FlexBillboardSeeder extends Seeder
                 'width' => 6,
                 'height' => 3,
 
-                'local_price' => 2500000,
-                'foreign_price' => 200,
             ],
 
             [
@@ -57,8 +55,6 @@ class FlexBillboardSeeder extends Seeder
                 'width' => 5,
                 'height' => 3,
 
-                'local_price' => 2200000,
-                'foreign_price' => 180,
             ],
 
             [
@@ -77,8 +73,6 @@ class FlexBillboardSeeder extends Seeder
                 'width' => 6,
                 'height' => 3,
 
-                'local_price' => 1800000,
-                'foreign_price' => 150,
             ],
         ];
 
@@ -111,12 +105,6 @@ class FlexBillboardSeeder extends Seeder
 
                     'height' =>
                         $data['height'],
-
-                    'local_price' =>
-                        $data['local_price'],
-
-                    'foreign_price' =>
-                        $data['foreign_price'],
                 ]
             );
         }
@@ -231,13 +219,6 @@ class FlexBillboardSeeder extends Seeder
                     'height' =>
                         3 + ($i % 2),
 
-                    'local_price' =>
-                        1800000
-                        + (($i % 20) * 100000),
-
-                    'foreign_price' =>
-                        150
-                        + (($i % 20) * 10),
                 ]
             );
         }
