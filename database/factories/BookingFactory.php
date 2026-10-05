@@ -21,6 +21,8 @@ use App\Models\FlexBookingPeriod;
 use App\Models\LedBooking;
 use App\Models\LedBookingItem;
 use App\Models\LedBookingPeriod;
+use App\Models\LedBookingSlide;
+use App\Models\LedDesign;
 use App\Models\LedNetwork;
 use App\Models\LedScreen;
 use App\Models\Quotation;
@@ -176,9 +178,13 @@ class BookingFactory extends Factory
                     'booking_id' => $booking->id,
                 ]);
 
+                $design = LedDesign::query()->create([
+                    'led_booking_id' => $ledBooking->id,
+                    'name' => "Electronic Booking {$booking->id}",
+                ]);
+
                 $period = LedBookingPeriod::query()->create([
-                    'led_booking_id' =>
-                        $ledBooking->id,
+                    'led_booking_id' => $ledBooking->id,
 
                     'start_date' => now()
                         ->subDays(7)
@@ -190,52 +196,53 @@ class BookingFactory extends Factory
                 ]);
 
                 /*
-                 * Standalone Screen
+                 * Standalone screen
                  */
-
                 $screen = LedScreen::query()
                     ->whereNull('network_id')
                     ->orderBy('id')
                     ->skip($screenOffset)
                     ->firstOrFail();
 
-                LedBookingItem::query()->create([
-                    'led_booking_period_id' =>
-                        $period->id,
-
-                    'led_screen_id' =>
-                        $screen->id,
-
+                $standaloneItem = LedBookingItem::query()->create([
+                    'led_booking_period_id' => $period->id,
+                    'led_screen_id' => $screen->id,
                     'led_network_id' => null,
-
-
                     'is_gift' => false,
-
                     'status' => $status->value,
                 ]);
 
-                /*
-                 * Network
-                 */
+                LedBookingSlide::query()->create([
+                    'led_booking_item_id' => $standaloneItem->id,
+                    'design_id' => $design->id,
+                    'slide_number' => 1,
+                ]);
 
+                /*
+                 * Network + every screen inside it
+                 */
                 $network = LedNetwork::query()
+                    ->with('screens')
+                    ->whereHas('screens')
                     ->orderBy('id')
                     ->skip($networkOffset)
                     ->firstOrFail();
 
-                LedBookingItem::query()->create([
-                    'led_booking_period_id' =>
-                        $period->id,
+                foreach ($network->screens as $networkScreen) {
+                    $networkItem = LedBookingItem::query()->create([
+                        'led_booking_period_id' => $period->id,
+                        'led_screen_id' => $networkScreen->id,
+                        'led_network_id' => $network->id,
+                        'is_gift' => false,
+                        'status' => $status->value,
+                    ]);
 
-                    'led_screen_id' => null,
-
-                    'led_network_id' =>
-                        $network->id,
-
-                    'is_gift' => false,
-
-                    'status' => $status->value,
-                ]);
+                    LedBookingSlide::query()->create([
+                        'led_booking_item_id' => $networkItem->id,
+                        'design_id' => $design->id,
+                        'slide_number' => 1,
+                    ]);
+                }
             }
         );
     }
