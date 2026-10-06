@@ -59,7 +59,7 @@ return [
         'network' => 'الشبكة',
         'slides' => 'الشرائح',
         'slide_number' => 'رقم الشريحة',
-
+        'final_amount' => 'القيمة النهائية بعد الحسم',
     ],
 
         'custom' => [

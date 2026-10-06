@@ -38,8 +38,16 @@ class QuotationController extends Controller
     public function issue(IssueQuotationRequest $request,int $bookingId)
     {
         $booking = $this->bookingService->show($bookingId);
-        $data =     $request->validated('html');
-        $pdf = $this->quotationPdfService->generate($data);
+        $calculation = $this->quotationCalculator->calculate($booking);
+        $finalAmount = $request->validated('final_amount');
+
+        $pdf = $this->quotationPdfService->generate(
+            $booking,
+            $calculation,
+            $finalAmount !== null
+                ? (float) $finalAmount
+                : null
+        );
 
         $this->quotationService->issue($booking);
 

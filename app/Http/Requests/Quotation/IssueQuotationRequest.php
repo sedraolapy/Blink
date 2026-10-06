@@ -3,9 +3,7 @@
 namespace App\Http\Requests\Quotation;
 
 use App\Enums\PermissionEnum;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
 class IssueQuotationRequest extends FormRequest
 {
@@ -19,34 +17,26 @@ class IssueQuotationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'html' => [
-                'required',
-                'string',
-                function (
-                    string $attribute,
-                    mixed $value,
-                    \Closure $fail
-                ) {
-                    if (strlen($value) > 5 * 1024 * 1024) {
-                        $fail(__('validation.max.string', [
-                            'attribute' => 'html',
-                            'max' => '5 MB',
-                        ]));
-                    }
-                },
+            'final_amount' => [
+                'nullable',
+                'numeric',
+                'min:0',
             ],
         ];
     }
 
-    protected function failedValidation(
-        Validator $validator
-    ): void {
-        throw new HttpResponseException(
-            sendError(
-                __('messages.validation_failed'),
-                422,
-                $validator->errors()
-            )
-        );
+    public function messages(): array
+    {
+        return [
+            'final_amount.numeric' => __('validation.numeric'),
+            'final_amount.min' => __('validation.min.numeric'),
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'final_amount' => __('validation.attributes.final_amount'),
+        ];
     }
 }

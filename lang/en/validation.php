@@ -42,6 +42,7 @@ return [
         'network' => 'network',
         'slides' => 'slides',
         'slide_number' => 'slide number',
+        'final_amount' => 'final amount after discount',
     ],
 
     'custom' => [
