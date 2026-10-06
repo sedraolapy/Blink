@@ -140,9 +140,10 @@ class OutdoorQuotationCalculator
 
                 $details[$governorate->id]['items'][] = [
                     'id' => $asset->id,
+                    'code' => $asset->code,
                     'location' => $asset->location_name,
-                    'width' => $asset->width,
-                    'height' => $asset->height,
+                    'width' => (float) $asset->width,
+                    'height' => (float) $asset->height,
 
                     'period' => [
                         'start_date' =>

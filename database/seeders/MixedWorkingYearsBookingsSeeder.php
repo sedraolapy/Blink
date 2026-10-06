@@ -77,6 +77,17 @@ class MixedWorkingYearsBookingsSeeder extends Seeder
                 );
             }
 
+            CustomerSubscription::query()->firstOrCreate(
+                [
+                    'customer_id' => $customer->id,
+                    'year' => now()->year,
+                ],
+                [
+                    'subscription_type' =>
+                        SubscriptionTypeEnum::BRONZE->value,
+                ]
+            );
+
             /*
              * Cleanup only this seeder's old bookings.
              */

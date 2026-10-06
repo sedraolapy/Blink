@@ -55,19 +55,22 @@ class CustomerService
             'customers' => $customers,
         ];
     }
-
+    
     public function create(array $data)
     {
-        return DB::transaction(function () use ($data) {
+        $year = $this->workingYearContext->get();
+
+        return DB::transaction(function () use ($data, $year) {
             $customer = Customer::query()->create($data);
 
             $customer->subscriptions()->create([
-                'year' => now()->year,
+                'year' => $year,
                 'subscription_type' => SubscriptionTypeEnum::BRONZE->value,
             ]);
 
             return $customer->load([
-                'subscriptions' => fn ($query) => $query->where('year', now()->year),
+                'subscriptions' => fn ($query) =>
+                    $query->where('year', $year),
             ]);
         });
     }

@@ -169,9 +169,10 @@ class FlexQuotationCalculator
 
                 $details[$governorate->id]['items'][] = [
                     'id' => $billboard->id,
+                    'code' => $billboard->code,
                     'location' => $billboard->location_name,
-                    'width' => $billboard->width,
-                    'height' => $billboard->height,
+                    'width' => (float) $billboard->width,
+                    'height' => (float) $billboard->height,
                     'period' => [
                         'id' => $period->advertisingPeriod->id,
                         'number' => $period->advertisingPeriod->number,

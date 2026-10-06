@@ -104,9 +104,10 @@ class ElectronicQuotationCalculator
 
                 $standalone[$governorate->id]['items'][] = [
                     'id' => $screen->id,
+                    'code' => $screen->code,
                     'location' => $screen->location_name,
-                    'width' => $screen->width,
-                    'height' => $screen->height,
+                    'width' => (float) $screen->width,
+                    'height' => (float) $screen->height,
                     'resolution' =>  "{$screen->width_px}x{$screen->height_px}",
 
                     'period' => [
@@ -224,9 +225,10 @@ class ElectronicQuotationCalculator
 
                         return [
                             'id' => $screen->id,
+                            'code' => $screen->code,
                             'location' => $screen->location_name,
-                            'width' => $screen->width,
-                            'height' => $screen->height,
+                            'width' => (float) $screen->width,
+                            'height' => (float) $screen->height,
                             'resolution' => "{$screen->width_px}x{$screen->height_px}",
                             'slides_count' => $item->slides->count(),
                         ];

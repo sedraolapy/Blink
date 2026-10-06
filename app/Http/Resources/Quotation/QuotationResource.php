@@ -18,12 +18,10 @@ class QuotationResource extends JsonResource
                 'name' => $booking->customer->name,
             ],
 
-            'advertiser_type' =>
-                $booking->booking_type->value,
+            'advertiser_type' => $booking->booking_type->value,
 
             'quotation' => [
-                'last_issued_at' =>
-                    $booking->quotation
+                'last_issued_at' => $booking->quotation
                         ?->updated_at
                         ?->toISOString(),
             ],
@@ -31,9 +29,7 @@ class QuotationResource extends JsonResource
             'flex' => $calculation['flex'],
             'electronic' => $calculation['electronic'],
             'outdoor' => $calculation['outdoor'],
-
-            'grand_total' =>
-                $calculation['grand_total'],
+            'grand_total' => $calculation['grand_total'],
         ];
     }
 }

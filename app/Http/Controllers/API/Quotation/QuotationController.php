@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\API\Quotation;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Quotation\IssueQuotationRequest;
 use App\Http\Resources\Quotation\QuotationResource;
 use App\Services\Booking\BookingService;
 use App\Services\Quotation\QuotationCalculator;
+use App\Services\Quotation\QuotationPdfService;
 use App\Services\Quotation\QuotationService;
 
 class QuotationController extends Controller
@@ -14,6 +16,7 @@ class QuotationController extends Controller
         private readonly BookingService $bookingService,
         private readonly QuotationCalculator $quotationCalculator,
         private readonly QuotationService $quotationService,
+        private readonly QuotationPdfService $quotationPdfService,
     ) {}
 
     public function show(int $bookingId)
@@ -32,22 +35,18 @@ class QuotationController extends Controller
         );
     }
 
-    public function issue(int $bookingId)
+    public function issue(IssueQuotationRequest $request,int $bookingId)
     {
         $booking = $this->bookingService->show($bookingId);
-        $quotation = $this->quotationService->issue($booking);
-        $booking->setRelation('quotation',$quotation);
+        $data =     $request->validated('html');
+        $pdf = $this->quotationPdfService->generate($data);
 
-        $calculation = $this->quotationCalculator
-            ->calculate($booking);
+        $this->quotationService->issue($booking);
 
-        return sendResponse(
-            __('messages.quotation.issue'),
-            new QuotationResource([
-                'booking' => $booking,
-                'calculation' => $calculation,
-            ])
-        );
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="quotation.pdf"',
+        ]);
     }
 
 }
