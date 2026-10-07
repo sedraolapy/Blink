@@ -4,9 +4,10 @@ Standalone Blade-ready template with inline CSS.
 
 Expected variables:
 - $quotation    : same data structure returned in data from GET /bookings/{booking_id}/quotation
-- $language     : "ar" or "en"
 - $documentDate : formatted as yyyy/MM/dd
 - $finalAmount  : nullable; final payable amount after discount for the current issue
+
+Language is derived from Laravel's current locale, which is set by the Localization middleware.
 
 Expected backend assets:
 public/quotation/logos/Arabic.SVG
@@ -20,8 +21,13 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
 
 @php
     $quotation = $quotation ?? [];
-    $language = ($language ?? 'ar') === 'en' ? 'en' : 'ar';
+
+    $language = app()->getLocale() === 'en'
+        ? 'en'
+        : 'ar';
+
     $isArabic = $language === 'ar';
+
     $documentDate = $documentDate ?? '';
     $finalAmount = $finalAmount ?? null;
 
@@ -53,7 +59,7 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
                     'periodNumber' => 'رقم الفترة',
                     'networkPrice' => 'سعر الشبكة',
                     'totalPrice' => 'السعر الإجمالي',
-                    'id' => 'ID اللوحة',
+                    'code' => 'كود اللوحة',
                     'location' => 'الموقع',
                     'size' => 'القياس',
                 ],
@@ -72,7 +78,7 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
                     'networksCount' => 'عدد الشبكات',
                     'period' => 'الفترة',
                     'totalPrice' => 'السعر الإجمالي',
-                    'id' => 'ID الشاشة',
+                    'code' => 'كود الشاشة',
                     'location' => 'الموقع',
                     'size' => 'القياس',
                     'resolution' => 'الدقة',
@@ -90,7 +96,7 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
                     'assetsCount' => 'عدد اللوحات',
                     'period' => 'الفترة',
                     'totalPrice' => 'السعر الإجمالي',
-                    'id' => 'ID اللوحة',
+                    'code' => 'كود اللوحة',
                     'location' => 'الموقع',
                     'size' => 'القياس',
                     'price' => 'السعر',
@@ -142,7 +148,7 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
                     'periodNumber' => 'Period',
                     'networkPrice' => 'Network Price',
                     'totalPrice' => 'Total Price',
-                    'id' => 'Board ID',
+                    'code' => 'Board Code',
                     'location' => 'Location',
                     'size' => 'Size',
                 ],
@@ -161,7 +167,7 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
                     'networksCount' => 'Networks',
                     'period' => 'Period',
                     'totalPrice' => 'Total Price',
-                    'id' => 'Screen ID',
+                    'code' => 'Screen Code',
                     'location' => 'Location',
                     'size' => 'Size',
                     'resolution' => 'Resolution',
@@ -179,7 +185,7 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
                     'assetsCount' => 'Assets',
                     'period' => 'Period',
                     'totalPrice' => 'Total Price',
-                    'id' => 'Asset ID',
+                    'code' => 'Asset Code',
                     'location' => 'Location',
                     'size' => 'Size',
                     'price' => 'Price',
@@ -1003,7 +1009,7 @@ HTML;
         }
 
         /* Flex details */
-        .flex-col-id {
+        .flex-col-code {
             width: 14%;
         }
 
@@ -1041,12 +1047,12 @@ HTML;
         }
 
         /* Electronic standalone */
-        .electronic-standalone-col-id {
-            width: 9%;
+        .electronic-standalone-col-code {
+            width: 14%;
         }
 
         .electronic-standalone-col-location {
-            width: 27%;
+            width: 22%;
         }
 
         .electronic-standalone-col-size {
@@ -1070,12 +1076,12 @@ HTML;
         }
 
         /* Electronic network */
-        .electronic-network-col-id {
-            width: 10%;
+        .electronic-network-col-code {
+            width: 14%;
         }
 
         .electronic-network-col-location {
-            width: 34%;
+            width: 30%;
         }
 
         .electronic-network-col-size {
@@ -1112,12 +1118,12 @@ HTML;
         }
 
         /* Outdoor details */
-        .outdoor-details-col-id {
-            width: 12%;
+        .outdoor-details-col-code {
+            width: 14%;
         }
 
         .outdoor-details-col-location {
-            width: 38%;
+            width: 36%;
         }
 
         .outdoor-details-col-size {
@@ -1577,8 +1583,8 @@ HTML;
                             <table class="quotation-table">
                                 <thead>
                                     <tr>
-                                        <th class="flex-col-id">
-                                            {{ $t['flex']['columns']['id'] }}
+                                        <th class="flex-col-code">
+                                            {{ $t['flex']['columns']['code'] }}
                                         </th>
                                         <th class="flex-col-location">
                                             {{ $t['flex']['columns']['location'] }}
@@ -1595,7 +1601,7 @@ HTML;
                                 <tbody>
                                     @foreach ($group['items'] as $item)
                                         <tr>
-                                            <td>{{ $item['id'] }}</td>
+                                            <td>{{ $item['code'] }}</td>
                                             <td>{{ $item['location'] }}</td>
                                             <td dir="ltr">
                                                 {{
@@ -1753,8 +1759,8 @@ HTML;
                             <table class="quotation-table">
                                 <thead>
                                     <tr>
-                                        <th class="electronic-standalone-col-id">
-                                            {{ $t['electronic']['columns']['id'] }}
+                                        <th class="electronic-standalone-col-code">
+                                            {{ $t['electronic']['columns']['code'] }}
                                         </th>
                                         <th class="electronic-standalone-col-location">
                                             {{ $t['electronic']['columns']['location'] }}
@@ -1784,7 +1790,7 @@ HTML;
                                                 dir="ltr"
                                                 class="cell-nowrap"
                                             >
-                                                {{ $item['id'] }}
+                                                {{ $item['code'] }}
                                             </td>
 
                                             <td class="cell-start">
@@ -1909,8 +1915,8 @@ HTML;
                             <table class="quotation-table">
                                 <thead>
                                     <tr>
-                                        <th class="electronic-network-col-id">
-                                            {{ $t['electronic']['columns']['id'] }}
+                                        <th class="electronic-network-col-code">
+                                            {{ $t['electronic']['columns']['code'] }}
                                         </th>
                                         <th class="electronic-network-col-location">
                                             {{ $t['electronic']['columns']['location'] }}
@@ -1937,7 +1943,7 @@ HTML;
                                                 dir="ltr"
                                                 class="cell-nowrap"
                                             >
-                                                {{ $item['id'] }}
+                                                {{ $item['code'] }}
                                             </td>
 
                                             <td class="cell-start">
@@ -2193,8 +2199,8 @@ HTML;
                                 <table class="quotation-table">
                                     <thead>
                                         <tr>
-                                            <th class="outdoor-details-col-id">
-                                                {{ $t['outdoor']['columns']['id'] }}
+                                            <th class="outdoor-details-col-code">
+                                                {{ $t['outdoor']['columns']['code'] }}
                                             </th>
                                             <th class="outdoor-details-col-location">
                                                 {{ $t['outdoor']['columns']['location'] }}
@@ -2218,7 +2224,7 @@ HTML;
                                                     dir="ltr"
                                                     class="cell-nowrap"
                                                 >
-                                                    {{ $item['id'] }}
+                                                    {{ $item['code'] }}
                                                 </td>
 
                                                 <td class="cell-start">
