@@ -19,7 +19,7 @@ class CustomerResource extends JsonResource
                 ?->subscription_type
                 ?->value,
 
-            'contract_status' => $this->latestContract?->status,
+            'contract_status' => $this->contract_status,
         ];
     }
 }

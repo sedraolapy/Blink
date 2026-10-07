@@ -8,6 +8,7 @@ use App\Http\Controllers\API\Booking\ElectronicBooking\ElectronicBookingControll
 use App\Http\Controllers\API\Booking\ExternalBooking\ExternalBookingController;
 use App\Http\Controllers\Api\Booking\FlexBooking\BookingOptions\FlexBookingOptionsController;
 use App\Http\Controllers\Api\Booking\FlexBooking\FlexBookingController;
+use App\Http\Controllers\API\Contract\ContractController;
 use App\Http\Controllers\API\Customer\CustomerController;
 use App\Http\Controllers\API\Electronic\ElectronicController;
 use App\Http\Controllers\API\FlexBillboard\FlexController;
@@ -81,6 +82,9 @@ Route::middleware('localization')->group(function () {
             // Quotation
             Route::get('/bookings/{bookingId}/quotation',[QuotationController::class, 'show']);
 
+            // Contract
+            Route::get('/bookings/{bookingId}/contract',[ContractController::class, 'show']);
+
             Route::middleware('working.year.writable')->group(function () {
                 // Bookings
                 Route::patch('/bookings/{booking}',[BookingController::class, 'updateAdvertiserType']);
@@ -99,6 +103,10 @@ Route::middleware('localization')->group(function () {
 
                 // Qoutation
                 Route::post('/bookings/{bookingId}/quotation/issue',[QuotationController::class, 'issue']);
+
+                // Contract
+                Route::post('/bookings/{bookingId}/contract',[ContractController::class, 'store']);
+                Route::put('/bookings/{bookingId}/contract',[ContractController::class, 'update']);
             });
         });
     });

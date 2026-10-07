@@ -77,4 +77,12 @@ return [
         'issue' => 'Quotation issued successfully.',
     ],
 
+    'contract' => [
+        'already_exists' => 'A contract has already been uploaded for this booking.',
+        'uploaded' => 'Contract uploaded successfully.',
+        'show' => 'Contract retrieved successfully.',
+        'not_uploaded' => 'No contract has been uploaded yet.',
+        'updated' => 'Contract updated successfully.',
+    ],
+
 ];

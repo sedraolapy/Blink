@@ -10,16 +10,15 @@ use Illuminate\Support\Facades\DB;
 
 class CustomerService
 {
-    public function __construct(
-        private readonly WorkingYearContext $workingYearContext
-    ) {
-    }
+    public function __construct(private readonly WorkingYearContext $workingYearContext)
+    {}
 
     public function index(array $filters): array
     {
         $year = $this->workingYearContext->get();
 
         $query = Customer::query()
+            ->withLatestContractStatus($year)
             ->search($filters['search'] ?? null)
             ->subscriptionType(
                 $filters['subscription_type'] ?? null,
@@ -34,15 +33,7 @@ class CustomerService
 
         $customers = $query
             ->with([
-                'subscriptions' => fn ($query) =>
-                    $query->where('year', $year),
-
-                'latestContract' => fn ($query) =>
-                    $query->whereHas(
-                        'booking',
-                        fn ($bookingQuery) =>
-                            $bookingQuery->where('year', $year)
-                    ),
+                'subscriptions' => fn ($query) => $query->where('year', $year),
             ])
             ->orderByDesc('id')
             ->paginate(24);
@@ -69,8 +60,7 @@ class CustomerService
             ]);
 
             return $customer->load([
-                'subscriptions' => fn ($query) =>
-                    $query->where('year', $year),
+                'subscriptions' => fn ($query) => $query->where('year', $year),
             ]);
         });
     }
@@ -80,20 +70,12 @@ class CustomerService
         $year = $this->workingYearContext->get();
 
         return Customer::query()
+            ->withLatestContractStatus($year)
             ->with([
-                'subscriptions' => fn ($query) =>
-                    $query->where('year', $year),
-
-                'latestContract' => fn ($query) =>
-                    $query->whereHas(
-                        'booking',
-                        fn ($bookingQuery) =>
-                            $bookingQuery->where('year', $year)
-                    ),
+                'subscriptions' => fn ($query) => $query->where('year', $year),
             ])
             ->withCount([
-                'bookings' => fn ($query) =>
-                    $query->where('year', $year),
+                'bookings' => fn ($query) => $query->where('year', $year),
             ])
             ->findOrFail($id);
     }
@@ -102,7 +84,14 @@ class CustomerService
     {
         $customer->update($data);
 
-        return $customer->refresh();
+        $year = now()->year;
+
+        return Customer::query()
+            ->withLatestContractStatus($year)
+            ->with([
+                'subscriptions' => fn ($query) => $query->where('year', $year),
+            ])
+            ->findOrFail($customer->id);
     }
 
     public function bookings(int $customerId, array $filters)

@@ -185,10 +185,6 @@ class BookingApiTestSeeder extends Seeder
                 operation: true
             )
             ->withQuotation()
-            ->withContract(
-                ContractStatusEnum::PENDING,
-                true
-            )
             ->withFlex(
                 BookingItemStatusEnum::BOOKED,
                 0

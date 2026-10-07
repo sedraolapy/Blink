@@ -16,6 +16,7 @@ class Contract extends Model implements HasMedia
         'booking_id',
         'start_date',
         'end_date',
+        'contract_number',
         'status',
     ];
 
@@ -35,7 +36,7 @@ class Contract extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this
-            ->addMediaCollection('contract_images');
+        $this->addMediaCollection('contract_images');
+        $this->addMediaCollection('attachment_images');
     }
 }

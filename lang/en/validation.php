@@ -43,6 +43,14 @@ return [
         'slides' => 'slides',
         'slide_number' => 'slide number',
         'final_amount' => 'final amount after discount',
+        'working_year' => 'working year',
+        'contract_number' => 'contract number',
+        'start_date' => 'start date',
+        'end_date' => 'end date',
+        'contract_images' => 'contract image',
+        'contract_images.*' => 'contract image',
+        'attachment_images' => 'attachment images',
+        'attachment_images.*' => 'attachment image',
     ],
 
     'custom' => [
@@ -150,6 +158,20 @@ return [
 
         'subscription_type' => [
             'enum' => 'The selected subscription type is invalid.',
+        ],
+
+        'start_date' => [
+            'after_or_equal' => 'The :attribute must be within the selected working year.',
+            'before_or_equal' => 'The :attribute must be within the selected working year.',
+        ],
+
+        'end_date' => [
+            'after_or_equal' => 'The :attribute must be after or equal to the start date.',
+            'before_or_equal' => 'The :attribute must be within the selected working year.',
+        ],
+
+        'contract_images' => [
+            'min' => 'At least one :attribute is required.',
         ],
     ],
 
@@ -276,6 +298,28 @@ return [
         ],
     ],
 
+    'contract' => [
+        'permissions' => [
+            'create_denied' => 'You do not have permission to upload contracts.',
+        ],
 
+        'start_date' => [
+            'within_working_year' =>
+                'The start date must be within the selected working year.',
+        ],
+
+        'end_date' => [
+            'after_or_equal' =>
+                'The end date must be after or equal to the start date.',
+
+            'within_working_year' =>
+                'The end date must be within the selected working year.',
+        ],
+
+        'contract_images' => [
+            'min' =>
+                'At least one contract image is required.',
+        ],
+    ],
 
 ];

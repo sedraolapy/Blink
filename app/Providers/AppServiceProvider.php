@@ -3,8 +3,6 @@
 namespace App\Providers;
 
 use App\Enums\RoleEnum;
-use App\Models\Booking;
-use App\Observers\BookingObserver;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use App\Services\WorkingYear\WorkingYearContext;
@@ -27,7 +25,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Booking::observe(BookingObserver::class);
 
         Gate::before(function ($user, string $ability) {
             if ($user->hasRole(RoleEnum::SUPER_ADMIN->value)) {

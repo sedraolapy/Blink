@@ -1,0 +1,155 @@
+<?php
+
+namespace App\Http\Requests\Contract;
+
+use App\Enums\PermissionEnum;
+use App\Services\WorkingYear\WorkingYearContext;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+
+class UpdateContractRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user()?->can(
+            PermissionEnum::UPLOAD_CONTRACT->value
+        ) ?? false;
+    }
+
+    public function rules(): array
+    {
+        $year = app(WorkingYearContext::class)->get();
+
+        return [
+            'contract_number' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'start_date' => [
+                'required',
+                'date_format:Y-m-d',
+                "after_or_equal:{$year}-01-01",
+                "before_or_equal:{$year}-12-31",
+            ],
+
+            'end_date' => [
+                'required',
+                'date_format:Y-m-d',
+                'after_or_equal:start_date',
+                "before_or_equal:{$year}-12-31",
+            ],
+
+            'contract_images' => [
+                'nullable',
+                'array',
+            ],
+
+            'contract_images.*' => [
+                'image',
+                'mimes:jpg,jpeg,png',
+                'max:10240',
+            ],
+
+            'attachment_images' => [
+                'nullable',
+                'array',
+            ],
+
+            'attachment_images.*' => [
+                'image',
+                'mimes:jpg,jpeg,png',
+                'max:10240',
+            ],
+
+            'deleted_contract_image_ids' => [
+                'nullable',
+                'array',
+            ],
+
+            'deleted_contract_image_ids.*' => [
+                'integer',
+                'distinct',
+            ],
+
+            'deleted_attachment_image_ids' => [
+                'nullable',
+                'array',
+            ],
+
+            'deleted_attachment_image_ids.*' => [
+                'integer',
+                'distinct',
+            ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'start_date.after_or_equal' =>
+                __('validation.contract.start_date.within_working_year'),
+
+            'start_date.before_or_equal' =>
+                __('validation.contract.start_date.within_working_year'),
+
+            'end_date.after_or_equal' =>
+                __('validation.contract.end_date.after_or_equal'),
+
+            'end_date.before_or_equal' =>
+                __('validation.contract.end_date.within_working_year'),
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'contract_number' =>
+                __('validation.attributes.contract_number'),
+
+            'start_date' =>
+                __('validation.attributes.start_date'),
+
+            'end_date' =>
+                __('validation.attributes.end_date'),
+
+            'contract_images' =>
+                __('validation.attributes.contract_images'),
+
+            'contract_images.*' =>
+                __('validation.attributes.contract_image'),
+
+            'attachment_images' =>
+                __('validation.attributes.attachment_images'),
+
+            'attachment_images.*' =>
+                __('validation.attributes.attachment_image'),
+
+            'deleted_contract_image_ids' =>
+                __('validation.attributes.deleted_contract_image_ids'),
+
+            'deleted_contract_image_ids.*' =>
+                __('validation.attributes.deleted_contract_image_id'),
+
+            'deleted_attachment_image_ids' =>
+                __('validation.attributes.deleted_attachment_image_ids'),
+
+            'deleted_attachment_image_ids.*' =>
+                __('validation.attributes.deleted_attachment_image_id'),
+        ];
+    }
+
+    protected function failedValidation(
+        Validator $validator
+    ): void {
+        throw new HttpResponseException(
+            sendError(
+                __('messages.validation_failed'),
+                422,
+                $validator->errors(),
+            )
+        );
+    }
+}

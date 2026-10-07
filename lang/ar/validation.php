@@ -60,6 +60,12 @@ return [
         'slides' => 'الشرائح',
         'slide_number' => 'رقم الشريحة',
         'final_amount' => 'القيمة النهائية بعد الحسم',
+        'working_year' => 'سنة العمل',
+        'contract_number' => 'رقم العقد',
+        'contract_images' => 'صورة عقد',
+        'contract_images.*' => 'صورة العقد',
+        'attachment_images' => 'صور المرفقات',
+        'attachment_images.*' => 'صورة المرفق',
     ],
 
         'custom' => [
@@ -103,6 +109,21 @@ return [
                 'string' => 'يجب أن يكون :attribute نصًا.',
                 'max' => 'يجب ألا يتجاوز :attribute 255 محرفًا.',
             ],
+
+            'start_date' => [
+                'after_or_equal' => 'يجب أن يكون :attribute ضمن سنة العمل المحددة.',
+                'before_or_equal' => 'يجب أن يكون :attribute ضمن سنة العمل المحددة.',
+            ],
+
+            'end_date' => [
+                'after_or_equal' => 'يجب أن يكون :attribute بعد أو مساويًا لتاريخ البداية.',
+                'before_or_equal' => 'يجب أن يكون :attribute ضمن سنة العمل المحددة.',
+            ],
+
+            'contract_images' => [
+                'min' => 'يجب رفع :attribute واحدة على الأقل.',
+            ],
+
             'external_type_already_exists' => 'هذا النوع من الحجز الخارجي موجود مسبقاً ضمن الحجز.',
             'design_name_not_found' =>  'التصميم المحدد غير موجود ضمن قائمة التصاميم.',
             'external_asset_already_booked' => 'إحدى اللوحات الخارجية المحددة محجوزة مسبقًا خلال الفترة المحددة.',
@@ -289,6 +310,30 @@ return [
                 'conflict' =>
                     'إحدى الشاشات المحددة محجوزة خلال الفترة المطلوبة.',
             ],
+        ],
+
+        'contract' => [
+            'permissions' => [
+                'create_denied' => 'ليس لديك صلاحية لرفع العقود.',
+            ],
+            'start_date' => [
+                'within_working_year' =>
+                    'يجب أن يكون تاريخ البداية ضمن سنة العمل المحددة.',
+            ],
+
+            'end_date' => [
+                'after_or_equal' =>
+                    'يجب أن يكون تاريخ النهاية بعد أو مساوياً لتاريخ البداية.',
+
+                'within_working_year' =>
+                    'يجب أن يكون تاريخ النهاية ضمن سنة العمل المحددة.',
+            ],
+
+            'contract_images' => [
+                'min' =>
+                    'يجب رفع صورة عقد واحدة على الأقل.',
+            ],
+
         ],
 
 ];

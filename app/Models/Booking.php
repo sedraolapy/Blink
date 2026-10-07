@@ -43,7 +43,7 @@ class Booking extends Model
     {
         return $this->hasOne(Contract::class);
     }
-
+    
     public function quotation()
     {
         return $this->hasOne(Quotation::class);

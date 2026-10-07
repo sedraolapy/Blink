@@ -902,14 +902,19 @@ HTML;
          * Flex has the wrapper mt-10 + its own mt-10 = 80px.
          * Electronic fallback has only the wrapper mt-10 = 40px.
          */
-        .intro-flex-summary {
-            margin-top: 80px;
-        }
+.intro-flex-summary {
+    margin-top: 56px;
+}
 
         .intro-electronic-summary {
             margin-top: 40px;
         }
 
+        .intro-flex-summary .quotation-table th,
+.intro-flex-summary .quotation-table td {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
         /* ==============================================================
            Shared titles
            ============================================================== */

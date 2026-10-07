@@ -97,6 +97,9 @@ class BookingFactory extends Factory
                 $contract = Contract::query()->create([
                     'booking_id' => $booking->id,
 
+                    'contract_number' =>
+                    $booking->year . '/' . $booking->id,
+
                     'start_date' =>
                         $contractStartDate->toDateString(),
 

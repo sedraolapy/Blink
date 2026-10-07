@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ContractStatusEnum;
 use App\Enums\SubscriptionTypeEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -42,6 +43,15 @@ class Customer extends Model
             'customer_id',
             'booking_id'
         );
+    }
+
+    public function latestBooking()
+    {
+        return $this->hasOne(Booking::class)
+            ->ofMany([
+                'created_at' => 'max',
+                'id' => 'max',
+            ]);
     }
 
     public function latestContract(): HasOneThrough
@@ -95,26 +105,57 @@ class Customer extends Model
         );
     }
 
+    public function scopeWithLatestContractStatus(Builder $query,int $year): Builder
+    {
+        $latestContractStatus = Booking::query()
+            ->selectRaw(
+                'COALESCE(contracts.status, ?)',
+                [ContractStatusEnum::PENDING->value]
+            )
+            ->leftJoin(
+                'contracts',
+                'contracts.booking_id',
+                '=',
+                'bookings.id'
+            )
+            ->whereColumn(
+                'bookings.customer_id',
+                'customers.id'
+            )
+            ->where('bookings.year', $year)
+            ->orderByDesc('bookings.created_at')
+            ->orderByDesc('bookings.id')
+            ->limit(1);
+
+        return $query->addSelect([
+            'contract_status' => $latestContractStatus,
+        ]);
+    }
+
     public function scopeLatestContractStatus(Builder $query,?string $status,int $year)
     {
         if (! $status) {
             return $query;
         }
 
-        $latestContractStatus = Contract::query()
-            ->select('contracts.status')
-            ->whereHas(
-                'booking',
-                fn (Builder $bookingQuery) =>
-                    $bookingQuery
-                        ->whereColumn(
-                            'bookings.customer_id',
-                            'customers.id'
-                        )
-                        ->where('bookings.year', $year)
+        $latestContractStatus = Booking::query()
+            ->selectRaw(
+                'COALESCE(contracts.status, ?)',
+                [ContractStatusEnum::PENDING->value]
             )
-            ->orderByDesc('contracts.created_at')
-            ->orderByDesc('contracts.id')
+            ->leftJoin(
+                'contracts',
+                'contracts.booking_id',
+                '=',
+                'bookings.id'
+            )
+            ->whereColumn(
+                'bookings.customer_id',
+                'customers.id'
+            )
+            ->where('bookings.year', $year)
+            ->orderByDesc('bookings.created_at')
+            ->orderByDesc('bookings.id')
             ->limit(1);
 
         return $query->where(
