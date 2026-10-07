@@ -19,6 +19,10 @@ return [
     'confirmed' => 'تأكيد :attribute غير مطابق.',
     'unique' => 'قيمة :attribute مستخدمة مسبقًا.',
     'exists' => 'القيمة المحددة في :attribute غير موجودة.',
+    'integer' => 'يجب أن يكون :attribute رقمًا صحيحًا.',
+    'image' => 'يجب أن يكون :attribute صورة.',
+    'mimes' => 'يجب أن يكون :attribute ملفًا من النوع: :values.',
+    'date_format' => 'لا يتطابق :attribute مع التنسيق :format.',
 
 
     'attributes' => [
@@ -66,6 +70,12 @@ return [
         'contract_images.*' => 'صورة العقد',
         'attachment_images' => 'صور المرفقات',
         'attachment_images.*' => 'صورة المرفق',
+        'contract_image' => 'صورة العقد',
+        'attachment_image' => 'صورة المرفق',
+        'deleted_contract_image_ids' => 'معرّفات صور العقد المحذوفة',
+        'deleted_contract_image_id' => 'معرّف صورة العقد المحذوفة',
+        'deleted_attachment_image_ids' => 'معرّفات صور المرفقات المحذوفة',
+        'deleted_attachment_image_id' => 'معرّف صورة المرفق المحذوفة',
     ],
 
         'custom' => [

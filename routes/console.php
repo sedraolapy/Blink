@@ -15,8 +15,11 @@ Schedule::command('customers:update-subscriptions')
     ->when(function () {
         $startDate = Carbon::parse('2026-09-08');
 
-        return $startDate
-            ->diffInDays(today())
-            % 14 === 0;
+        return today()->gte($startDate)
+            && $startDate->diffInDays(today()) % 14 === 0;
     })
+    ->withoutOverlapping();
+
+Schedule::command('contracts:update-statuses')
+    ->dailyAt('00:10')
     ->withoutOverlapping();

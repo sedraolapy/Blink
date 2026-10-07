@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Spatie\Translatable\HasTranslations;
 
 class Customer extends Model
@@ -45,28 +44,6 @@ class Customer extends Model
         );
     }
 
-    public function latestBooking()
-    {
-        return $this->hasOne(Booking::class)
-            ->ofMany([
-                'created_at' => 'max',
-                'id' => 'max',
-            ]);
-    }
-
-    public function latestContract(): HasOneThrough
-    {
-        return $this->hasOneThrough(
-            Contract::class,
-            Booking::class,
-            'customer_id',
-            'booking_id',
-            'id',
-            'id'
-        )
-            ->orderByDesc('contracts.created_at')
-            ->orderByDesc('contracts.id');
-    }
 
     public function scopeSearch(Builder $query,?string $search)
     {

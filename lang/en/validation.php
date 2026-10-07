@@ -5,6 +5,12 @@ return [
     'email' => 'The :attribute must be a valid email address.',
     'string' => 'The :attribute must be a string.',
     'unique' => 'The :attribute has already been taken.',
+    'array' => 'The :attribute must be an array.',
+    'integer' => 'The :attribute must be an integer.',
+    'distinct' => 'The :attribute field has a duplicate value.',
+    'image' => 'The :attribute must be an image.',
+    'mimes' => 'The :attribute must be a file of type: :values.',
+    'date_format' => 'The :attribute does not match the format :format.',
 
     'attributes' => [
         'email' => 'email',
@@ -45,12 +51,16 @@ return [
         'final_amount' => 'final amount after discount',
         'working_year' => 'working year',
         'contract_number' => 'contract number',
-        'start_date' => 'start date',
-        'end_date' => 'end date',
         'contract_images' => 'contract image',
         'contract_images.*' => 'contract image',
         'attachment_images' => 'attachment images',
         'attachment_images.*' => 'attachment image',
+        'contract_image' => 'contract image',
+        'attachment_image' => 'attachment image',
+        'deleted_contract_image_ids' => 'deleted contract image IDs',
+        'deleted_contract_image_id' => 'deleted contract image ID',
+        'deleted_attachment_image_ids' => 'deleted attachment image IDs',
+        'deleted_attachment_image_id' => 'deleted attachment image ID',
     ],
 
     'custom' => [

@@ -21,8 +21,8 @@ return new class extends Migration
 
             $table->string('contract_number');
 
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
+            $table->date('start_date');
+            $table->date('end_date');
 
             $table->string('status');
 
