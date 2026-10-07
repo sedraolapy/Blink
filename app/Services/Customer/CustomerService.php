@@ -55,10 +55,10 @@ class CustomerService
             'customers' => $customers,
         ];
     }
-    
+
     public function create(array $data)
     {
-        $year = $this->workingYearContext->get();
+        $year = now()->year;
 
         return DB::transaction(function () use ($data, $year) {
             $customer = Customer::query()->create($data);
