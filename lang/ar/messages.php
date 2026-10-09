@@ -85,4 +85,9 @@ return [
         'updated' => 'تم تحديث العقد بنجاح.',
     ],
 
+    'dashboard' => [
+        'index_success' => 'تم جلب إحصائيات الصفحة الرئيسية بنجاح.',
+        'top_requested_assets_success' => 'تم جلب الأصول الأكثر طلباً بنجاح.',
+    ],
+
 ];

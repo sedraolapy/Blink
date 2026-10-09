@@ -85,4 +85,9 @@ return [
         'updated' => 'Contract updated successfully.',
     ],
 
+    'dashboard' => [
+        'index_success' => 'Dashboard statistics retrieved successfully.',
+        'top_requested_assets_success' => 'Top requested assets retrieved successfully.',
+    ],
+
 ];

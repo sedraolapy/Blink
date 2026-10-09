@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             OutdoorMultiplePeriodsTestSeeder::class,
             FlexPriceGroupSeeder::class,
             MixedWorkingYearsBookingsSeeder::class,
+            DashboardStatisticsSeeder::class,
         ]);
 
         Customer::factory()->count(20)->create();

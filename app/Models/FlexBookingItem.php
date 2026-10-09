@@ -5,7 +5,8 @@ namespace App\Models;
 use App\Enums\BookingItemStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Enums\BookingStatusEnum;
+use Illuminate\Database\Eloquent\Builder;
 
 class FlexBookingItem extends Model
 {
@@ -42,5 +43,25 @@ class FlexBookingItem extends Model
     public function design()
     {
         return $this->belongsTo(FlexDesign::class,'design_id');
+    }
+
+    public function scopeConfirmedForYear(Builder $query,int $year)
+    {
+        return $query->whereHas(
+            'period.flexBooking.booking',
+            fn (Builder $query) =>
+                $query
+                    ->where('year', $year)
+                    ->where('status', BookingStatusEnum::CONFIRMED->value)
+        );
+    }
+
+    public function scopeForAdvertisingPeriod(Builder $query,int $periodId): Builder
+    {
+        return $query->whereHas(
+            'period',
+            fn (Builder $query) =>
+                $query->where('advertising_period_id', $periodId)
+        );
     }
 }

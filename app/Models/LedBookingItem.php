@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\BookingItemStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\BookingStatusEnum;
+use Illuminate\Database\Eloquent\Builder;
 
 
 class LedBookingItem extends Model
@@ -44,5 +46,16 @@ class LedBookingItem extends Model
     public function slides()
     {
         return $this->hasMany(LedBookingSlide::class,'led_booking_item_id');
+    }
+
+    public function scopeConfirmedForYear(Builder $query,int $year): Builder
+    {
+        return $query->whereHas(
+            'period.ledBooking.booking',
+            fn (Builder $query) =>
+                $query
+                    ->where('year', $year)
+                    ->where('status',BookingStatusEnum::CONFIRMED->value)
+        );
     }
 }

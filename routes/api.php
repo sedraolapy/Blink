@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Booking\FlexBooking\BookingOptions\FlexBookingOptio
 use App\Http\Controllers\Api\Booking\FlexBooking\FlexBookingController;
 use App\Http\Controllers\API\Contract\ContractController;
 use App\Http\Controllers\API\Customer\CustomerController;
+use App\Http\Controllers\API\Dashboard\DashboardController;
 use App\Http\Controllers\API\Electronic\ElectronicController;
 use App\Http\Controllers\API\FlexBillboard\FlexController;
 use App\Http\Controllers\Api\Governorate\GovernorateController;
@@ -84,6 +85,10 @@ Route::middleware('localization')->group(function () {
 
             // Contract
             Route::get('/bookings/{bookingId}/contract',[ContractController::class, 'show']);
+
+            // Dashboard
+            Route::get('/dashboard', [DashboardController::class, 'index']);
+            Route::get('/dashboard/top-requested-assets',[DashboardController::class, 'topRequestedAssets']);
 
             Route::middleware('working.year.writable')->group(function () {
                 // Bookings

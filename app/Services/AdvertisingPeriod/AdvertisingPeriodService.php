@@ -5,6 +5,7 @@ namespace App\Services\AdvertisingPeriod;
 use App\Models\AdvertisingPeriod;
 use App\Services\WorkingYear\WorkingYearContext;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 
 class AdvertisingPeriodService
 {
@@ -45,9 +46,41 @@ class AdvertisingPeriodService
 
     private function getCurrentPeriodNumber(): int
     {
-        $dayOfYear = now()->dayOfYear;
-        $periodNumber = (int) floor(($dayOfYear - 1) / 14) + 1;
+        return $this->getPeriodNumber(now());
+    }
 
-        return min($periodNumber, 26);
+    public function getCurrentPeriodForYear(int $year): AdvertisingPeriod
+    {
+        $today = now();
+
+        $referenceDate = Carbon::create(
+            $year,
+            $today->month,
+            1
+        )->startOfDay();
+
+        $referenceDate->day(
+            min(
+                $today->day,
+                $referenceDate->daysInMonth
+            )
+        );
+
+        return AdvertisingPeriod::query()
+            ->where(
+                'number',
+                $this->getPeriodNumber($referenceDate)
+            )
+            ->firstOrFail();
+    }
+
+    private function getPeriodNumber(Carbon $date): int
+    {
+        return min(
+            (int) floor(
+                ($date->dayOfYear - 1) / 14
+            ) + 1,
+            26
+        );
     }
 }

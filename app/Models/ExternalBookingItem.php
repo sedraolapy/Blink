@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\BookingItemStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\BookingStatusEnum;
+use Illuminate\Database\Eloquent\Builder;
 
 class ExternalBookingItem extends Model
 {
@@ -39,5 +41,16 @@ class ExternalBookingItem extends Model
     public function design()
     {
         return $this->belongsTo(ExternalDesign::class,'design_id');
+    }
+
+    public function scopeConfirmedForYear(Builder $query,int $year): Builder
+    {
+        return $query->whereHas(
+            'period.externalBookingType.externalBooking.booking',
+            fn (Builder $query) =>
+                $query
+                    ->where('year', $year)
+                    ->where('status', BookingStatusEnum::CONFIRMED->value)
+        );
     }
 }
