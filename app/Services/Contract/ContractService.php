@@ -2,6 +2,7 @@
 
 namespace App\Services\Contract;
 
+use App\Enums\BookingStatusEnum;
 use App\Enums\ContractStatusEnum;
 use App\Models\Booking;
 use App\Models\Contract;
@@ -62,6 +63,9 @@ class ContractService
                     ->addMedia($image)
                     ->toMediaCollection('attachment_images');
             }
+
+            $booking->status = BookingStatusEnum::CONFIRMED;
+            $booking->save();
 
             return $contract->refresh();
         });

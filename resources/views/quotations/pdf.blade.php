@@ -374,6 +374,33 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
     $hasElectronic = count($electronic['summary'] ?? []) > 0;
 
     /*
+     * Split long summary tables across document pages. The introduction page
+     * can hold fewer rows because its top area also contains the salutation.
+     */
+    $paginateSummary = static function (
+        array $rows,
+        int $firstPageSize,
+        int $followingPageSize
+    ): array {
+        if (count($rows) === 0) {
+            return [];
+        }
+
+        return array_merge(
+            [array_slice($rows, 0, $firstPageSize)],
+            array_chunk(array_slice($rows, $firstPageSize), $followingPageSize),
+        );
+    };
+
+    $flexSummaryPages = $hasFlex
+        ? $paginateSummary($flex['summary'], 16, 18)
+        : [];
+
+    $electronicSummaryPages = $hasElectronic
+        ? $paginateSummary($electronic['summary'], $hasFlex ? 16 : 8, 14)
+        : [];
+
+    /*
      * Same row limits used by the current React preview.
      */
     $flexDetailPages = $hasFlex
@@ -381,7 +408,7 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
         : [];
 
     $electronicStandalonePages = $hasElectronic
-        ? $buildGroupedDetailPages($electronic['standalone'] ?? [], 12)
+        ? $buildGroupedDetailPages($electronic['standalone'] ?? [], 10)
         : [];
 
     $electronicNetworks = $electronic['networks'] ?? [];
@@ -396,8 +423,18 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
     }
 
     $electronicNetworkPages = $hasElectronicNetworks
-        ? $buildGroupedDetailPages($electronicNetworkGroups, 12)
+        ? $buildGroupedDetailPages($electronicNetworkGroups, 10)
         : [];
+
+    $introOutdoorType = null;
+    if (!$hasFlex && !$hasElectronic) {
+        foreach ($outdoorTypes as $type) {
+            if (count($outdoor[$type]['summary'] ?? []) > 0) {
+                $introOutdoorType = $type;
+                break;
+            }
+        }
+    }
 
     $outdoorSections = [];
 
@@ -415,9 +452,24 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
         $outdoorSections[] = [
             'type' => $type,
             'data' => $data,
-            'detailPages' => $buildGroupedDetailPages($data['details'] ?? [], 14),
+            'summaryPages' => $paginateSummary(
+                $data['summary'],
+                $type === $introOutdoorType ? 8 : 16,
+                18,
+            ),
+            'detailPages' => $buildGroupedDetailPages($data['details'] ?? [], 18),
         ];
     }
+
+    $introOutdoorSection = $introOutdoorType !== null
+        ? $outdoorSections[0]
+        : null;
+
+    $introSummaryPages = $hasFlex
+        ? $flexSummaryPages
+        : ($hasElectronic
+            ? $electronicSummaryPages
+            : ($introOutdoorSection['summaryPages'] ?? [[]]));
 
     /*
      * Same final-summary composition as the React preview.
@@ -454,17 +506,16 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
     }
 
     /*
-     * Same page-number calculation as QuotationDocument.jsx.
+     * Page indices follow the same chunk lengths as the React preview.
+     * The introduction begins on page 2 and may span multiple pages.
      */
-    $flexDetailsStartPage = 3;
+    $flexDetailsStartPage = 2 + count($introSummaryPages);
 
-    $electronicSummaryPage = $hasFlex
-        ? $flexDetailsStartPage + count($flexDetailPages)
-        : 2;
+    $electronicSummaryPage = $flexDetailsStartPage + count($flexDetailPages);
 
     $electronicStandaloneStartPage = $hasFlex
-        ? $electronicSummaryPage + 1
-        : 3;
+        ? $electronicSummaryPage + count($electronicSummaryPages)
+        : 2 + count($introSummaryPages);
 
     $electronicNetworksStartPage =
         $electronicStandaloneStartPage + count($electronicStandalonePages);
@@ -473,22 +524,25 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
         ? $electronicNetworksStartPage + count($electronicNetworkPages)
         : ($hasFlex
             ? $flexDetailsStartPage + count($flexDetailPages)
-            : 3);
+            : 2 + count($introSummaryPages));
 
     $outdoorSectionsWithPages = [];
     $nextOutdoorPage = $outdoorStartPage;
 
     foreach ($outdoorSections as $section) {
-        $summaryPage = $nextOutdoorPage;
-        $detailsStartPage = $summaryPage + 1;
+        $isIntroSummary = $section['type'] === $introOutdoorType;
+        $summaryPage = $isIntroSummary ? 2 : $nextOutdoorPage;
+        $detailsStartPage = $isIntroSummary
+            ? $nextOutdoorPage
+            : $summaryPage + count($section['summaryPages']);
 
+        $section['isIntroSummary'] = $isIntroSummary;
         $section['summaryPage'] = $summaryPage;
         $section['detailsStartPage'] = $detailsStartPage;
 
         $outdoorSectionsWithPages[] = $section;
 
-        $nextOutdoorPage =
-            $detailsStartPage + count($section['detailPages']);
+        $nextOutdoorPage = $detailsStartPage + count($section['detailPages']);
     }
 
     $finalSummaryPage = $nextOutdoorPage;
@@ -898,23 +952,39 @@ HTML;
         }
 
         /*
-         * Page 2 spacing is intentionally different:
-         * Flex has the wrapper mt-10 + its own mt-10 = 80px.
-         * Electronic fallback has only the wrapper mt-10 = 40px.
+         * Intro summary spacing mirrors React:
+         * Flex: 16px wrapper + 40px component margin = 56px.
+         * Electronic/Outdoor: 40px wrapper on first page only.
          */
-.intro-flex-summary {
-    margin-top: 56px;
-}
+        .intro-flex-summary {
+            margin-top: 56px;
+        }
+
+        .intro-flex-summary.is-continuation {
+            margin-top: 40px;
+        }
 
         .intro-electronic-summary {
             margin-top: 40px;
         }
 
+        .intro-electronic-summary.is-continuation {
+            margin-top: 0;
+        }
+
+        .intro-outdoor-summary {
+            margin-top: 40px;
+        }
+
+        .intro-outdoor-summary.is-continuation {
+            margin-top: 0;
+        }
+
         .intro-flex-summary .quotation-table th,
-.intro-flex-summary .quotation-table td {
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
+        .intro-flex-summary .quotation-table td {
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
         /* ==============================================================
            Shared titles
            ============================================================== */
@@ -1414,10 +1484,12 @@ HTML;
     {{-- ============================================================
          Page 2 — Intro + first available summary
          ============================================================ --}}
+    @foreach ($introSummaryPages as $introPageIndex => $summaryRows)
     <section class="pdf-page">
         {!! $renderPageHeader() !!}
 
         <div class="page-content">
+            @if ($introPageIndex === 0)
             <section>
                 <p class="intro-recipient">
                     {{
@@ -1441,9 +1513,10 @@ HTML;
                     }}
                 </p>
             </section>
+            @endif
 
             @if ($hasFlex)
-                <section class="intro-flex-summary">
+                <section class="intro-flex-summary{{ $introPageIndex > 0 ? ' is-continuation' : '' }}">
                     <div class="section-title">
                         <div class="section-title-accent"></div>
                         <h2 class="section-title-text">
@@ -1465,7 +1538,7 @@ HTML;
                             </thead>
 
                             <tbody>
-                                @foreach ($flex['summary'] as $row)
+                                @foreach ($summaryRows as $row)
                                     <tr>
                                         <td>{{ $row['governorate']['name'] }}</td>
                                         <td>{{ $row['boards_count'] }}</td>
@@ -1487,7 +1560,7 @@ HTML;
                     </div>
                 </section>
             @elseif ($hasElectronic)
-                <section class="intro-electronic-summary">
+                <section class="intro-electronic-summary{{ $introPageIndex > 0 ? ' is-continuation' : '' }}">
                     <div class="section-title">
                         <div class="section-title-accent"></div>
                         <h2 class="section-title-text">
@@ -1518,7 +1591,7 @@ HTML;
                             </thead>
 
                             <tbody>
-                                @foreach ($electronic['summary'] as $row)
+                                @foreach ($summaryRows as $row)
                                     <tr>
                                         <td>{{ $row['governorate']['name'] }}</td>
                                         <td>{{ $row['screens_count'] }}</td>
@@ -1541,11 +1614,113 @@ HTML;
                         </table>
                     </div>
                 </section>
+            @elseif ($introOutdoorSection !== null)
+                @php
+                    $introOutdoorTypeLabel = $t['outdoor']['types'][$introOutdoorSection['type']];
+                    $introOutdoorDetailPages = $introOutdoorSection['detailPages'];
+                @endphp
+                <section class="intro-outdoor-summary{{ $introPageIndex > 0 ? ' is-continuation' : '' }}">
+                    <div class="section-title">
+                        <div class="section-title-accent"></div>
+                        <h2 class="section-title-text">
+                            {{
+                                $replace(
+                                    $t['outdoor']['summaryTitle'],
+                                    ['type' => $introOutdoorTypeLabel],
+                                )
+                            }}
+                        </h2>
+                    </div>
+
+                    <div class="quotation-table-shell">
+                        <table class="quotation-table">
+                            <thead>
+                                <tr>
+                                    <th class="outdoor-summary-col-governorate">
+                                        {{ $t['outdoor']['columns']['governorate'] }}
+                                    </th>
+                                    <th class="outdoor-summary-col-count">
+                                        {{ $t['outdoor']['columns']['assetsCount'] }}
+                                    </th>
+                                    <th class="outdoor-summary-col-period">
+                                        {{ $t['outdoor']['columns']['period'] }}
+                                    </th>
+                                    <th class="outdoor-summary-col-total">
+                                        {{ $t['outdoor']['columns']['totalPrice'] }}
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach ($summaryRows as $row)
+                                    <tr>
+                                        <td>
+                                            {{ $row['governorate']['name'] }}
+                                        </td>
+
+                                        <td>
+                                            {{ $row['assets_count'] }}
+                                        </td>
+
+                                        <td
+                                            dir="ltr"
+                                            class="cell-nowrap"
+                                        >
+                                            {{
+                                                $formatDateRange(
+                                                    $row['period']
+                                                )
+                                            }}
+                                        </td>
+
+                                        <td
+                                            dir="ltr"
+                                            class="cell-strong cell-nowrap"
+                                        >
+                                            {{
+                                                $formatUsd(
+                                                    $row['total_price']
+                                                )
+                                            }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if (count($introOutdoorDetailPages) === 0 && $introPageIndex === count($introOutdoorSection['summaryPages']) - 1)
+                        <div class="section-total">
+                            <div class="section-total-box">
+                                <div class="section-total-accent"></div>
+
+                                <div class="section-total-content">
+                                    <p class="section-total-label">
+                                        {{
+                                            $replace(
+                                                $t['outdoor']['total'],
+                                                ['type' => $introOutdoorTypeLabel],
+                                            )
+                                        }}
+                                    </p>
+
+                                    <p
+                                        class="section-total-value"
+                                        dir="ltr"
+                                    >
+                                        {{ $formatUsd($introOutdoorSection['data']['total']) }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </section>
             @endif
         </div>
 
-        {!! $renderPageFooter(2) !!}
+        {!! $renderPageFooter(2 + $introPageIndex) !!}
     </section>
+    @endforeach
 
     {{-- ============================================================
          Flex detail pages
@@ -1657,6 +1832,7 @@ HTML;
          Electronic summary on its own page when Flex exists
          ============================================================ --}}
     @if ($hasElectronic && $hasFlex)
+        @foreach ($electronicSummaryPages as $electronicSummaryIndex => $summaryRows)
         <section class="pdf-page">
             {!! $renderPageHeader() !!}
 
@@ -1692,7 +1868,7 @@ HTML;
                             </thead>
 
                             <tbody>
-                                @foreach ($electronic['summary'] as $row)
+                                @foreach ($summaryRows as $row)
                                     <tr>
                                         <td>{{ $row['governorate']['name'] }}</td>
                                         <td>{{ $row['screens_count'] }}</td>
@@ -1717,8 +1893,9 @@ HTML;
                 </section>
             </div>
 
-            {!! $renderPageFooter($electronicSummaryPage) !!}
+            {!! $renderPageFooter($electronicSummaryPage + $electronicSummaryIndex) !!}
         </section>
+        @endforeach
     @endif
 
     {{-- ============================================================
@@ -2052,7 +2229,9 @@ HTML;
             $detailPages = $section['detailPages'];
         @endphp
 
-        {{-- Outdoor summary --}}
+        {{-- Outdoor summary: may span multiple pages; first subtype may already be on the intro --}}
+        @if (!$section['isIntroSummary'])
+        @foreach ($section['summaryPages'] as $summaryIndex => $summaryRows)
         <section class="pdf-page">
             {!! $renderPageHeader() !!}
 
@@ -2090,7 +2269,7 @@ HTML;
                             </thead>
 
                             <tbody>
-                                @foreach ($data['summary'] as $row)
+                                @foreach ($summaryRows as $row)
                                     <tr>
                                         <td>
                                             {{ $row['governorate']['name'] }}
@@ -2127,7 +2306,7 @@ HTML;
                         </table>
                     </div>
 
-                    @if (count($detailPages) === 0)
+                    @if (count($detailPages) === 0 && $summaryIndex === count($section['summaryPages']) - 1)
                         <div class="section-total">
                             <div class="section-total-box">
                                 <div class="section-total-accent"></div>
@@ -2155,8 +2334,10 @@ HTML;
                 </section>
             </div>
 
-            {!! $renderPageFooter($section['summaryPage']) !!}
+            {!! $renderPageFooter($section['summaryPage'] + $summaryIndex) !!}
         </section>
+        @endforeach
+        @endif
 
         {{-- Outdoor details --}}
         @foreach ($detailPages as $pageIndex => $pageGroups)
