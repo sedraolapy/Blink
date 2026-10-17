@@ -95,4 +95,12 @@ return [
         'pdf_template_pending' => 'Flex order issuance is currently unavailable until the official PDF template is ready.',
     ],
 
+
+    'electronic_orders' => [
+        'customers_retrieved' => 'Electronic order customers retrieved successfully.',
+        'periods_retrieved' => 'Electronic order periods retrieved successfully.',
+        'candidates_retrieved' => 'Eligible screens and networks for electronic operation orders retrieved successfully.',
+    ],
+
+
 ];

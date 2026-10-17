@@ -240,7 +240,7 @@ class MixedWorkingYearsBookingsSeeder extends Seeder
         $flexBooking = FlexBooking::query()->create([
                 'booking_id' => $booking->id,
             ]);
-            
+
         $design = FlexDesign::query()->create([
             'flex_booking_id' =>
                 $flexBooking->id,
@@ -284,12 +284,10 @@ class MixedWorkingYearsBookingsSeeder extends Seeder
         int $month,
         int $scenarioIndex
     ): void {
-        $ledBooking = LedBooking::query()->create([
-            'booking_id' =>
-                $booking->id,
 
-            'operation_order' =>
-                (bool) $booking->operation_order,
+        $ledBooking = LedBooking::query()->create([
+            'booking_id' => $booking->id,
+            'operation_order' => false,
         ]);
 
         $design = LedDesign::query()->create([

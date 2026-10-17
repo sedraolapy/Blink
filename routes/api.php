@@ -15,6 +15,7 @@ use App\Http\Controllers\API\Electronic\ElectronicController;
 use App\Http\Controllers\API\FlexBillboard\FlexController;
 use App\Http\Controllers\Api\Governorate\GovernorateController;
 use App\Http\Controllers\Api\Map\MapController;
+use App\Http\Controllers\API\Orders\Electronic\ElectronicOrderController;
 use App\Http\Controllers\API\Orders\Flex\FlexOrderController;
 use App\Http\Controllers\API\Outdoor\OutdoorController;
 use App\Http\Controllers\API\Quotation\QuotationController;
@@ -94,6 +95,12 @@ Route::middleware('localization')->group(function () {
             // Flex orders
             Route::get('/orders/flex/candidates',[FlexOrderController::class, 'candidates']);
 
+            // Electronic orders
+            Route::get('/orders/electronic/customers',[ElectronicOrderController::class, 'customers']);
+            Route::get('/orders/electronic/customers/{customer_id}/periods',[ElectronicOrderController::class, 'periods']);
+            Route::get('/orders/electronic/candidates',[ElectronicOrderController::class, 'candidates']);
+
+
             Route::middleware('working.year.writable')->group(function () {
                 // Bookings
                 Route::patch('/bookings/{booking}',[BookingController::class, 'updateAdvertiserType']);
@@ -119,6 +126,10 @@ Route::middleware('localization')->group(function () {
 
                 // Flex orders
                 Route::post('/orders/flex/issue', [FlexOrderController::class, 'issue']);
+
+                // Electronic orders
+                Route::post('/orders/electronic/issue',[ElectronicOrderController::class, 'issue']);
+
             });
         });
     });

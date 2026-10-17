@@ -153,6 +153,8 @@ class ElectronicBookingService
                     $designSync['delete_ids']
                 );
 
+                $this->refreshOperationOrderFlag($ledBooking);
+
                 return $this->loadResult(
                     $booking,
                     $ledBooking
@@ -335,18 +337,50 @@ class ElectronicBookingService
                 $screenId
             );
 
-            if ($item) {
-                $item->update([
-                    'led_network_id' =>$itemData['network_id'],
-                    'is_gift' => $itemData['is_gift'],
-                ]);
-            } else {
+
+        if ($item) {
+            $oldNetworkId = $item->led_network_id;
+            $newNetworkId = $itemData['network_id'];
+
+            if ($oldNetworkId != $newNetworkId) {
+                $networkIds = array_values(array_filter(
+                    [$oldNetworkId, $newNetworkId],
+                    fn ($id) => $id !== null
+                ));
+
+                if ($networkIds !== []) {
+                    LedBookingItem::query()
+                        ->where(
+                            'led_booking_period_id',
+                            $period->id
+                        )
+                        ->whereIn('led_network_id', $networkIds)
+                        ->update(['operation_order' => false]);
+                }
+                $item->operation_order = false;
+            }
+
+            $item->update([
+                'led_network_id' => $newNetworkId,
+                'is_gift' => $itemData['is_gift'],
+            ]);
+        }else {
                 $item = LedBookingItem::create([
                     'led_booking_period_id' =>$period->id,
                     'led_screen_id' => $screenId,
                     'led_network_id' => $itemData['network_id'],
                     'is_gift' => $itemData['is_gift'],
                 ]);
+
+
+            if ($item->led_network_id !== null) {
+                LedBookingItem::query()
+                    ->where('led_booking_period_id', $period->id)
+                    ->where('led_network_id', $item->led_network_id)
+                    ->update([
+                        'operation_order' => false,
+                    ]);
+            }
 
                 $item->setRelation(
                     'slides',
@@ -374,13 +408,21 @@ class ElectronicBookingService
                     )
             );
 
-        foreach (
-            $itemsToDelete
-            as $item
-        ) {
-            $item->slides()->delete();
-            $item->delete();
-        }
+
+            foreach ($itemsToDelete as $item) {
+                if ($item->led_network_id !== null) {
+                    LedBookingItem::query()
+                        ->where('led_booking_period_id', $period->id)
+                        ->where('led_network_id', $item->led_network_id)
+                        ->update([
+                            'operation_order' => false,
+                        ]);
+                }
+
+                $item->slides()->delete();
+                $item->delete();
+            }
+
     }
 
     private function syncItemSlides(LedBookingItem $item,array $slides,array $designs)
@@ -391,6 +433,29 @@ class ElectronicBookingService
                 fn (LedBookingSlide $slide) =>
                     (int) $slide->slide_number
             );
+
+
+        $previousSlides = $existingSlides
+        ->mapWithKeys(
+            fn (LedBookingSlide $slide) => [
+                (int) $slide->slide_number => (int) $slide->design_id,
+            ]
+        )
+        ->sortKeys()
+        ->all();
+
+        $submittedSlides = collect($slides)
+        ->mapWithKeys(
+            fn (array $slide) => [
+                (int) $slide['slide_number'] =>
+                    (int) $designs[$slide['design_name']],
+            ]
+        )
+        ->sortKeys()
+        ->all();
+
+        $slidesChanged = $previousSlides !== $submittedSlides;
+
 
         $keptSlideIds = [];
 
@@ -436,7 +501,48 @@ class ElectronicBookingService
                 fn (LedBookingSlide $slide) =>
                     $slide->delete()
             );
+
+
+        if ($slidesChanged) {
+            $query = LedBookingItem::query()
+                ->where(
+                    'led_booking_period_id',
+                    $item->led_booking_period_id
+                );
+
+            if ($item->led_network_id !== null) {
+                $query->where(
+                    'led_network_id',
+                    $item->led_network_id
+                );
+            } else {
+                $query->whereKey($item->id);
+            }
+
+            $query->update([
+                'operation_order' => false,
+            ]);
+        }
+
     }
+
+
+    private function refreshOperationOrderFlag(LedBooking $ledBooking): void
+    {
+        $hasIssuedOrder = $ledBooking
+            ->periods()
+            ->whereHas(
+                'items',
+                fn ($query) =>
+                    $query->where('operation_order', true)
+            )
+            ->exists();
+
+        $ledBooking->update([
+            'operation_order' => $hasIssuedOrder,
+        ]);
+    }
+
 
     private function deletePeriod(LedBookingPeriod $period)
     {

@@ -18,12 +18,14 @@ class LedBookingItem extends Model
         'led_screen_id',
         'led_network_id',
         'is_gift',
+        'operation_order',
     ];
 
     protected function casts(): array
     {
         return [
             'is_gift' => 'boolean',
+            'operation_order' => 'boolean',
             'status' => BookingItemStatusEnum::class,
         ];
     }

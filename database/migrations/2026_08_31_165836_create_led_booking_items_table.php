@@ -31,7 +31,11 @@ return new class extends Migration
 
             $table->boolean('is_gift')->default(false);
 
-            $table->string('status')->default(BookingItemStatusEnum::UNCONFIRMED->value);
+            $table->string('status')
+                ->default(BookingItemStatusEnum::UNCONFIRMED->value);
+
+            $table->boolean('operation_order')->default(false);
+
             $table->timestamps();
 
             $table->unique(['led_booking_period_id', 'led_screen_id'],'led_period_screen_unique');

@@ -370,4 +370,14 @@ return [
     ],
 
 
+    'electronic_orders' => [
+        'empty_selection' => 'At least one independent screen or network must be selected to issue an operation order.',
+        'invalid_screens' => 'The selected screens contain a screen that is not eligible for an operation order within the specified booking period.',
+        'invalid_networks' => 'The selected networks contain an incomplete or ineligible network for an operation order.',
+        'invalid_selection' => 'The operation order cannot be issued because the selected items are invalid or an operation order has already been issued for them.',
+        'issue_date_outside_year' =>  'The operation order issue date must be within the selected working year.',
+        'deadline_outside_year' => 'The operation order execution deadline must be within the selected working year.',
+    ],
+
+
 ];
