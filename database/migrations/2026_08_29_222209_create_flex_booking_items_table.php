@@ -34,7 +34,11 @@ return new class extends Migration
             $table->boolean('is_gift')
                 ->default(false);
 
-            $table->string('status')->default(BookingItemStatusEnum::UNCONFIRMED->value);
+            $table->string('status')
+                ->default(BookingItemStatusEnum::UNCONFIRMED->value);
+
+            $table->string('order_status')
+                ->nullable();
 
             $table->timestamps();
 

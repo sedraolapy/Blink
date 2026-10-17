@@ -2,10 +2,13 @@
 
 namespace App\Services\Contract;
 
+use App\Enums\BookingItemStatusEnum;
 use App\Enums\BookingStatusEnum;
 use App\Enums\ContractStatusEnum;
 use App\Models\Booking;
 use App\Models\Contract;
+use App\Models\FlexBookingItem;
+use App\Services\Booking\FlexBooking\FlexBookingService;
 use App\Services\WorkingYear\WorkingYearContext;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -13,8 +16,10 @@ use Illuminate\Validation\ValidationException;
 
 class ContractService
 {
-    public function __construct(private readonly WorkingYearContext $workingYearContext)
-    {}
+    public function __construct(
+        private readonly WorkingYearContext $workingYearContext,
+        private readonly FlexBookingService $flexBookingService
+    ) {}
 
     public function show(int $bookingId): ?Contract
     {
@@ -66,6 +71,17 @@ class ContractService
 
             $booking->status = BookingStatusEnum::CONFIRMED;
             $booking->save();
+
+            FlexBookingItem::query()
+                ->whereHas('period.flexBooking', function ($query) use ($booking) {
+                    $query->where('booking_id', $booking->id);
+                })
+                ->update([
+                    'status' => BookingItemStatusEnum::BOOKED->value,
+                ]);
+
+            $this->flexBookingService
+                ->resetFollowingOrdersForConfirmedBooking($booking);
 
             return $contract->refresh();
         });

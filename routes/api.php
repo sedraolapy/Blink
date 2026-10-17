@@ -15,6 +15,7 @@ use App\Http\Controllers\API\Electronic\ElectronicController;
 use App\Http\Controllers\API\FlexBillboard\FlexController;
 use App\Http\Controllers\Api\Governorate\GovernorateController;
 use App\Http\Controllers\Api\Map\MapController;
+use App\Http\Controllers\API\Orders\Flex\FlexOrderController;
 use App\Http\Controllers\API\Outdoor\OutdoorController;
 use App\Http\Controllers\API\Quotation\QuotationController;
 use Illuminate\Http\Request;
@@ -90,6 +91,9 @@ Route::middleware('localization')->group(function () {
             Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::get('/dashboard/top-requested-assets',[DashboardController::class, 'topRequestedAssets']);
 
+            // Flex orders
+            Route::get('/orders/flex/candidates',[FlexOrderController::class, 'candidates']);
+
             Route::middleware('working.year.writable')->group(function () {
                 // Bookings
                 Route::patch('/bookings/{booking}',[BookingController::class, 'updateAdvertiserType']);
@@ -112,6 +116,9 @@ Route::middleware('localization')->group(function () {
                 // Contract
                 Route::post('/bookings/{bookingId}/contract',[ContractController::class, 'store']);
                 Route::put('/bookings/{bookingId}/contract',[ContractController::class, 'update']);
+
+                // Flex orders
+                Route::post('/orders/flex/issue', [FlexOrderController::class, 'issue']);
             });
         });
     });

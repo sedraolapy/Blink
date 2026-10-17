@@ -19,6 +19,7 @@ class FlexBookingItem extends Model
         'has_dykat',
         'is_gift',
         'status',
+        'order_status',
     ];
 
     protected function casts(): array

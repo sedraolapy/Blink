@@ -2,7 +2,9 @@
 
 namespace App\Services\Booking\FlexBooking;
 
+use App\Enums\BookingItemStatusEnum;
 use App\Enums\BookingStatusEnum;
+use App\Models\AdvertisingPeriod;
 use App\Models\Booking;
 use App\Models\FlexBillboard;
 use App\Models\FlexBooking;
@@ -98,6 +100,8 @@ class FlexBookingService
                 $data['designs']
             );
 
+            $this->refreshFlexOrderFlags($flexBooking);
+
             return $this->buildResult(
                 $booking,
                 $flexBooking,
@@ -107,6 +111,30 @@ class FlexBookingService
             );
         });
     }
+
+
+    private function refreshFlexOrderFlags(FlexBooking $flexBooking): void
+    {
+        $hasInstallationOrder = FlexBookingItem::query()
+            ->whereHas('period', function ($query) use ($flexBooking) {
+                $query->where('flex_booking_id', $flexBooking->id);
+            })
+            ->where('order_status', 'installation')
+            ->exists();
+
+        $hasExtensionOrder = FlexBookingItem::query()
+            ->whereHas('period', function ($query) use ($flexBooking) {
+                $query->where('flex_booking_id', $flexBooking->id);
+            })
+            ->where('order_status', 'extension')
+            ->exists();
+
+        $flexBooking->update([
+            'installation_order' => $hasInstallationOrder,
+            'extension_order' => $hasExtensionOrder,
+        ]);
+    }
+
 
     private function resolveBooking(array $data): Booking
     {
@@ -412,13 +440,31 @@ class FlexBookingService
             );
         }
 
+
+        $removedPeriods = $existingPeriods->filter(
+            fn (FlexBookingPeriod $existingPeriod) =>
+                ! $requestedPeriodIds->contains(
+                    (int) $existingPeriod->advertising_period_id
+                )
+        );
+
+        foreach ($removedPeriods as $removedPeriod) {
+            foreach ($removedPeriod->bookingItems as $removedItem) {
+                $this->resetNextPeriodOrderStatus(
+                    $removedPeriod,
+                    (int) $removedItem->flex_billboard_id
+                );
+            }
+        }
+
         FlexBookingPeriod::query()
-            ->where('flex_booking_id',$flexBooking->id)
+            ->where('flex_booking_id', $flexBooking->id)
             ->whereNotIn(
                 'advertising_period_id',
                 $requestedPeriodIds
             )
             ->delete();
+
     }
     private function syncPeriodItems(FlexBookingPeriod $period,array $items,Collection $billboards,Collection $designs)
     {
@@ -437,15 +483,46 @@ class FlexBookingService
             $existingItem = $existingItems->get($flexId);
             $design = $this->resolveDesign($itemData,$designs);
 
+
             if ($existingItem) {
-                $existingItem->update([
-                    'design_id' => $design?->id,
+
+                $oldDesignId = $existingItem->design_id === null
+                    ? null
+                    : (int) $existingItem->design_id;
+
+                $newDesignId = $design?->id === null
+                    ? null
+                    : (int) $design->id;
+
+                $designChanged = $oldDesignId !== $newDesignId;
+
+                $dykatChanged =
+                    (bool) $existingItem->has_dykat
+                    !== (bool) $itemData['has_dykes'];
+
+                $updateData = [
+                    'design_id' => $newDesignId,
                     'has_dykat' => $itemData['has_dykes'],
                     'is_gift' => $itemData['is_gift'],
-                ]);
+                ];
+
+                if ($designChanged || $dykatChanged) {
+                    $updateData['order_status'] = null;
+                }
+
+                $existingItem->update($updateData);
+
+                if ($designChanged) {
+                    $this->resetNextPeriodOrderStatus(
+                        $period,
+                        $flexId
+                    );
+                }
+
 
                 continue;
             }
+
 
             $this->createItem(
                 $period,
@@ -455,25 +532,165 @@ class FlexBookingService
             );
         }
 
+
+        $removedItems = $existingItems->filter(
+            fn ($item) => ! $requestedFlexIds->contains(
+                (int) $item->flex_billboard_id
+            )
+        );
+
+        foreach ($removedItems as $removedItem) {
+            $this->resetNextPeriodOrderStatus(
+                $period,
+                (int) $removedItem->flex_billboard_id
+            );
+        }
+
         FlexBookingItem::query()
-            ->where('flex_booking_period_id',$period->id)
-            ->whereNotIn('flex_billboard_id',$requestedFlexIds)
+            ->where('flex_booking_period_id', $period->id)
+            ->whereNotIn('flex_billboard_id', $requestedFlexIds)
             ->delete();
+
     }
+
+
+
+    public function resetFollowingOrdersForConfirmedBooking(Booking $booking): void
+    {
+        $flexBooking = FlexBooking::query()
+            ->where('booking_id', $booking->id)
+            ->with([
+                'periods.bookingItems',
+                'periods.advertisingPeriod',
+            ])
+            ->first();
+
+        if (! $flexBooking) {
+            return;
+        }
+
+        foreach ($flexBooking->periods as $period) {
+            foreach ($period->bookingItems as $item) {
+                $this->resetNextPeriodOrderStatus(
+                    $period,
+                    (int) $item->flex_billboard_id
+                );
+            }
+        }
+    }
+
+
+
+    private function resetNextPeriodOrderStatus(FlexBookingPeriod $period,int $flexId): void
+    {
+
+        $booking = $period->flexBooking->booking;
+
+        if ($booking->status !== BookingStatusEnum::CONFIRMED) {
+            return;
+        }
+
+        $hasBookedItem = FlexBookingItem::query()
+            ->where('flex_booking_period_id', $period->id)
+            ->where('flex_billboard_id', $flexId)
+            ->where('status', BookingItemStatusEnum::BOOKED->value)
+            ->exists();
+
+        if (! $hasBookedItem) {
+            return;
+        }
+
+        $currentNumber = (int) $period->advertisingPeriod->number;
+        $currentYear = (int) $period->flexBooking->booking->year;
+
+        $nextNumber = $currentNumber === 26
+            ? 1
+            : $currentNumber + 1;
+
+        $nextYear = $currentNumber === 26
+            ? $currentYear + 1
+            : $currentYear;
+
+        $nextPeriodId = AdvertisingPeriod::query()
+            ->where('number', $nextNumber)
+            ->value('id');
+
+        if ($nextPeriodId === null) {
+            return;
+        }
+
+        $nextItems = FlexBookingItem::query()
+            ->where('flex_billboard_id', $flexId)
+            ->whereNotNull('order_status')
+            ->whereHas('period', function ($query) use ($nextPeriodId) {
+                $query->where(
+                    'advertising_period_id',
+                    $nextPeriodId
+                );
+            })
+            ->whereHas(
+                'period.flexBooking.booking',
+                function ($query) use ($nextYear) {
+                    $query->where('year', $nextYear);
+                }
+            )
+            ->with('period')
+            ->lockForUpdate()
+            ->get();
+
+        $affectedBookingIds = $nextItems
+            ->map(fn ($item) => $item->period->flex_booking_id)
+            ->unique();
+
+        foreach ($nextItems as $item) {
+            $item->update([
+                'order_status' => null,
+            ]);
+        }
+
+        foreach ($affectedBookingIds as $flexBookingId) {
+            $flexBooking = FlexBooking::query()->find($flexBookingId);
+
+            if ($flexBooking) {
+                $this->refreshFlexOrderFlags($flexBooking);
+            }
+        }
+    }
+
 
     private function createItem(FlexBookingPeriod $period,array $itemData,Collection $billboards,Collection $designs)
     {
         $billboard = $billboards->get((int) $itemData['flex_id']);
-        $design = $this->resolveDesign($itemData,$designs);
+        $design = $this->resolveDesign($itemData, $designs);
 
-        return FlexBookingItem::query()->create([
+        $booking = $period->flexBooking->booking;
+
+        $itemStatus = $booking->status === BookingStatusEnum::CONFIRMED
+            ? BookingItemStatusEnum::BOOKED
+            : BookingItemStatusEnum::UNCONFIRMED;
+
+
+        $item = FlexBookingItem::query()->create([
             'flex_booking_period_id' => $period->id,
             'flex_billboard_id' => $billboard->id,
             'design_id' => $design?->id,
             'has_dykat' => $itemData['has_dykes'],
             'is_gift' => $itemData['is_gift'],
+            'status' => $itemStatus->value,
+            'order_status' => null,
         ]);
+
+        if ($itemStatus === BookingItemStatusEnum::BOOKED) {
+            $this->resetNextPeriodOrderStatus(
+                $period,
+                (int) $billboard->id
+            );
+        }
+
+        return $item;
+
     }
+
 
     private function resolveDesign(array $itemData,Collection $designs)
     {

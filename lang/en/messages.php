@@ -90,4 +90,9 @@ return [
         'top_requested_assets_success' => 'Top requested assets retrieved successfully.',
     ],
 
+    'flex_orders' => [
+        'candidates_retrieved' => 'Flex order candidates retrieved successfully.',
+        'pdf_template_pending' => 'Flex order issuance is currently unavailable until the official PDF template is ready.',
+    ],
+
 ];

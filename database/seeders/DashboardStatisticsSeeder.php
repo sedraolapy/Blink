@@ -284,16 +284,9 @@ class DashboardStatisticsSeeder extends Seeder
                     Booking $booking
                 ) use ($year) {
                     $flexBooking =
-                        FlexBooking::query()->create([
-                            'booking_id' =>
-                                $booking->id,
-
-                            'installation_order' =>
-                                true,
-
-                            'extension_order' =>
-                                false,
-                        ]);
+                    FlexBooking::query()->create([
+                        'booking_id' => $booking->id,
+                    ]);
 
                     $design =
                         FlexDesign::query()->create([

@@ -238,15 +238,9 @@ class MixedWorkingYearsBookingsSeeder extends Seeder
             ->firstOrFail();
 
         $flexBooking = FlexBooking::query()->create([
-            'booking_id' => $booking->id,
-
-            'installation_order' =>
-                (bool) $booking->installation_order,
-
-            'extension_order' =>
-                (bool) $booking->extension_order,
-        ]);
-
+                'booking_id' => $booking->id,
+            ]);
+            
         $design = FlexDesign::query()->create([
             'flex_booking_id' =>
                 $flexBooking->id,

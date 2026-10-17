@@ -61,9 +61,24 @@ return [
         'deleted_contract_image_id' => 'deleted contract image ID',
         'deleted_attachment_image_ids' => 'deleted attachment image IDs',
         'deleted_attachment_image_id' => 'deleted attachment image ID',
+        'flex_order_type' => 'Flex order type',
+        'selected_flex_ids' => 'selected Flex billboards',
+        'selected_flex_id' => 'selected Flex billboard',
+        'excluded_flex_ids' => 'excluded Flex billboards',
+        'excluded_flex_id' => 'excluded Flex billboard',
+        'issue_date' => 'issue date',
+        'recipient' => 'recipient',
+        'execution_deadline' => 'execution deadline',
+        'notes' => 'notes',
     ],
 
     'custom' => [
+
+        'period_id' => [
+            'required' => 'The :attribute field is required.',
+            'integer' => 'The :attribute must be an integer.',
+            'exists' => 'The selected :attribute does not exist.',
+        ],
         'network_id' => [
             'same_area' => 'All screens within the network must belong to the same area.',
             ],
@@ -331,5 +346,28 @@ return [
                 'At least one contract image is required.',
         ],
     ],
+
+    'flex_orders' => [
+        'required' => 'The :attribute field is required.',
+        'integer' => 'The :attribute must be an integer.',
+        'exists' => 'The selected :attribute does not exist.',
+        'string' => 'The :attribute must be a string.',
+        'in' => 'The selected :attribute is invalid.',
+        'array' => 'The :attribute must be an array.',
+        'selected_min' => 'At least one Flex billboard must be selected.',
+        'distinct' => 'The :attribute field contains a duplicate value.',
+        'present' => 'The :attribute field must be present, even if the array is empty.',
+        'date_format' => 'The :attribute must match the date format :format.',
+        'after_or_equal' => 'The :attribute must be after or equal to the issue date.',
+        'selection_overlap' => 'The same Flex billboard cannot be both selected and excluded in the same order.',
+        'invalid_selected' =>'The selected billboards contain one or more billboards that are not eligible for this order type.',
+        'invalid_excluded' =>'The excluded billboards contain one or more billboards that are not eligible for exclusion from this order type.',
+        'incomplete_selection' =>'All eligible billboards must be either selected or excluded before issuing the order.',
+        'issue_date_outside_year' => 'The issue date must be within the selected working year.',
+        'deadline_outside_year' => 'The execution deadline must be within the selected working year.',
+        'period_range_missing' => 'Unable to determine the advertising period date range for one or more selected Flex billboards.',
+        'deadline_outside_period' => 'The execution deadline must fall within the advertising period date range for all selected Flex billboards.',
+    ],
+
 
 ];
