@@ -2,8 +2,9 @@
 
 namespace App\Services\Orders\Electronic;
 
+use App\Enums\BookingStatusEnum;
+use App\Models\Booking;
 use App\Models\LedBookingItem;
-use App\Models\LedBookingPeriod;
 use App\Services\WorkingYear\WorkingYearContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,25 @@ class ElectronicOrderIssueService
         $this->validateDates($data);
 
         return DB::transaction(function () use ($data, $generatePdf) {
-            $period = LedBookingPeriod::query()
+
+            $booking = Booking::query()
+                ->where('customer_id', (int) $data['customer_id'])
+                ->where('year', $this->workingYearContext->get())
+                ->where('status', BookingStatusEnum::CONFIRMED->value)
+                ->whereHas(
+                    'ledBooking.periods',
+                    fn ($query) => $query->whereKey(
+                        (int) $data['period_id']
+                    )
+                )
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $ledBooking = $booking->ledBooking()
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $period = $ledBooking->periods()
                 ->whereKey((int) $data['period_id'])
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -74,7 +93,7 @@ class ElectronicOrderIssueService
                     'operation_order' => true,
                 ]);
 
-            $period->ledBooking()->update([
+            $ledBooking->update([
                 'operation_order' => true,
             ]);
 

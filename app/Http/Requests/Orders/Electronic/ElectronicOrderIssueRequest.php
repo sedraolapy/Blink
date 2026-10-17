@@ -53,7 +53,6 @@ class ElectronicOrderIssueRequest extends FormRequest
                 'exists:led_networks,id',
             ],
 
-
             'issue_date' => [
                 'required',
                 'date',
@@ -68,6 +67,7 @@ class ElectronicOrderIssueRequest extends FormRequest
             'execution_deadline' => [
                 'required',
                 'date',
+                'after_or_equal:issue_date',
             ],
 
             'notes' => [
