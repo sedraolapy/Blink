@@ -21,8 +21,11 @@ class FlexOrderController extends Controller
     {
         $data = $request->validated();
 
-        $candidates = $this->candidatesService
-            ->getCandidates((int) $data['period_id']);
+        $candidates = $this->candidatesService->getCandidates(
+            (int) $data['period_id'],
+            $data['type']
+        );
+
 
         return sendResponse(
             __('messages.flex_orders.candidates_retrieved'),

@@ -14,7 +14,7 @@ class FlexOrderCandidatesService
         private readonly WorkingYearContext $workingYearContext
     ) {}
 
-    public function getCandidates(int $periodId): array
+    public function getCandidates(int $periodId, ?string $type = null): array
     {
         $year = $this->workingYearContext->get();
 
@@ -102,7 +102,20 @@ class FlexOrderCandidatesService
                 'design_name' => $item->design?->name,
                 'classification' => $this->classify($item,$previousItem),
             ];
-        })->values()->all();
+
+        })
+        ->filter(
+            fn (array $item) =>
+                $type === null
+                || in_array(
+                    $item['classification'],
+                    [$type, 'unclassified', 'no_design'],
+                    true
+                )
+        )
+        ->values()
+        ->all();
+
 
         return [
             'period' => [

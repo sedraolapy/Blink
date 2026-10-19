@@ -5,6 +5,7 @@ namespace App\Http\Requests\Orders\Flex;
 use App\Enums\PermissionEnum;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class FlexOrderCandidatesRequest extends FormRequest
@@ -24,6 +25,16 @@ class FlexOrderCandidatesRequest extends FormRequest
                 'integer',
                 'exists:advertising_periods,id',
             ],
+
+            'type' => [
+                'required',
+                'string',
+                Rule::in([
+                    'installation',
+                    'extension',
+                ]),
+            ],
+
         ];
     }
 
@@ -59,6 +70,9 @@ class FlexOrderCandidatesRequest extends FormRequest
         return [
             'period_id' =>
                 __('validation.attributes.period_id'),
+
+            'type' =>
+                __('validation.attributes.flex_order_type'),
         ];
     }
 

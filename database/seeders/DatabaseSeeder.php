@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
             FlexPriceGroupSeeder::class,
             MixedWorkingYearsBookingsSeeder::class,
             DashboardStatisticsSeeder::class,
+            FlexOrdersTestSeeder::class,
         ]);
 
         Customer::factory()->count(20)->create();
