@@ -70,6 +70,12 @@ return [
         'recipient' => 'recipient',
         'execution_deadline' => 'execution deadline',
         'notes' => 'notes',
+        'outdoor_type' => 'outdoor asset type',
+        'outdoor_period_id' => 'outdoor booking period',
+        'selected_asset_ids' => 'selected outdoor assets',
+        'selected_asset_id' => 'selected outdoor asset',
+        'excluded_asset_ids' => 'excluded outdoor assets',
+        'excluded_asset_id' => 'excluded outdoor asset',
     ],
 
     'custom' => [
@@ -379,5 +385,26 @@ return [
         'deadline_outside_year' => 'The operation order execution deadline must be within the selected working year.',
     ],
 
+    'outdoor_orders' => [
+        'required' => 'The :attribute field is required.',
+        'invalid_type' => 'The selected outdoor asset type is invalid.',
+        'integer' => 'The :attribute must be an integer.',
+        'exists' => 'The selected :attribute does not exist.',
+        'array' => 'The :attribute must be an array.',
+        'selected_min' => 'At least one outdoor asset must be selected.',
+        'distinct' => 'The :attribute field contains a duplicate value.',
+        'present' => 'The :attribute field must be present, even if the array is empty.',
+        'date_format' => 'The :attribute must match the date format :format.',
+        'after_or_equal' => 'The :attribute must be after or equal to the issue date.',
+        'string' => 'The :attribute must be a string.',
+        'max' => 'The :attribute must not exceed :max characters.',
+        'selection_overlap' =>'The same outdoor asset cannot be both selected and excluded in the same order.',
+        'invalid_selected' => 'The selected assets contain an asset that is not eligible for an outdoor order or has already been issued.',
+        'invalid_excluded' =>'The excluded assets contain an asset that is not eligible for exclusion from this order.',
+        'design_required' => 'Every selected outdoor asset must have a design before issuing the order.',
+        'issue_date_outside_year' => 'The order issue date must be within the selected working year.',
+        'deadline_outside_year' => 'The execution deadline must be within the selected working year.',
+        'deadline_outside_period' => 'The execution deadline must fall within the selected outdoor booking period.',
+    ],
 
 ];

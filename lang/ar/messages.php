@@ -102,5 +102,11 @@ return [
         'candidates_retrieved' => 'تم جلب الشاشات والشبكات الجاهزة لإصدار أمر التشغيل بنجاح.',
     ],
 
+    'outdoor_orders' => [
+        'customers_retrieved' => 'تم جلب عملاء أوامر الخارجي بنجاح.',
+        'periods_retrieved' => 'تم جلب فترات أوامر الخارجي بنجاح.',
+        'candidates_retrieved' => 'تم جلب الأصول المرشحة لأوامر الخارجي بنجاح.',
+    ],
+
 
 ];

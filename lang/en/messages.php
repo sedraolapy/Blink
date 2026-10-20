@@ -103,4 +103,12 @@ return [
     ],
 
 
+    'outdoor_orders' => [
+        'customers_retrieved' => 'Outdoor order customers retrieved successfully.',
+        'periods_retrieved' => 'Outdoor order periods retrieved successfully.',
+        'candidates_retrieved' => 'Outdoor order candidates retrieved successfully.',
+    ],
+
+
+
 ];

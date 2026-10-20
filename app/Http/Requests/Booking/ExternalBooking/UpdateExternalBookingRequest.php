@@ -18,6 +18,7 @@ class UpdateExternalBookingRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+
         $this->merge([
             'booking_id' => $this->route('booking_id'),
             'type' => $this->route('type'),

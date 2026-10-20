@@ -4,7 +4,6 @@ namespace App\Services\Orders\Flex;
 
 use App\Enums\BookingItemStatusEnum;
 use App\Models\AdvertisingPeriod;
-use App\Models\FlexBillboard;
 use App\Models\FlexBooking;
 use App\Models\FlexBookingItem;
 use App\Services\WorkingYear\WorkingYearContext;
@@ -98,16 +97,15 @@ class FlexOrderIssueService
     }
 
 
-    public function validateDates(array $data,array $selection): void
+
+    public function validateDates(array $data, array $selection): void
     {
         $year = $this->workingYearContext->get();
 
         $issueDate = $data['issue_date'];
         $executionDeadline = $data['execution_deadline'];
 
-        if (
-            CarbonImmutable::parse($issueDate)->year !== $year
-        ) {
+        if (CarbonImmutable::parse($issueDate)->year !== $year) {
             throw ValidationException::withMessages([
                 'issue_date' => [
                     __('validation.flex_orders.issue_date_outside_year'),
@@ -115,79 +113,12 @@ class FlexOrderIssueService
             ]);
         }
 
-        if (
-            CarbonImmutable::parse($executionDeadline)->year !== $year
-        ) {
+        if (CarbonImmutable::parse($executionDeadline)->year !== $year) {
             throw ValidationException::withMessages([
                 'execution_deadline' => [
                     __('validation.flex_orders.deadline_outside_year'),
                 ],
             ]);
-        }
-
-        $period = AdvertisingPeriod::query()
-            ->with('ranges')
-            ->findOrFail((int) $data['period_id']);
-
-        $selectedIds = collect($selection['selected_items'])
-            ->pluck('flex.id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
-
-        $billboards = FlexBillboard::query()
-            ->with('area.governorate')
-            ->whereIn('id', $selectedIds)
-            ->get();
-
-        if ($billboards->count() !== count($selectedIds)) {
-            throw ValidationException::withMessages([
-                'selected_flex_ids' => [
-                    __('validation.flex_orders.invalid_selected'),
-                ],
-            ]);
-        }
-
-        foreach ($billboards as $billboard) {
-            $displayGroup = $billboard
-                ->area
-                ?->governorate
-                ?->display_group;
-
-            $range = $period->ranges->first(
-                fn ($range) =>
-                    $range->display_group === $displayGroup
-            );
-
-            if (! $range || $displayGroup === null) {
-                throw ValidationException::withMessages([
-                    'execution_deadline' => [
-                        __('validation.flex_orders.period_range_missing'),
-                    ],
-                ]);
-            }
-
-            $periodStart = CarbonImmutable::create(
-                $year,
-                (int) $range->start_month,
-                (int) $range->start_day
-            )->toDateString();
-
-            $periodEnd = CarbonImmutable::create(
-                $year,
-                (int) $range->end_month,
-                (int) $range->end_day
-            )->toDateString();
-
-            if (
-                $executionDeadline < $periodStart
-                || $executionDeadline > $periodEnd
-            ) {
-                throw ValidationException::withMessages([
-                    'execution_deadline' => [
-                        __('validation.flex_orders.deadline_outside_period'),
-                    ],
-                ]);
-            }
         }
     }
 

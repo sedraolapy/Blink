@@ -3,6 +3,7 @@
 namespace App\Services\Booking\ExternalBooking;
 
 use App\Enums\BookingItemStatusEnum;
+use App\Enums\BookingStatusEnum;
 use App\Enums\ExternalAssetTypeEnum;
 use App\Models\Booking;
 use App\Models\ExternalAsset;
@@ -321,94 +322,177 @@ class ExternalBookingService
             ->firstOrFail();
     }
 
+
     public function update(int $bookingId,ExternalAssetTypeEnum $type,array $data)
     {
-        return DB::transaction(
-            function () use (
-                $bookingId,
-                $type,
-                $data
-            ) {
-                $year = $this->workingYearContext->get();
-                $this->validatePeriodsWithinWorkingYear($data['periods'],$year);
+        return DB::transaction(function () use (
+            $bookingId,
+            $type,
+            $data
+        ) {
+            $year = $this->workingYearContext->get();
+            $this->validatePeriodsWithinWorkingYear($data['periods'],$year);
+            $this->validatePeriodsDoNotOverlap($data['periods']);
 
-                $externalBookingType =
-                    ExternalBookingType::query()
-                        ->where('type',$type->value)
-                        ->whereHas(
-                            'externalBooking.booking',
-                            fn ($query) =>
-                                $query
-                                    ->where('id',$bookingId)
-                                    ->where('year',$year)
-                        )
-                        ->with('externalBooking.booking')
-                        ->firstOrFail();
+            $booking = Booking::query()
+                ->where('year', $year)
+                ->lockForUpdate()
+                ->findOrFail($bookingId);
 
-                $this->validatePeriodsDoNotOverlap($data['periods']);
-                $this->lockAndValidateAvailableAssets($data['periods'],$bookingId);
+            $externalBooking = $booking
+                ->externalBooking()
+                ->lockForUpdate()
+                ->firstOrFail();
 
-                $externalBookingType
-                    ->periods()
-                    ->delete();
+            $externalBookingType = $externalBooking
+                ->types()
+                ->where('type', $type->value)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-                $externalBookingType
-                    ->designs()
-                    ->delete();
+            $this->lockAndValidateAvailableAssets(
+                $data['periods'],
+                $bookingId
+            );
 
-                foreach ($data['designs'] as $designName)
-                {
-                    $externalBookingType
-                        ->designs()
+            $designs = $externalBookingType
+                ->designs()
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('name');
+
+            foreach ($data['designs'] as $designName) {
+                if (! $designs->has($designName)) {
+                    $designs->put(
+                        $designName,
+                        $externalBookingType
+                            ->designs()
+                            ->create([
+                                'name' => $designName,
+                            ])
+                    );
+                }
+            }
+
+            $existingPeriods = $externalBookingType
+                ->periods()
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy(
+                    fn ($period) =>
+                        $period->start_date->toDateString()
+                        . '|'
+                        . $period->end_date->toDateString()
+                );
+
+            $keptPeriodIds = [];
+
+            foreach ($data['periods'] as $periodData) {
+                $startDate = CarbonImmutable::parse(
+                    $periodData['start_date']
+                )->toDateString();
+
+                $endDate = CarbonImmutable::parse(
+                    $periodData['end_date']
+                )->toDateString();
+
+                $periodKey = $startDate . '|' . $endDate;
+
+                $period = $existingPeriods->get($periodKey);
+
+                if (! $period) {
+                    $period = $externalBookingType
+                        ->periods()
                         ->create([
-                            'name' => $designName,
+                            'start_date' => $startDate,
+                            'end_date' => $endDate,
                         ]);
                 }
 
-                foreach ($data['periods'] as $periodData)
-                {
-                    $period =
-                        $externalBookingType
-                            ->periods()
-                            ->create([
-                                'start_date' => $periodData['start_date'],
-                                'end_date' => $periodData['end_date'],
-                            ]);
+                $keptPeriodIds[] = $period->id;
 
-                    foreach ($periodData['items'] as $itemData)
-                    {
-                        $design = null;
-                        if (!empty($itemData['design_name']))
-                        {
-                            $design =
-                                $externalBookingType
-                                    ->designs()
-                                    ->where('name',$itemData['design_name'])
-                                    ->first();
+                $existingItems = $period
+                    ->items()
+                    ->orderBy('id')
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('external_asset_id');
+
+                $keptAssetIds = [];
+
+                foreach ($periodData['items'] as $itemData) {
+                    $assetId = (int) $itemData['asset_id'];
+                    $keptAssetIds[] = $assetId;
+                    $designName = $itemData['design_name'] ?? null;
+
+                    $designId = $designName !== null
+                        ? $designs->get($designName)?->id
+                        : null;
+
+                    $existingItem = $existingItems->get($assetId);
+
+                    if ($existingItem) {
+                        $updates = [
+                            'design_id' => $designId,
+                            'is_gift' => $itemData['is_gift'],
+                        ];
+
+                        if (
+                            $booking->status === BookingStatusEnum::CONFIRMED
+                        ) {
+                            $updates['status'] = BookingItemStatusEnum::BOOKED->value;
                         }
 
-                        $period
-                            ->items()
-                            ->create([
-                                'external_asset_id' => $itemData['asset_id'],
-                                'design_id' => $design?->id,
-                                'is_gift' => $itemData['is_gift'],
-                                'status' => BookingItemStatusEnum::UNCONFIRMED->value,
-                            ]);
+                        if (
+                            $existingItem->design_id != $designId
+                        ) {
+                            $updates['order_status'] = null;
+                        }
+
+                        $existingItem->update($updates);
+                    } else {
+                        $period->items()->create([
+                            'external_asset_id' => $assetId,
+                            'design_id' => $designId,
+                            'is_gift' => $itemData['is_gift'],
+
+                            'status' =>
+                                $booking->status ===
+                                BookingStatusEnum::CONFIRMED
+                                    ? BookingItemStatusEnum::BOOKED->value
+                                    : BookingItemStatusEnum::UNCONFIRMED->value,
+
+                            'order_status' => null,
+                        ]);
                     }
                 }
 
-                return $externalBookingType
-                    ->fresh([
-                        'designs',
-                        'periods.items.asset.area.governorate',
-                        'externalBooking.booking.flexBooking',
-                        'externalBooking.booking.ledBooking',
-                        'externalBooking.booking.externalBooking.types',
-                    ]);
+                $period->items()
+                    ->whereNotIn('external_asset_id',$keptAssetIds)
+                    ->delete();
             }
-        );
+
+            $externalBookingType
+                ->periods()
+                ->whereNotIn('id', $keptPeriodIds)
+                ->delete();
+
+            $externalBookingType
+                ->designs()
+                ->whereNotIn('name', $data['designs'])
+                ->delete();
+
+            return $externalBookingType->fresh([
+                'designs',
+                'periods.items.asset.area.governorate',
+                'externalBooking.booking.flexBooking',
+                'externalBooking.booking.ledBooking',
+                'externalBooking.booking.externalBooking.types',
+            ]);
+        });
     }
+
 
     private function validatePeriodsDoNotOverlap(array $periods)
     {

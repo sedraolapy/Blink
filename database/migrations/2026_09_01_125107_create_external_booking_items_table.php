@@ -28,10 +28,14 @@ return new class extends Migration
                 ->constrained('external_designs')
                 ->nullOnDelete();
 
-            $table->string('status')->default(BookingItemStatusEnum::UNCONFIRMED->value);
+            $table->string('status')
+                ->default(BookingItemStatusEnum::UNCONFIRMED->value);
+
+
+            $table->string('order_status')->nullable();
 
             $table->boolean('is_gift')->default(false);
-            
+
             $table->timestamps();
 
             $table->unique(['external_booking_period_id', 'external_asset_id'],'external_period_asset_unique');

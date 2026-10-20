@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\Governorate\GovernorateController;
 use App\Http\Controllers\Api\Map\MapController;
 use App\Http\Controllers\API\Orders\Electronic\ElectronicOrderController;
 use App\Http\Controllers\API\Orders\Flex\FlexOrderController;
+use App\Http\Controllers\API\Orders\Outdoor\OutdoorOrderController;
 use App\Http\Controllers\API\Outdoor\OutdoorController;
 use App\Http\Controllers\API\Quotation\QuotationController;
 use Illuminate\Http\Request;
@@ -100,6 +101,11 @@ Route::middleware('localization')->group(function () {
             Route::get('/orders/electronic/customers/{customer_id}/periods',[ElectronicOrderController::class, 'periods']);
             Route::get('/orders/electronic/candidates',[ElectronicOrderController::class, 'candidates']);
 
+            // Outdoor orders
+            Route::get('/orders/outdoor/customers',[OutdoorOrderController::class, 'customers']);
+            Route::get('/orders/outdoor/customers/{customer_id}/periods',[OutdoorOrderController::class, 'periods']);
+            Route::get('/orders/outdoor/candidates',[OutdoorOrderController::class, 'candidates']);
+
 
             Route::middleware('working.year.writable')->group(function () {
                 // Bookings
@@ -129,6 +135,9 @@ Route::middleware('localization')->group(function () {
 
                 // Electronic orders
                 Route::post('/orders/electronic/issue',[ElectronicOrderController::class, 'issue']);
+
+                // Outdoor orders
+                Route::post('/orders/outdoor/issue',[OutdoorOrderController::class, 'issue']);
 
             });
         });

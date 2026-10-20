@@ -13,6 +13,7 @@ class FlexOrderPdfService
             'period' => $selection['period'],
             'type' => $data['type'],
             'selected_items' => $selection['selected_items'],
+            'items' => $selection['selected_items'],
             'issue_date' => $data['issue_date'],
             'recipient' => $data['recipient'],
             'execution_deadline' => $data['execution_deadline'],

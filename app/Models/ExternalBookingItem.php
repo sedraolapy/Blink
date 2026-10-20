@@ -18,6 +18,7 @@ class ExternalBookingItem extends Model
         'design_id',
         'is_gift',
         'status',
+        'order_status',
     ];
 
     protected function casts(): array
