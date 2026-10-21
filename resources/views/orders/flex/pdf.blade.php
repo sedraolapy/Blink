@@ -1,6 +1,7 @@
 {{--
 Blink — Flex Work Order PDF
 Standalone Laravel Blade view with inline CSS, following the quotation PDF template.
+No JavaScript, waiting flags, or backend PDF service changes are required.
 
 Expected view variable: $order (associative array built from the PERSISTED issuance).
 Example shape:
@@ -25,6 +26,8 @@ $order = [
 The backend must fetch customer, governorate, period and selected board records
 from its own database, NOT from request-supplied names or quantities.
 The order type already determines the list of candidates server-side.
+Page-break estimates are deliberately conservative; long notes may use more pages
+than React preview, but no dynamic script is needed before printing.
 
 Locale follows app()->getLocale(), as in the supplied quotation PDF template.
 Reuses the same backend assets; no Vite, Tailwind, external URLs or JavaScript:
@@ -221,7 +224,130 @@ Intended for a Chromium-based HTML-to-PDF renderer, just like the quotation temp
         }
     }
 
-    $pageCount = count($pages);
+    /*
+     * Notes pagination is rendered fully in PHP before Browsershot prints.
+     * Short notes remain beside the approvals on the last table/approval page.
+     * Long notes use natural browser text wrapping and conservative page limits.
+     */
+    // Calculate conservative visual-line estimates without adding line breaks.
+    // This keeps the original punctuation, spaces, and paragraphs intact.
+    // Chromium still wraps every chunk naturally in the fixed A4 text column.
+    $notesNormalized = str_replace(["\r\n", "\r"], "\n", $notes);
+    $estimateWidth = static function (string $part): float {
+        $width = 0.0;
+        foreach (preg_split('//u', $part, -1, PREG_SPLIT_NO_EMPTY) as $char) {
+            if (preg_match('/^\s$/u', $char)) {
+                $width += 4.0;
+            } elseif (preg_match('/^\p{Arabic}$/u', $char)) {
+                $width += 8.5;
+            } elseif (preg_match('/^[A-Z]$/u', $char)) {
+                $width += 10.5;
+            } elseif (preg_match('/^[a-z0-9]$/u', $char)) {
+                $width += 7.5;
+            } else {
+                $width += 10.0;
+            }
+        }
+        return $width;
+    };
+
+    $estimatedLines = [];
+    $maxEstimatedWidth = 570; // CSS px; printable text width is 698px.
+    $sourceLines = explode("\n", $notesNormalized);
+    foreach ($sourceLines as $sourceIndex => $sourceLine) {
+        preg_match_all('/\S+|\s+/u', $sourceLine, $matched);
+        $currentText = '';
+        $currentWidth = 0.0;
+
+        foreach ($matched[0] as $token) {
+            $tokenWidth = $estimateWidth($token);
+            $tokenIsWord = trim($token) !== '';
+
+            if ($tokenIsWord && $currentWidth > 0 && $currentWidth + $tokenWidth > $maxEstimatedWidth) {
+                $estimatedLines[] = $currentText;
+                $currentText = '';
+                $currentWidth = 0.0;
+            }
+
+            // An exceptionally long unbroken token may wrap over multiple lines.
+            if ($tokenWidth > $maxEstimatedWidth) {
+                foreach (preg_split('//u', $token, -1, PREG_SPLIT_NO_EMPTY) as $char) {
+                    $charWidth = $estimateWidth($char);
+                    if ($currentWidth > 0 && $currentWidth + $charWidth > $maxEstimatedWidth) {
+                        $estimatedLines[] = $currentText;
+                        $currentText = '';
+                        $currentWidth = 0.0;
+                    }
+                    $currentText .= $char;
+                    $currentWidth += $charWidth;
+                }
+            } else {
+                $currentText .= $token;
+                $currentWidth += $tokenWidth;
+            }
+        }
+
+        // Preserve real user-entered paragraph breaks; do not insert artificial ones.
+        $estimatedLines[] = $currentText . ($sourceIndex < count($sourceLines) - 1 ? "\n" : '');
+    }
+
+    $documentPages = [];
+    $lastRowsCount = count($pages[count($pages) - 1]);
+    $inlineLimit = $lastRowsCount === 0 ? 16 : 4;
+    $lineCount = count($estimatedLines);
+
+    if ($lineCount <= $inlineLimit) {
+        foreach ($pages as $index => $pageRows) {
+            $isLast = $index === count($pages) - 1;
+            $documentPages[] = [
+                'rows' => $pageRows,
+                'notes' => $isLast ? $notesNormalized : null,
+                'signatures' => $isLast,
+            ];
+        }
+    } else {
+        $tablePages = $pages;
+        if (count($tablePages[count($tablePages) - 1]) === 0) {
+            array_pop($tablePages);
+        }
+        foreach ($tablePages as $pageRows) {
+            $documentPages[] = ['rows' => $pageRows, 'notes' => null, 'signatures' => false];
+        }
+
+        // Leave generous room for branding, footer, and the three signatures.
+        $normalPageLimit = 26;
+        $signaturesPageLimit = 16;
+        $extraPages = max(0, (int) ceil(($lineCount - $signaturesPageLimit) / $normalPageLimit));
+        $notesPageCount = $extraPages + 1;
+        $remaining = $lineCount;
+
+        for ($index = 0; $index < $notesPageCount; ++$index) {
+            $pagesAfter = $notesPageCount - $index - 1;
+            $futureCapacity = $pagesAfter > 0
+                ? ($pagesAfter - 1) * $normalPageLimit + $signaturesPageLimit
+                : 0;
+            $maxHere = $pagesAfter === 0 ? $signaturesPageLimit : $normalPageLimit;
+            $take = min(
+                $maxHere,
+                max((int) ceil($remaining / ($pagesAfter + 1)), $remaining - $futureCapacity)
+            );
+            $chunk = array_splice($estimatedLines, 0, $take);
+            $documentPages[] = [
+                'rows' => [],
+                'notes' => implode('', $chunk),
+                'signatures' => $pagesAfter === 0,
+            ];
+            $remaining -= $take;
+        }
+    }
+
+    $pageCount = count($documentPages);
+    $lastTablePageIndex = null;
+    foreach ($documentPages as $index => $page) {
+        if (count($page['rows']) > 0) {
+            $lastTablePageIndex = $index;
+        }
+    }
 
     /* The same embedded assets used by the quotation Blade PDF. */
     $assetDataUri = static function (string $path, string $mime): string {
@@ -545,7 +671,8 @@ Intended for a Chromium-based HTML-to-PDF renderer, just like the quotation temp
         /* Footer: same visual grammar as QuotationDocumentPage.jsx. */
         .page-footer {
             position: absolute;
-            inset-inline: 48px;
+            left: 48px;
+            right: 48px;
             bottom: 32px;
         }
 
@@ -589,12 +716,14 @@ Intended for a Chromium-based HTML-to-PDF renderer, just like the quotation temp
     </style>
 </head>
 <body>
-    @foreach ($pages as $pageIndex => $pageRows)
+    @foreach ($documentPages as $pageIndex => $page)
         @php
+            $pageRows = $page['rows'];
+            $noteChunk = $page['notes'];
+            $showSignatures = $page['signatures'];
             $isFirst = $pageIndex === 0;
             $isLast = $pageIndex === $pageCount - 1;
-            $isLastTablePage = count($pageRows) > 0
-                && ($isLast || count($pages[$pageIndex + 1] ?? []) === 0);
+            $isLastTablePage = $pageIndex === $lastTablePageIndex;
 
             /* Rebuild rowSpan groups on each page, exactly as OrderTable() does. */
             $pageGroups = [];
@@ -699,12 +828,14 @@ Intended for a Chromium-based HTML-to-PDF renderer, just like the quotation temp
                     </section>
                 @endif
 
-                @if ($isLast)
+                @if ($noteChunk !== null)
                     <section class="order-notes">
                         <h2 class="order-notes-heading">{{ $t['notes'] }}</h2>
-                        <p class="order-notes-text">{{ $notes }}</p>
+                        <p class="order-notes-text">{{ $noteChunk }}</p>
                     </section>
+                @endif
 
+                @if ($showSignatures)
                     <section class="signatures">
                         <div class="sales-signatures">
                             @foreach (['coordinator', 'manager'] as $signatureType)

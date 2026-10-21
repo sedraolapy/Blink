@@ -15,6 +15,7 @@ class ElectronicOrderCustomersService
         private readonly ElectronicOrderEligibilityService $eligibilityService
     ) {}
 
+
     public function getCustomers(): array
     {
         $bookings = Booking::query()
@@ -36,10 +37,15 @@ class ElectronicOrderCustomersService
                     fn (Collection $bookings) =>
                         $this->formatCustomer($bookings)
                 )
+                ->sortBy(
+                    fn (array $customer) =>
+                        $customer['nearest_start_date'] ?? '9999-12-31'
+                )
                 ->values()
                 ->all(),
         ];
     }
+
 
     private function formatCustomer(Collection $bookings): array
     {
