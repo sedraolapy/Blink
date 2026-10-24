@@ -66,11 +66,6 @@ class OutdoorOrderIssueService
                 ->lockForUpdate()
                 ->get();
 
-            $this->validateDeadlineWithinPeriod(
-                $data,
-                $period
-            );
-
             $candidates = $this->candidatesService
                 ->getCandidates(
                     $data['outdoor_type'],
@@ -107,7 +102,7 @@ class OutdoorOrderIssueService
                 )
                 ->whereNull('order_status')
                 ->update([
-                    'order_status' => 'issued',
+                    'order_status' => $data['type'],
                 ]);
 
             if ($updated !== count($data['selected_asset_ids'])) {
@@ -224,22 +219,5 @@ class OutdoorOrderIssueService
         }
     }
 
-    private function validateDeadlineWithinPeriod(array $data,$period): void
-    {
-        $deadline = $data['execution_deadline'];
 
-        $startDate = $period->start_date->toDateString();
-        $endDate = $period->end_date->toDateString();
-
-        if (
-            $deadline < $startDate
-            || $deadline > $endDate
-        ) {
-            throw ValidationException::withMessages([
-                'execution_deadline' => [
-                    __('validation.outdoor_orders.deadline_outside_period'),
-                ],
-            ]);
-        }
-    }
 }

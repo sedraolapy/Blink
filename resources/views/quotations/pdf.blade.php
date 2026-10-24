@@ -38,6 +38,11 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
             'advertiserType' => 'نوع المعلن',
             'issueDate' => 'تاريخ الإصدار',
             'pageNumber' => 'الصفحة :page',
+            'brand' => [
+                'coverCaption' => 'QUOTATION',
+                'closingTitle' => 'شكراً لثقتكم',
+                'closingMessage' => 'نتطلع إلى تعاون مثمر معكم',
+            ],
             'advertiser' => [
                 'local' => 'محلي',
                 'foreign' => 'أجنبي',
@@ -127,6 +132,11 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
             'advertiserType' => 'Advertiser Type',
             'issueDate' => 'Issue Date',
             'pageNumber' => 'Page :page',
+            'brand' => [
+                'coverCaption' => 'PRICE PROPOSAL',
+                'closingTitle' => 'Thank you for your trust',
+                'closingMessage' => 'We look forward to working together',
+            ],
             'advertiser' => [
                 'local' => 'Local',
                 'foreign' => 'Foreign',
@@ -326,10 +336,17 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
         'image/svg+xml',
     );
 
-    $logoWhite = $assetDataUri(
-        $quotationAssetRoot . '/logos/' . ($isArabic ? 'Arabic-white.SVG' : 'English-white.SVG'),
+    $logoWhiteArabic = $assetDataUri(
+        $quotationAssetRoot . '/logos/Arabic-white.SVG',
         'image/svg+xml',
     );
+
+    $logoWhiteEnglish = $assetDataUri(
+        $quotationAssetRoot . '/logos/English-white.SVG',
+        'image/svg+xml',
+    );
+
+    $logoWhite = $isArabic ? $logoWhiteArabic : $logoWhiteEnglish;
 
     $brandSymbol = $assetDataUri(
         $quotationAssetRoot . '/logos/logo.svg',
@@ -457,7 +474,7 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
                 $type === $introOutdoorType ? 8 : 16,
                 18,
             ),
-            'detailPages' => $buildGroupedDetailPages($data['details'] ?? [], 18),
+            'detailPages' => $buildGroupedDetailPages($data['details'] ?? [], 14),
         ];
     }
 
@@ -506,16 +523,17 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
     }
 
     /*
-     * Page indices follow the same chunk lengths as the React preview.
-     * The introduction begins on page 2 and may span multiple pages.
+     * Branded cover = 1, detailed cover = 2.
+     * The introduction starts at 3 and may span multiple pages.
      */
-    $flexDetailsStartPage = 2 + count($introSummaryPages);
+    $firstContentPage = 3;
+    $flexDetailsStartPage = $firstContentPage + count($introSummaryPages);
 
     $electronicSummaryPage = $flexDetailsStartPage + count($flexDetailPages);
 
     $electronicStandaloneStartPage = $hasFlex
         ? $electronicSummaryPage + count($electronicSummaryPages)
-        : 2 + count($introSummaryPages);
+        : $firstContentPage + count($introSummaryPages);
 
     $electronicNetworksStartPage =
         $electronicStandaloneStartPage + count($electronicStandalonePages);
@@ -524,14 +542,14 @@ public/quotation/fonts/cairo-latin-wght-normal.woff2
         ? $electronicNetworksStartPage + count($electronicNetworkPages)
         : ($hasFlex
             ? $flexDetailsStartPage + count($flexDetailPages)
-            : 2 + count($introSummaryPages));
+            : $firstContentPage + count($introSummaryPages));
 
     $outdoorSectionsWithPages = [];
     $nextOutdoorPage = $outdoorStartPage;
 
     foreach ($outdoorSections as $section) {
         $isIntroSummary = $section['type'] === $introOutdoorType;
-        $summaryPage = $isIntroSummary ? 2 : $nextOutdoorPage;
+        $summaryPage = $isIntroSummary ? $firstContentPage : $nextOutdoorPage;
         $detailsStartPage = $isIntroSummary
             ? $nextOutdoorPage
             : $summaryPage + count($section['summaryPages']);
@@ -593,6 +611,64 @@ HTML;
         <p class="page-footer-number" dir="ltr">{$pageLabel}</p>
     </div>
 </footer>
+HTML;
+    };
+
+    /* Same full-bleed brand page for the cover and closing. No PDF page number. */
+    $renderBrandPage = static function (bool $closing) use (
+        $t,
+        $isArabic,
+        $logoWhiteEnglish,
+        $logoWhiteArabic,
+        $brandSymbol
+    ): string {
+        $dir = $isArabic ? 'rtl' : 'ltr';
+        $heading = e($closing ? $t['brand']['closingTitle'] : $t['title']);
+        $enLogo = e($logoWhiteEnglish);
+        $arLogo = e($logoWhiteArabic);
+        $symbol = e($brandSymbol);
+        $lastClass = $closing ? 'pdf-page--last' : '';
+
+        if ($closing) {
+            $message = e($t['brand']['closingMessage']);
+            $copy = <<<HTML
+<h2 class="brand-title brand-title--closing">{$heading}</h2>
+<p class="brand-message">{$message}</p>
+<div class="brand-closing-rule" aria-hidden="true"></div>
+HTML;
+        } else {
+            $caption = e($t['brand']['coverCaption']);
+            $copy = <<<HTML
+<div class="brand-heading">
+    <span class="brand-rule" aria-hidden="true"></span>
+    <h1 class="brand-title">{$heading}</h1>
+    <span class="brand-rule" aria-hidden="true"></span>
+</div>
+<p class="brand-caption">{$caption}</p>
+HTML;
+        }
+
+        return <<<HTML
+<section class="pdf-page quotation-brand-page {$lastClass}" dir="{$dir}">
+    <div aria-hidden="true">
+        <div class="brand-panel brand-panel--layer-1"></div>
+        <div class="brand-panel brand-panel--layer-2"></div>
+        <div class="brand-panel brand-panel--layer-3"></div>
+        <div class="brand-panel brand-panel--layer-4"></div>
+    </div>
+    <div class="brand-center">
+        <div class="brand-lockup" dir="ltr" aria-label="Blink">
+            <span class="brand-word brand-word--english">
+                <img src="{$enLogo}" alt="">
+            </span>
+            <img class="brand-symbol" src="{$symbol}" alt="">
+            <span class="brand-word brand-word--arabic">
+                <img src="{$arLogo}" alt="">
+            </span>
+        </div>
+        {$copy}
+    </div>
+</section>
 HTML;
     };
 @endphp
@@ -711,6 +787,179 @@ HTML;
         .pdf-page--last {
             break-after: auto;
             page-break-after: auto;
+        }
+
+        /* ==============================================================
+           Branded opening and closing pages — matches QuotationBrandPage.css
+           ============================================================== */
+        /* Blink quotation: shared cover + closing artwork. Mirror this CSS in Laravel Blade. */
+        /* Shared visual system for the first cover and last closing page.
+           The panels follow a single staircase pattern: each starts lower/right. */
+        .quotation-brand-page {
+          position: relative;
+          isolation: isolate;
+          width: 794px;
+          height: 1123px;
+          flex-shrink: 0;
+          overflow: hidden;
+          color: #fff;
+          background:
+            radial-gradient(ellipse at 8% 4%, rgba(125, 30, 192, .22), transparent 48%),
+            radial-gradient(ellipse at 95% 90%, rgba(151, 28, 232, .32), transparent 46%),
+            linear-gradient(145deg, #43106f 0%, #350a60 58%, #491178 100%);
+        }
+
+        /* Quiet translucent panels, aligned like the supplied Blink reference. */
+        .quotation-brand-page .brand-panel {
+          position: absolute;
+          pointer-events: none;
+          border: 1px solid rgba(184, 89, 243, .10);
+          border-radius: 20px;
+          box-shadow: inset 0 1px 0 rgba(235, 176, 255, .04);
+          background: linear-gradient(
+            150deg,
+            rgba(160, 45, 224, .18),
+            rgba(113, 30, 178, .12) 53%,
+            rgba(63, 13, 121, .07)
+          );
+        }
+
+        .quotation-brand-page .brand-panel--layer-1 {
+          top: 20%;
+          left: 18%;
+          width: 97%;
+          height: 96%;
+        }
+
+        .quotation-brand-page .brand-panel--layer-2 {
+          top: 41%;
+          left: 38%;
+          width: 86%;
+          height: 86%;
+          background: linear-gradient(150deg, rgba(154, 42, 221, .19), rgba(87, 19, 148, .08));
+        }
+
+        .quotation-brand-page .brand-panel--layer-3 {
+          top: 63%;
+          left: 59%;
+          width: 75%;
+          height: 69%;
+          background: linear-gradient(150deg, rgba(145, 34, 222, .20), rgba(91, 14, 153, .09));
+        }
+
+        .quotation-brand-page .brand-panel--layer-4 {
+          top: 81%;
+          left: 79%;
+          width: 58%;
+          height: 54%;
+          background: linear-gradient(150deg, rgba(161, 48, 232, .21), rgba(79, 13, 143, .09));
+        }
+
+        .quotation-brand-page .brand-center {
+          position: absolute;
+          z-index: 1;
+          top: 43%; left: 50%;
+          width: 100%;
+          padding: 0 50px;
+          transform: translate(-50%, -50%);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+
+        /* The exact Blink SVG artwork is used. Only its text regions are cropped,
+           so the bilingual lockup uses a single separate Blink emblem. */
+        .quotation-brand-page .brand-lockup {
+          direction: ltr;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 2px;
+          width: max-content;
+          max-width: none;
+          height: 78px;
+        }
+        .quotation-brand-page .brand-word {
+          position: relative;
+          display: block;
+          flex-shrink: 0;
+          height: 78px;
+          overflow: hidden;
+        }
+        .quotation-brand-page .brand-word--english { width: 197px; }
+        .quotation-brand-page .brand-word--arabic { width: 159px; }
+        .quotation-brand-page .brand-word img {
+          position: absolute;
+          top: 0;
+          height: 78px;
+          width: auto;
+          max-width: none;
+          display: block;
+        }
+        .quotation-brand-page .brand-word--english img { left: 0; }
+        .quotation-brand-page .brand-word--arabic img { right: 0; }
+        .quotation-brand-page .brand-symbol {
+          display: block;
+          flex-shrink: 0;
+          height: 78px;
+          width: 104px;
+          max-width: none;
+          object-fit: contain;
+        }
+
+        .quotation-brand-page .brand-heading {
+          display: flex;
+          width: 100%;
+          align-items: center;
+          justify-content: center;
+          gap: 22px;
+          margin-top: 40px;
+        }
+        .quotation-brand-page .brand-rule {
+          flex-shrink: 0;
+          width: 84px;
+          height: 4px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, #b949ff, #8801fe);
+        }
+        .quotation-brand-page .brand-title {
+          margin: 0;
+          color: #fff;
+          font-size: 52px;
+          font-weight: 800;
+          line-height: 1.35;
+          white-space: nowrap;
+        }
+        .quotation-brand-page .brand-caption {
+          margin: 5px 0 0;
+          color: #d3b5e6;
+          font-family: Arial, sans-serif;
+          font-size: 12px;
+          font-weight: 400;
+          letter-spacing: .38em;
+          direction: ltr;
+        }
+        .quotation-brand-page .brand-title--closing { margin-top: 42px; }
+        .quotation-brand-page .brand-message {
+          margin: 8px 0 0;
+          color: #d9bfe9;
+          font-size: 22px;
+          font-weight: 400;
+          line-height: 1.8;
+        }
+        .quotation-brand-page .brand-closing-rule {
+          width: 148px;
+          height: 4px;
+          margin-top: 22px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, #a83afd, #8801fe);
+        }
+
+        .pdf-page.quotation-brand-page {
+            width: 210mm;
+            height: 297mm;
+            min-height: 297mm;
         }
 
         /* ==============================================================
@@ -1410,8 +1659,11 @@ HTML;
 </head>
 
 <body>
+    {{-- Cover: full-bleed Blink branding, no page number or footer. --}}
+    {!! $renderBrandPage(false) !!}
+
     {{-- ============================================================
-         Page 1 — Cover
+         Page 2 — Detailed quotation cover
          ============================================================ --}}
     <section class="pdf-page">
         <header class="cover-brand-header">
@@ -1482,7 +1734,7 @@ HTML;
     </section>
 
     {{-- ============================================================
-         Page 2 — Intro + first available summary
+         Page 3 — Intro + first available summary
          ============================================================ --}}
     @foreach ($introSummaryPages as $introPageIndex => $summaryRows)
     <section class="pdf-page">
@@ -1718,7 +1970,7 @@ HTML;
             @endif
         </div>
 
-        {!! $renderPageFooter(2 + $introPageIndex) !!}
+        {!! $renderPageFooter($firstContentPage + $introPageIndex) !!}
     </section>
     @endforeach
 
@@ -2493,7 +2745,7 @@ HTML;
     {{-- ============================================================
          Final summary
          ============================================================ --}}
-    <section class="pdf-page pdf-page--last">
+    <section class="pdf-page">
         {!! $renderPageHeader() !!}
 
         <div class="page-content">
@@ -2582,5 +2834,7 @@ HTML;
 
         {!! $renderPageFooter($finalSummaryPage) !!}
     </section>
+    {{-- Closing: after the final summary and customer signature. --}}
+    {!! $renderBrandPage(true) !!}
 </body>
 </html>

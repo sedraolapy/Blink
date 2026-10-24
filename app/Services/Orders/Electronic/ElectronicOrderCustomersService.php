@@ -30,20 +30,22 @@ class ElectronicOrderCustomersService
             ->orderByDesc('id')
             ->get();
 
-        return [
-            'items' => $bookings
-                ->groupBy('customer_id')
-                ->map(
-                    fn (Collection $bookings) =>
-                        $this->formatCustomer($bookings)
-                )
-                ->sortBy(
-                    fn (array $customer) =>
-                        $customer['nearest_start_date'] ?? '9999-12-31'
-                )
-                ->values()
-                ->all(),
-        ];
+            return [
+                'items' => $bookings
+                    ->groupBy('customer_id')
+                    ->map(
+                        fn (Collection $bookings) =>  $this->formatCustomer($bookings)
+                    )
+                    ->filter(
+                        fn (array $customer) =>  $customer['bookings_count'] > 0
+                    )
+                    ->sortBy(
+                        fn (array $customer) =>  $customer['nearest_start_date'] ?? '9999-12-31'
+                    )
+                    ->values()
+                    ->all(),
+            ];
+
     }
 
 

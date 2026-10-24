@@ -17,11 +17,12 @@ class OutdoorOrderCustomersService
         private readonly WorkingYearContext $workingYearContext
     ) {}
 
+
     public function getCustomers(string $outdoorType): array
     {
         $bookings = Booking::query()
             ->where('year', $this->workingYearContext->get())
-            ->where('status',BookingStatusEnum::CONFIRMED->value)
+            ->where('status', BookingStatusEnum::CONFIRMED->value)
             ->whereHas(
                 'externalBooking.types',
                 fn (Builder $query) =>
@@ -46,10 +47,16 @@ class OutdoorOrderCustomersService
                     fn (Collection $customerBookings) =>
                         $this->formatCustomer($customerBookings)
                 )
+                ->filter(
+                    fn (array $customer) =>
+                        $customer['ready_assets_count'] > 0
+                )
+                ->sortBy('nearest_start_date')
                 ->values()
                 ->all(),
         ];
     }
+
 
     private function formatCustomer(Collection $bookings)
     {

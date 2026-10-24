@@ -110,5 +110,6 @@ return [
     ],
 
 
+    'unauthenticated' => 'Unauthenticated.',
 
 ];

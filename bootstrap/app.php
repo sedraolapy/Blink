@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\AuthenticationException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,8 +19,22 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(Localization::class);
+
         $middleware->statefulApi();
+
+        $middleware->redirectGuestsTo(
+            fn (Request $request) =>
+                $request->is('api/*')
+                    ? null
+                    : (
+                        \Illuminate\Support\Facades\Route::has('login')
+                            ? route('login')
+                            : null
+                    )
+        );
 
         $middleware->alias([
             'localization' => Localization::class,
@@ -28,6 +43,30 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+
+        $exceptions->shouldRenderJsonWhen(
+            fn (Request $request, \Throwable $e): bool =>
+                $request->is('api/*') || $request->expectsJson()
+        );
+
+
+        $exceptions->render(
+            function (
+                AuthenticationException $exception,
+                Request $request
+            ) {
+                if (! $request->is('api/*')) {
+                    return null;
+                }
+
+                return sendError(
+                    __('messages.unauthenticated'),
+                    401
+                );
+            }
+        );
+
+
         $exceptions->render(
             function (
                 NotFoundHttpException $exception,

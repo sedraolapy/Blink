@@ -76,6 +76,7 @@ return [
         'selected_asset_id' => 'selected outdoor asset',
         'excluded_asset_ids' => 'excluded outdoor assets',
         'excluded_asset_id' => 'excluded outdoor asset',
+        'outdoor_order_type' => 'outdoor order type',
     ],
 
     'custom' => [

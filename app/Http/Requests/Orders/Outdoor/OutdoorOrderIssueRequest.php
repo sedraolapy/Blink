@@ -26,6 +26,12 @@ class OutdoorOrderIssueRequest extends FormRequest
                 Rule::enum(ExternalAssetTypeEnum::class),
             ],
 
+            'type' => [
+                'required',
+                'string',
+                Rule::in(['installation', 'extension']),
+            ],
+
             'customer_id' => [
                 'required',
                 'integer',
@@ -106,6 +112,10 @@ class OutdoorOrderIssueRequest extends FormRequest
             'outdoor_type.required' => __('validation.outdoor_orders.required'),
             'outdoor_type.enum' => __('validation.outdoor_orders.invalid_type'),
 
+            'type.required' => __('validation.outdoor_orders.required'),
+            'type.string' => __('validation.outdoor_orders.string'),
+            'type.in' => __('validation.in'),
+
             'customer_id.required' => __('validation.outdoor_orders.required'),
             'customer_id.integer' => __('validation.outdoor_orders.integer'),
             'customer_id.exists' => __('validation.outdoor_orders.exists'),
@@ -151,6 +161,7 @@ class OutdoorOrderIssueRequest extends FormRequest
     {
         return [
             'outdoor_type' => __('validation.attributes.outdoor_type'),
+            'type' => __('validation.attributes.outdoor_order_type'),
             'customer_id' => __('validation.attributes.customer_id'),
             'period_id' => __('validation.attributes.outdoor_period_id'),
 

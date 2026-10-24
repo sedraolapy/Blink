@@ -6,22 +6,22 @@ use Spatie\Browsershot\Browsershot;
 
 class OutdoorOrderPdfService
 {
-    public function generate(
-        array $data,
-        array $selection
-    ): string {
-        $order = [
-            'outdoor_type' => $data['outdoor_type'],
-            'customer' => $selection['customer'],
-            'period' => $selection['period'],
+    public function generate(array $data,array $selection): string
+    {
 
-            'selected_items' => $selection['selected_items'],
+    $order = [
+        'type' => $data['type'],
+        'outdoor_type' => $data['outdoor_type'],
+        'customer' => $selection['customer'],
+        'period' => $selection['period'],
+        'selected_items' => $selection['selected_items'],
+        'items' => $selection['selected_items'],
+        'issue_date' => $data['issue_date'],
+        'recipient' => $data['recipient'],
+        'execution_deadline' => $data['execution_deadline'],
+        'notes' => $data['notes'] ?? null,
+    ];
 
-            'issue_date' => $data['issue_date'],
-            'recipient' => $data['recipient'],
-            'execution_deadline' => $data['execution_deadline'],
-            'notes' => $data['notes'] ?? null,
-        ];
 
         $html = view('orders.outdoor.pdf', [
             'order' => $order,

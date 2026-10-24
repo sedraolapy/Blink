@@ -16,6 +16,10 @@ class Localization
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (! $request->is('api/*')) {
+            return $next($request);
+        }
+        
         $supportedLocales = ['ar', 'en'];
 
         $locale = $request->header(

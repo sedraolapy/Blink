@@ -47,8 +47,8 @@ Intended for a Chromium-based HTML-to-PDF renderer, just like the quotation temp
         'ar' => [
             'organization' => 'إدارة العمليات',
             'titles' => [
-                'installation' => 'أمر تركيب',
-                'extension' => 'أمر تمديد',
+                'installation' => 'أمر تركيب فليكس',
+                'extension' => 'أمر تمديد فليكس',
             ],
             'work' => [
                 'installation' => 'التركيب',
@@ -81,8 +81,8 @@ Intended for a Chromium-based HTML-to-PDF renderer, just like the quotation temp
         'en' => [
             'organization' => 'Operations Department',
             'titles' => [
-                'installation' => 'Installation Order',
-                'extension' => 'Extension Order',
+                'installation' => 'Flex Installation Order',
+                'extension' => 'Flex Extension Order',
             ],
             'work' => [
                 'installation' => 'installation',

@@ -91,6 +91,7 @@ return [
         'selected_asset_id' => 'الأصل الخارجي المختار',
         'excluded_asset_ids' => 'الأصول الخارجية المستثناة',
         'excluded_asset_id' => 'الأصل الخارجي المستثنى',
+        'outdoor_order_type' => 'نوع أمر الخارجي',
     ],
 
         'custom' => [
