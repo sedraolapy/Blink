@@ -483,6 +483,13 @@ class ExternalBookingService
                 ->whereNotIn('name', $data['designs'])
                 ->delete();
 
+
+            $externalBooking->update([
+                'installation_order' => $externalBooking->hasOrderInEveryPeriod('installation'),
+                'extension_order' => $externalBooking->hasOrderInEveryPeriod('extension'),
+            ]);
+
+
             return $externalBookingType->fresh([
                 'designs',
                 'periods.items.asset.area.governorate',

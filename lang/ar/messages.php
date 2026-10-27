@@ -109,5 +109,11 @@ return [
     ],
 
     'unauthenticated' => 'يرجى تسجيل الدخول للمتابعة.',
+    'campaign_report_period_not_available' => 'التقارير غير متاحة حالياً خارج فترة إصدار التقارير.',
+
+    'campaign_start_report' => [
+        'retrieved' => 'تم جلب تقرير بداية الحملة بنجاح.',
+        'not_available' => 'تقرير بداية الحملة غير متاح حالياً.',
+    ],
 
 ];

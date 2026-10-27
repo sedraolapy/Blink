@@ -111,5 +111,11 @@ return [
 
 
     'unauthenticated' => 'Unauthenticated.',
+    'campaign_report_period_not_available' =>'Reports are currently unavailable outside the reporting period.',
+
+    'campaign_start_report' => [
+        'retrieved' => 'Campaign start report retrieved successfully.',
+        'not_available' => 'Campaign start report is not currently available.',
+    ],
 
 ];

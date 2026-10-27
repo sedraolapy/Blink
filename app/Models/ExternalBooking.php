@@ -33,4 +33,21 @@ class ExternalBooking extends Model
         return $this->hasMany(ExternalBookingType::class);
     }
 
+
+    public function hasOrderInEveryPeriod(string $type): bool
+    {
+        $periods = ExternalBookingPeriod::query()
+            ->whereHas('externalBookingType',
+                fn ($query) => $query->where('external_booking_id', $this->id)
+            );
+
+        return (clone $periods)->exists()
+            && ! $periods
+                ->whereDoesntHave('items',
+                    fn ($query) => $query->where('order_status', $type)
+                )
+                ->exists();
+    }
+
+
 }

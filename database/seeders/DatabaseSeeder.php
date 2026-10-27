@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
             MixedWorkingYearsBookingsSeeder::class,
             DashboardStatisticsSeeder::class,
             FlexOrdersTestSeeder::class,
+            CampaignStartReportTestSeeder::class,
         ]);
 
         Customer::factory()->count(20)->create();

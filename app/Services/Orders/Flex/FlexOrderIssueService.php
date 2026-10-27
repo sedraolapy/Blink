@@ -217,29 +217,18 @@ class FlexOrderIssueService
             ->pluck('period.flex_booking_id')
             ->unique();
 
+
         foreach ($flexBookingIds as $flexBookingId) {
 
-            $hasInstallation = FlexBookingItem::query()
-                ->whereHas('period', function ($query) use ($flexBookingId) {
-                    $query->where('flex_booking_id', $flexBookingId);
-                })
-                ->where('order_status', 'installation')
-                ->exists();
+            $flexBooking = FlexBooking::query()
+                ->findOrFail($flexBookingId);
 
-            $hasExtension = FlexBookingItem::query()
-                ->whereHas('period', function ($query) use ($flexBookingId) {
-                    $query->where('flex_booking_id', $flexBookingId);
-                })
-                ->where('order_status', 'extension')
-                ->exists();
-
-            FlexBooking::query()
-                ->whereKey($flexBookingId)
-                ->update([
-                    'installation_order' => $hasInstallation,
-                    'extension_order' => $hasExtension,
-                ]);
+            $flexBooking->update([
+                'installation_order' => $flexBooking->hasOrderInEveryPeriod('installation'),
+                'extension_order' => $flexBooking->hasOrderInEveryPeriod('extension'),
+            ]);
         }
+
     }
 
 

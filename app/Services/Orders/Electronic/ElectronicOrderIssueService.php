@@ -93,9 +93,11 @@ class ElectronicOrderIssueService
                     'operation_order' => true,
                 ]);
 
+
             $ledBooking->update([
-                'operation_order' => true,
+                'operation_order' => $ledBooking->hasOperationOrderInEveryPeriod(),
             ]);
+
 
             return $pdf;
         });

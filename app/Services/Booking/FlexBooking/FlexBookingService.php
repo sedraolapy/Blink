@@ -112,26 +112,11 @@ class FlexBookingService
         });
     }
 
-
     private function refreshFlexOrderFlags(FlexBooking $flexBooking): void
     {
-        $hasInstallationOrder = FlexBookingItem::query()
-            ->whereHas('period', function ($query) use ($flexBooking) {
-                $query->where('flex_booking_id', $flexBooking->id);
-            })
-            ->where('order_status', 'installation')
-            ->exists();
-
-        $hasExtensionOrder = FlexBookingItem::query()
-            ->whereHas('period', function ($query) use ($flexBooking) {
-                $query->where('flex_booking_id', $flexBooking->id);
-            })
-            ->where('order_status', 'extension')
-            ->exists();
-
         $flexBooking->update([
-            'installation_order' => $hasInstallationOrder,
-            'extension_order' => $hasExtensionOrder,
+            'installation_order' => $flexBooking->hasOrderInEveryPeriod('installation'),
+            'extension_order' =>  $flexBooking->hasOrderInEveryPeriod('extension'),
         ]);
     }
 

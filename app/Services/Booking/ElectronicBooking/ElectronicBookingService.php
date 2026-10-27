@@ -529,17 +529,8 @@ class ElectronicBookingService
 
     private function refreshOperationOrderFlag(LedBooking $ledBooking): void
     {
-        $hasIssuedOrder = $ledBooking
-            ->periods()
-            ->whereHas(
-                'items',
-                fn ($query) =>
-                    $query->where('operation_order', true)
-            )
-            ->exists();
-
         $ledBooking->update([
-            'operation_order' => $hasIssuedOrder,
+            'operation_order' => $ledBooking->hasOperationOrderInEveryPeriod(),
         ]);
     }
 

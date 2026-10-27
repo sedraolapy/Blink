@@ -113,6 +113,13 @@ class OutdoorOrderIssueService
                 ]);
             }
 
+
+            $externalBooking->update([
+                'installation_order' => $externalBooking->hasOrderInEveryPeriod('installation'),
+                'extension_order' => $externalBooking->hasOrderInEveryPeriod('extension'),
+            ]);
+
+
             return $pdf;
         });
     }

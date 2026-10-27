@@ -20,6 +20,7 @@ use App\Http\Controllers\API\Orders\Flex\FlexOrderController;
 use App\Http\Controllers\API\Orders\Outdoor\OutdoorOrderController;
 use App\Http\Controllers\API\Outdoor\OutdoorController;
 use App\Http\Controllers\API\Quotation\QuotationController;
+use App\Http\Controllers\API\Reports\CampaignStartReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -106,6 +107,12 @@ Route::middleware('localization')->group(function () {
             Route::get('/orders/outdoor/customers/{customer_id}/periods',[OutdoorOrderController::class, 'periods']);
             Route::get('/orders/outdoor/candidates',[OutdoorOrderController::class, 'candidates']);
 
+            Route::prefix('reports')->middleware('campaign.report.period')->group(function ()
+            {
+                //campaign Start
+                Route::get('/campaign-start',[CampaignStartReportController::class, 'index']);
+                Route::get('/campaign-start/export',[CampaignStartReportController::class, 'export']);
+            });
 
             Route::middleware('working.year.writable')->group(function () {
                 // Bookings

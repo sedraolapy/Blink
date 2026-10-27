@@ -834,7 +834,7 @@ No Vite/Tailwind/JS/external URLs. Page slices use frontend row limits 10/18.
                 @if (count($page['notes']) > 0)
                     <section class="order-notes">
                         <h2 class="order-notes-heading">{{ $t['notes'] }}</h2>
-                        <p class="order-notes-text">{{ implode("\n", $page['notes']) }}</p>
+                        <p class="order-notes-text">{{ $page['notes'] === $noteLines ? $notes : implode("\n", $page['notes']) }}</p>
                     </section>
                 @endif
 

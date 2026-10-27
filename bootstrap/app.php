@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CampaignReportPeriodMiddleware;
 use App\Http\Middleware\Localization;
 use App\Http\Middleware\WorkingYear;
 use App\Http\Middleware\WritableWorkingYear;
@@ -40,6 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'localization' => Localization::class,
             'working.year' => WorkingYear::class,
             'working.year.writable' => WritableWorkingYear::class,
+            'campaign.report.period' => CampaignReportPeriodMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

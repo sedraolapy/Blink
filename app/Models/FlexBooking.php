@@ -38,4 +38,16 @@ class FlexBooking extends Model
     {
         return $this->hasMany(FlexDesign::class);
     }
+
+
+    public function hasOrderInEveryPeriod(string $type): bool
+    {
+        return $this->periods()->exists()
+            && ! $this->periods()
+                ->whereDoesntHave('bookingItems',
+                    fn ($query) => $query->where('order_status', $type)
+                )
+                ->exists();
+    }
+
 }

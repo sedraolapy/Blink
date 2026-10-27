@@ -35,4 +35,16 @@ class LedBooking extends Model
     {
         return $this->hasMany(LedDesign::class);
     }
+
+
+    public function hasOperationOrderInEveryPeriod(): bool
+    {
+        return $this->periods()->exists()
+            && ! $this->periods()
+                ->whereDoesntHave('items',
+                    fn ($query) => $query->where('operation_order', true)
+                )
+                ->exists();
+    }
+
 }
