@@ -48,11 +48,8 @@ class CampaignStartReportTestSeeder extends Seeder
     public function run(): void
     {
         $this->assertLocal();
-
         $currentYear = (int) now('Asia/Damascus')->year;
-
-        $period = app(CampaignReportPeriodService::class)
-        ->getAvailablePeriod($currentYear);
+        $period = app(CampaignReportPeriodService::class)->getAvailablePeriod($currentYear);
 
         if ($period === null) {
             throw new RuntimeException(

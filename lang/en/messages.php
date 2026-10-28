@@ -118,4 +118,7 @@ return [
         'not_available' => 'Campaign start report is not currently available.',
     ],
 
+    'campaign_route_report' => [
+        'retrieved' => 'Campaign route report retrieved successfully.',
+    ],
 ];

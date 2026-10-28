@@ -77,6 +77,8 @@ return [
         'excluded_asset_ids' => 'excluded outdoor assets',
         'excluded_asset_id' => 'excluded outdoor asset',
         'outdoor_order_type' => 'outdoor order type',
+        'governorate_ids' => 'governorates',
+        'governorate_ids.*' => 'governorate',
     ],
 
     'custom' => [

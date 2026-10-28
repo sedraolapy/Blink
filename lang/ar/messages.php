@@ -116,4 +116,7 @@ return [
         'not_available' => 'تقرير بداية الحملة غير متاح حالياً.',
     ],
 
+    'campaign_route_report' => [
+        'retrieved' => 'تم جلب تقرير مسار الحملة بنجاح.',
+    ],
 ];

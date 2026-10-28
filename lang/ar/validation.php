@@ -92,6 +92,8 @@ return [
         'excluded_asset_ids' => 'الأصول الخارجية المستثناة',
         'excluded_asset_id' => 'الأصل الخارجي المستثنى',
         'outdoor_order_type' => 'نوع أمر الخارجي',
+        'governorate_ids' => 'المحافظات',
+        'governorate_ids.*' => 'المحافظة',
     ],
 
         'custom' => [
