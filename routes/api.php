@@ -21,6 +21,7 @@ use App\Http\Controllers\API\Orders\Outdoor\OutdoorOrderController;
 use App\Http\Controllers\API\Outdoor\OutdoorController;
 use App\Http\Controllers\API\Quotation\QuotationController;
 use App\Http\Controllers\API\Reports\CampaignRouteReportController;
+use App\Http\Controllers\API\Reports\CampaignSalesReportController;
 use App\Http\Controllers\API\Reports\CampaignStartReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -117,6 +118,10 @@ Route::middleware('localization')->group(function () {
                 // Campaign Route Report
                 Route::get('/campaign-route',[CampaignRouteReportController::class, 'index']);
                 Route::get('/campaign-route/export',[CampaignRouteReportController::class, 'export']);
+
+                // Campaign Sales Report
+                Route::get('/campaign-sales',[CampaignSalesReportController::class, 'index']);
+                Route::get('/campaign-sales/export',[CampaignSalesReportController::class, 'export']);
             });
 
             Route::middleware('working.year.writable')->group(function () {

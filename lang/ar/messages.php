@@ -119,4 +119,8 @@ return [
     'campaign_route_report' => [
         'retrieved' => 'تم جلب تقرير مسار الحملة بنجاح.',
     ],
+
+    'campaign_sales_report' => [
+        'retrieved' => 'تم جلب تقرير إجمالي مبيعات الحملة بنجاح.',
+    ],
 ];

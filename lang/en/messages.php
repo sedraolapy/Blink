@@ -121,4 +121,8 @@ return [
     'campaign_route_report' => [
         'retrieved' => 'Campaign route report retrieved successfully.',
     ],
+
+    'campaign_sales_report' => [
+        'retrieved' => 'Campaign sales report retrieved successfully.',
+    ],
 ];
