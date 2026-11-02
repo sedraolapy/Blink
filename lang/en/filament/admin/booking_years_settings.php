@@ -6,4 +6,5 @@ return [
     'available_years' => 'Available booking years',
     'helper_text' => 'The current year is always available for booking.',
     'saved' => 'Booking years updated successfully.',
+    'save' => 'Save Changes',
 ];

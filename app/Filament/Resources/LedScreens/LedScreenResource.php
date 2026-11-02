@@ -30,6 +30,11 @@ class LedScreenResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'code';
 
+    public static function getNavigationGroup(): string
+    {
+        return __('filament/admin/navigation.advertising_assets');
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('filament/admin/led_screen_resource.navigation_label');

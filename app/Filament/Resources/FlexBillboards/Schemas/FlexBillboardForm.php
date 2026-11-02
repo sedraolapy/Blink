@@ -38,11 +38,15 @@ class FlexBillboardForm
                     ->label(__('filament/admin/flex_billboard_resource.code'))
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->maxLength(255),
+                    ->maxLength(100),
 
                 Select::make('area_id')
                     ->label(__('filament/admin/flex_billboard_resource.area_id'))
                     ->relationship('area', 'name')
+                    ->getOptionLabelFromRecordUsing(
+                        fn ($record): string =>
+                            $record->getTranslation('name', app()->getLocale())
+                    )
                     ->searchable()
                     ->preload()
                     ->required(),

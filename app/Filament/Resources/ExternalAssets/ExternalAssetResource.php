@@ -30,6 +30,11 @@ class ExternalAssetResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'code';
 
+    public static function getNavigationGroup(): string
+    {
+        return __('filament/admin/navigation.advertising_assets');
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('filament/admin/external_asset_resource.navigation_label');

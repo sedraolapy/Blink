@@ -21,7 +21,7 @@ class LedScreenForm
                     ->label(__('filament/admin/led_screen_resource.code'))
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->maxLength(255),
+                    ->maxLength(100),
 
                 Tabs::make('location_name_translations')
                     ->tabs([

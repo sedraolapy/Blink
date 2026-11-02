@@ -44,6 +44,12 @@ class Customer extends Model
         );
     }
 
+    public function currentYearSubscription()
+    {
+        return $this->hasOne(CustomerSubscription::class)
+            ->where('year', now()->year);
+    }
+
 
     public function scopeSearch(Builder $query,?string $search)
     {

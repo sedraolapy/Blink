@@ -9,9 +9,21 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Spatie\Permission\Models\Role;
+use Closure;
+use Illuminate\Database\Eloquent\Builder;
+use App\Models\User;
+use Filament\Facades\Filament;
 
 class UserForm
 {
+    private static function isCurrentUserSuperAdmin(): bool
+    {
+        $user = Filament::auth()->user();
+
+        return $user instanceof User
+            && $user->hasRole(RoleEnum::SUPER_ADMIN->value);
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -60,7 +72,18 @@ class UserForm
 
                 Select::make('roles')
                     ->label(__('filament/admin/user_resource.roles'))
-                    ->relationship('roles', 'name')
+                    ->relationship(
+                        name: 'roles',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn (Builder $query): Builder =>
+                            self::isCurrentUserSuperAdmin()
+                                ? $query
+                                : $query->where(
+                                    'name',
+                                    '!=',
+                                    RoleEnum::SUPER_ADMIN->value
+                                )
+                    )
                     ->multiple()
                     ->preload()
                     ->searchable()
@@ -68,6 +91,28 @@ class UserForm
                         fn (Role $record): string =>
                             RoleEnum::tryFrom($record->name)?->label()
                             ?? $record->name
+                    )
+                    ->rule(
+                        fn () => function (
+                            string $attribute,
+                            mixed $value,
+                            Closure $fail
+                        ): void {
+                            if (self::isCurrentUserSuperAdmin()) {
+                                return;
+                            }
+
+                            $hasSuperAdminRole = Role::query()
+                                ->where('name', RoleEnum::SUPER_ADMIN->value)
+                                ->whereIn('id', (array) $value)
+                                ->exists();
+
+                            if ($hasSuperAdminRole) {
+                                $fail(__('validation.in', [
+                                    'attribute' => __('filament/admin/user_resource.roles'),
+                                ]));
+                            }
+                        }
                     )
                     ->required(),
             ]);

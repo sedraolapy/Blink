@@ -9,9 +9,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -20,8 +18,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use CraftForge\FilamentLanguageSwitcher\FilamentLanguageSwitcherPlugin;
 use Filament\View\PanelsRenderHook;
-use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
-
+use Filament\Navigation\NavigationGroup;
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -33,7 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->brandLogo(asset('images/blink-logo.svg'))
             ->brandLogoHeight('5rem')
-            ->favicon(asset('images/blink-favicon.svg'))
+            ->favicon(asset('images/blink-tab.svg'))
             ->colors([
                 'primary' => '#2F1660',
                 'secondary' => '#8801FE',
@@ -46,6 +43,22 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
+            ])
+            ->navigationGroups([
+                NavigationGroup::make()
+                    ->label(fn (): string =>
+                        __('filament/admin/navigation.advertising_assets')
+                    ),
+
+                NavigationGroup::make()
+                    ->label(fn (): string =>
+                        __('filament/admin/navigation.master_data')
+                    ),
+
+                NavigationGroup::make()
+                    ->label(fn (): string =>
+                        __('filament/admin/navigation.administration')
+                    ),
             ])
             ->middleware([
                 EncryptCookies::class,

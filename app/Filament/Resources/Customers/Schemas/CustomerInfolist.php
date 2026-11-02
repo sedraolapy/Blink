@@ -21,7 +21,7 @@ class CustomerInfolist
                     ->label(__('filament/admin/customer_resource.phone'))
                     ->placeholder('-'),
 
-                TextEntry::make('subscription_type')
+                TextEntry::make('currentYearSubscription.subscription_type')
                     ->label(__('filament/admin/customer_resource.subscription_type'))
                     ->badge()
                     ->formatStateUsing(

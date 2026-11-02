@@ -15,8 +15,12 @@ class BookingYearsSettings extends Page
 {
     protected string $view = 'filament.pages.booking-years-settings';
 
-    protected static string|BackedEnum|null $navigationIcon =
-        Heroicon::OutlinedAdjustmentsHorizontal;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAdjustmentsHorizontal;
+
+        public static function getNavigationGroup(): string
+    {
+        return __('filament/admin/navigation.administration');
+    }
 
     public static function getNavigationLabel(): string
     {

@@ -4,9 +4,9 @@ return [
 
     'arabic' => 'العربية',
     'area' => 'المنطقة',
-    'area.governorate.name' => 'Name',
-    'area.name' => 'Name',
-    'area_id' => 'Area',
+    'area.governorate.name' => 'المحافظة',
+    'area.name' => 'المنطقة',
+    'area_id' => 'المنطقة',
     'code' => 'الكود',
     'created_at' => 'تاريخ الإنشاء',
     'english' => 'الإنجليزية',

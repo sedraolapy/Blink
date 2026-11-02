@@ -3,9 +3,6 @@
 namespace App\Filament\Resources\AdvertisingPeriods\RelationManagers;
 
 use App\Enums\DisplayGroupEnum;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -109,13 +106,7 @@ class RangesRelationManager extends RelationManager
             ])
 
             ->headerActions([
-                CreateAction::make()
-                    ->label(
-                        __('filament/admin/advertising_period_resource.create_range')
-                    )
-                    ->modalHeading(
-                        __('filament/admin/advertising_period_resource.create_range')
-                    ),
+                //
                 ]);
     }
 }

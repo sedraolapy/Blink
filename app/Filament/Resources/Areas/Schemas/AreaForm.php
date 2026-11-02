@@ -37,6 +37,10 @@ class AreaForm
                 Select::make('governorate_id')
                     ->label(__('filament/admin/area_resource.governorate_id'))
                     ->relationship('governorate', 'name')
+                    ->getOptionLabelFromRecordUsing(
+                        fn ($record): string =>
+                            $record->getTranslation('name', app()->getLocale())
+                    )
                     ->searchable()
                     ->preload()
                     ->required(),

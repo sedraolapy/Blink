@@ -30,6 +30,11 @@ class AreaResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function getNavigationGroup(): string
+    {
+        return __('filament/admin/navigation.master_data');
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('filament/admin/area_resource.navigation_label');

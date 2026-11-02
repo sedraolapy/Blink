@@ -2,14 +2,14 @@
 
 namespace App\Filament\Resources\AdvertisingPeriods;
 
-use App\Filament\Resources\AdvertisingPeriods\Pages\CreateAdvertisingPeriod;
-use App\Filament\Resources\AdvertisingPeriods\Pages\EditAdvertisingPeriod;
 use App\Filament\Resources\AdvertisingPeriods\Pages\ListAdvertisingPeriods;
 use App\Filament\Resources\AdvertisingPeriods\Pages\ViewAdvertisingPeriod;
 use App\Filament\Resources\AdvertisingPeriods\RelationManagers\RangesRelationManager;
 use App\Filament\Resources\AdvertisingPeriods\Schemas\AdvertisingPeriodForm;
 use App\Filament\Resources\AdvertisingPeriods\Schemas\AdvertisingPeriodInfolist;
 use App\Filament\Resources\AdvertisingPeriods\Tables\AdvertisingPeriodsTable;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Database\Eloquent\Model;
 use App\Models\AdvertisingPeriod;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -23,7 +23,12 @@ class AdvertisingPeriodResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $recordTitleAttribute = 'number';
+
+    public static function getNavigationGroup(): string
+    {
+        return __('filament/admin/navigation.administration');
+    }
 
     public static function getNavigationLabel(): string
     {
@@ -38,6 +43,26 @@ class AdvertisingPeriodResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return __('filament/admin/advertising_period_resource.plural_model_label');
+    }
+
+    public static function getCreateAuthorizationResponse(): Response
+    {
+        return Response::deny();
+    }
+
+    public static function getEditAuthorizationResponse(Model $record): Response
+    {
+        return Response::deny();
+    }
+
+    public static function getDeleteAuthorizationResponse(Model $record): Response
+    {
+        return Response::deny();
+    }
+
+    public static function getDeleteAnyAuthorizationResponse(): Response
+    {
+        return Response::deny();
     }
 
     public static function form(Schema $schema): Schema
@@ -66,9 +91,7 @@ class AdvertisingPeriodResource extends Resource
     {
         return [
             'index' => ListAdvertisingPeriods::route('/'),
-            'create' => CreateAdvertisingPeriod::route('/create'),
             'view' => ViewAdvertisingPeriod::route('/{record}'),
-            'edit' => EditAdvertisingPeriod::route('/{record}/edit'),
         ];
     }
 }

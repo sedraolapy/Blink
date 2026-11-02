@@ -30,6 +30,11 @@ class CustomerResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function getNavigationGroup(): string
+    {
+        return __('filament/admin/navigation.master_data');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return CustomerForm::configure($schema);

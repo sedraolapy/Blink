@@ -30,6 +30,11 @@ class FlexBillboardResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'code';
 
+    public static function getNavigationGroup(): string
+    {
+        return __('filament/admin/navigation.advertising_assets');
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('filament/admin/flex_billboard_resource.navigation_label');

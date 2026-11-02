@@ -3,7 +3,7 @@
         {{ $this->form }}
 
         <x-filament::button type="submit">
-            Save
+            {{ __('filament/admin/booking_years_settings.save') }}
         </x-filament::button>
     </form>
 </x-filament-panels::page>
