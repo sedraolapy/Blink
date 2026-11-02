@@ -22,6 +22,12 @@ class FlexBillboardsTable
                     ->searchable()
                     ->sortable(),
 
+                TextColumn::make('institution_name')
+                    ->label(__('filament/admin/flex_billboard_resource.institution_name'))
+                    ->placeholder('-')
+                    ->searchable()
+                    ->sortable(),
+
                 TextColumn::make('location_name')
                     ->label(__('filament/admin/flex_billboard_resource.location_name'))
                     ->limit(35)

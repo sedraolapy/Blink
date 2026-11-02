@@ -17,6 +17,7 @@ class FlexBillboard extends Model implements HasMedia
 
     protected $fillable = [
         'code',
+        'institution_name',
         'area_id',
         'location_name',
         'latitude',

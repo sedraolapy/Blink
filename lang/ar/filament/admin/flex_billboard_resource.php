@@ -26,5 +26,6 @@ return [
     'video' => 'الفيديو',
     'view_video' => 'عرض الفيديو',
     'width' => 'العرض',
-
+    'institution_name' => 'اسم المؤسسة',
+    'institution_name_placeholder' => 'أدخل اسم المؤسسة (اختياري)',
 ];

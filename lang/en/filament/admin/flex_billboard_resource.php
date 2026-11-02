@@ -26,5 +26,6 @@ return [
     'video' => 'Video',
     'view_video' => 'View Video',
     'width' => 'Width',
-
+    'institution_name' => 'Institution Name',
+    'institution_name_placeholder' => 'Enter institution name (optional)',
 ];

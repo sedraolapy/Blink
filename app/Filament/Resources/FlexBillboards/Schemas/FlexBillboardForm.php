@@ -39,6 +39,11 @@ class FlexBillboardForm
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(100),
+                TextInput::make('institution_name')
+                    ->label(__('filament/admin/flex_billboard_resource.institution_name'))
+                    ->maxLength(255)
+                    ->default(null)
+                    ->placeholder(__('filament/admin/flex_billboard_resource.institution_name_placeholder')),
 
                 Select::make('area_id')
                     ->label(__('filament/admin/flex_billboard_resource.area_id'))
