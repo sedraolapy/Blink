@@ -15,6 +15,7 @@ use App\Http\Controllers\API\Electronic\ElectronicController;
 use App\Http\Controllers\API\FlexBillboard\FlexController;
 use App\Http\Controllers\Api\Governorate\GovernorateController;
 use App\Http\Controllers\Api\Map\MapController;
+use App\Http\Controllers\API\Notification\NotificationController;
 use App\Http\Controllers\API\Orders\Electronic\ElectronicOrderController;
 use App\Http\Controllers\API\Orders\Flex\FlexOrderController;
 use App\Http\Controllers\API\Orders\Outdoor\OutdoorOrderController;
@@ -37,11 +38,16 @@ Route::middleware('localization')->group(function () {
         Route::get('/me', [LoginController::class, 'me']);
         Route::post('/logout', [LoginController::class, 'logout']);
 
-        // Customers - no working year needed
+        // Customers
         Route::apiResource('customers', CustomerController::class)->only(['store', 'update']);
 
         Route::get('/governorates', [GovernorateController::class, 'index']);
         Route::get('/map', [MapController::class, 'index']);
+
+        // Notifications
+        Route::get('/notifications', [NotificationController::class,'index']);
+        Route::patch('/notifications/read-status', [NotificationController::class,'updateReadStatus']);
+        Route::delete('/notifications', [NotificationController::class,'destroy']);
 
         Route::middleware('working.year')->group(function () {
             // Customers

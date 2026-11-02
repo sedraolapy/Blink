@@ -123,4 +123,10 @@ return [
     'campaign_sales_report' => [
         'retrieved' => 'تم جلب تقرير إجمالي مبيعات الحملة بنجاح.',
     ],
+
+    'notifications' => [
+        'retrieved' => 'تم جلب الإشعارات بنجاح.',
+        'read_status_updated' => 'تم تحديث حالة الإشعارات بنجاح.',
+        'deleted' => 'تم حذف الإشعارات بنجاح.',
+    ],
 ];

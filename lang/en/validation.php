@@ -79,10 +79,15 @@ return [
         'outdoor_order_type' => 'outdoor order type',
         'governorate_ids' => 'governorates',
         'governorate_ids.*' => 'governorate',
+        'notification_filter' => 'notification filter',
+        'notification_per_page' => 'notifications per page',
+        'notification_ids' => 'notification IDs',
+        'notification_id' => 'notification ID',
+        'notification_all' => 'all notifications option',
+        'is_read' => 'read status',
     ],
 
     'custom' => [
-
         'period_id' => [
             'required' => 'The :attribute field is required.',
             'integer' => 'The :attribute must be an integer.',
@@ -410,4 +415,48 @@ return [
         'deadline_outside_period' => 'The execution deadline must fall within the selected outdoor booking period.',
     ],
 
+    'notifications' => [
+        'filter' => [
+            'in' => 'The selected :attribute is invalid.',
+        ],
+
+        'page' => [
+            'integer' => 'The :attribute must be an integer.',
+            'min' => 'The :attribute must be at least :min.',
+        ],
+
+        'per_page' => [
+            'integer' => 'The :attribute must be an integer.',
+            'min' => 'The :attribute must be at least :min.',
+            'max' => 'The :attribute must not exceed :max.',
+        ],
+
+        'read_status' => [
+            'ids_required' => 'The :attribute field is required.',
+            'ids_prohibited' => 'The :attribute cannot be sent with the all option.',
+            'ids_array' => 'The :attribute must be an array.',
+            'ids_min' => 'At least one notification must be selected.',
+            'ids_max' => 'You cannot select more than :max notifications.',
+            'id_required' => 'The :attribute field is required.',
+            'id_uuid' => 'The :attribute must be a valid UUID.',
+            'id_distinct' => 'Duplicate notifications are not allowed.',
+            'all_boolean' => 'The :attribute must be a boolean.',
+            'all_accepted' => 'The :attribute must be true.',
+            'is_read_required' => 'The :attribute field is required.',
+            'is_read_boolean' => 'The :attribute must be true or false.',
+            'is_read_accepted' => 'When selecting all notifications, :attribute must be true.',
+        ],
+
+        'delete' => [
+            'ids_required' => 'The :attribute field is required.',
+            'ids_array' => 'The :attribute must be an array.',
+            'ids_min' => 'At least one notification must be selected.',
+            'ids_max' => 'You cannot select more than :max notifications.',
+            'id_required' => 'The :attribute field is required.',
+            'id_uuid' => 'The :attribute must be a valid UUID.',
+            'id_distinct' => 'Duplicate notifications are not allowed.',
+            'not_found' => 'One or more notifications do not exist or do not belong to the authenticated user.',
+        ],
+
+    ],
 ];

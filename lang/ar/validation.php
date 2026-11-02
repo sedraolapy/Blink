@@ -94,6 +94,12 @@ return [
         'outdoor_order_type' => 'نوع أمر الخارجي',
         'governorate_ids' => 'المحافظات',
         'governorate_ids.*' => 'المحافظة',
+        'notification_filter' => 'فلتر الإشعارات',
+        'notification_per_page' => 'عدد الإشعارات في الصفحة',
+        'notification_ids' => 'معرّفات الإشعارات',
+        'notification_id' => 'معرّف الإشعار',
+        'notification_all' => 'خيار جميع الإشعارات',
+        'is_read' => 'حالة القراءة',
     ],
 
         'custom' => [
@@ -423,6 +429,50 @@ return [
         'issue_date_outside_year' => 'يجب أن يكون تاريخ إصدار الأمر ضمن سنة العمل المحددة.',
         'deadline_outside_year' => 'يجب أن يكون الموعد النهائي للتنفيذ ضمن سنة العمل المحددة.',
         'deadline_outside_period' =>'يجب أن يكون الموعد النهائي للتنفيذ ضمن فترة الحجز الخارجي المحددة.',
+    ],
+
+    'notifications' => [
+        'filter' => [
+            'in' => 'القيمة المحددة لـ :attribute غير صالحة.',
+        ],
+
+        'page' => [
+            'integer' => 'يجب أن يكون :attribute رقماً صحيحاً.',
+            'min' => 'يجب ألا يقل :attribute عن :min.',
+        ],
+
+        'per_page' => [
+            'integer' => 'يجب أن يكون :attribute رقماً صحيحاً.',
+            'min' => 'يجب ألا يقل :attribute عن :min.',
+            'max' => 'يجب ألا يزيد :attribute عن :max.',
+        ],
+
+        'read_status' => [
+            'ids_required' => 'حقل :attribute مطلوب.',
+            'ids_prohibited' => 'لا يمكن إرسال :attribute مع خيار جميع الإشعارات.',
+            'ids_array' => 'يجب أن يكون :attribute قائمة.',
+            'ids_min' => 'يجب تحديد إشعار واحد على الأقل.',
+            'ids_max' => 'لا يمكن تحديد أكثر من :max إشعار.',
+            'id_required' => 'حقل :attribute مطلوب.',
+            'id_uuid' => 'يجب أن يكون :attribute بصيغة UUID صحيحة.',
+            'id_distinct' => 'لا يمكن تكرار نفس الإشعار.',
+            'all_boolean' => 'يجب أن تكون قيمة :attribute منطقية.',
+            'all_accepted' => 'يجب أن تكون قيمة :attribute true.',
+            'is_read_required' => 'حقل :attribute مطلوب.',
+            'is_read_boolean' => 'يجب أن تكون قيمة :attribute true أو false.',
+            'is_read_accepted' => 'عند اختيار جميع الإشعارات، يجب أن تكون :attribute true.',
+        ],
+
+        'delete' => [
+            'ids_required' => 'حقل :attribute مطلوب.',
+            'ids_array' => 'يجب أن يكون :attribute قائمة.',
+            'ids_min' => 'يجب تحديد إشعار واحد على الأقل.',
+            'ids_max' => 'لا يمكن تحديد أكثر من :max إشعار.',
+            'id_required' => 'حقل :attribute مطلوب.',
+            'id_uuid' => 'يجب أن يكون :attribute بصيغة UUID صحيحة.',
+            'id_distinct' => 'لا يمكن تكرار نفس الإشعار.',
+            'not_found' => 'إشعار واحد أو أكثر غير موجود أو غير تابع للمستخدم الحالي.',
+        ],
 
     ],
 

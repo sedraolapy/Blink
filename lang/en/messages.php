@@ -125,4 +125,10 @@ return [
     'campaign_sales_report' => [
         'retrieved' => 'Campaign sales report retrieved successfully.',
     ],
+
+    'notifications' => [
+        'retrieved' => 'Notifications retrieved successfully.',
+        'read_status_updated' => 'Notification read status updated successfully.',
+        'deleted' => 'Notifications deleted successfully.',
+    ],
 ];

@@ -35,6 +35,9 @@ class DatabaseSeeder extends Seeder
             FlexOrdersTestSeeder::class,
             CampaignStartReportTestSeeder::class,
             CampaignRouteReportTestSeeder::class,
+            ContractNotificationTestSeeder::class,
+            ElectronicNotificationTestSeeder::class,
+            OutdoorNotificationTestSeeder::class,
         ]);
 
         Customer::factory()->count(20)->create();
