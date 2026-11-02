@@ -1,462 +1,211 @@
-
 @php
     $isArabic = app()->getLocale() === 'ar';
 
-    $t = $isArabic
+    $labels = $isArabic
         ? [
             'title' => 'تقرير إجمالي مبيعات الحملة',
             'period' => 'الفترة',
+            'statisticsBooked' => 'اللوحات المحجوزة',
+            'statisticsConfirmed' => 'اللوحات المؤكدة',
+            'statisticsUnconfirmed' => 'اللوحات غير المؤكدة',
+            'statisticsRemaining' => 'المتبقي بعد المؤكد',
             'customer' => 'الشركة',
-            'damascus_boards' => 'لوحات دمشق',
-            'other_boards' => 'لوحات باقي المحافظات',
-            'booked_boards' => 'اللوحات المحجوزة',
-            'booking_status' => 'حالة الحجز',
+            'status' => 'حالة الحجز',
+            'damascus' => 'لوحات دمشق',
+            'otherGovernorates' => 'لوحات باقي المحافظات',
+            'total' => 'المجموع',
             'confirmed' => 'مؤكد',
             'unconfirmed' => 'غير مؤكد',
+            'inventory' => 'إجمالي المخزون',
+            'booked' => 'اللوحات المحجوزة',
             'remaining' => 'المتبقي بعد المؤكد',
-            'total' => 'الإجمالي',
-            'inventory' => 'إجمالي اللوحات',
-            'damascus' => 'لوحات دمشق',
-            'other_governorates' => 'لوحات باقي المحافظات',
-            'empty' => 'لا توجد حجوزات لهذه الفترة',
-            'note' => 'تُعرض الحجوزات غير المؤكدة بشكل مستقل، وتبقى ضمن المتبقي حتى تأكيدها.',
+            'empty' => 'لا توجد حجوزات لهذه الفترة.',
         ]
         : [
             'title' => 'Campaign Sales Report',
             'period' => 'Period',
-            'customer' => 'Customer',
-            'damascus_boards' => 'Damascus Boards',
-            'other_boards' => 'Other Governorates Boards',
-            'booked_boards' => 'Booked Boards',
-            'booking_status' => 'Booking Status',
+            'statisticsBooked' => 'Booked Billboards',
+            'statisticsConfirmed' => 'Confirmed Billboards',
+            'statisticsUnconfirmed' => 'Unconfirmed Billboards',
+            'statisticsRemaining' => 'Remaining After Confirmed',
+            'customer' => 'Company',
+            'status' => 'Booking Status',
+            'damascus' => 'Damascus Billboards',
+            'otherGovernorates' => 'Other Governorates',
+            'total' => 'Total',
             'confirmed' => 'Confirmed',
             'unconfirmed' => 'Unconfirmed',
-            'remaining' => 'Remaining After Confirmed',
-            'total' => 'Total',
             'inventory' => 'Total Inventory',
-            'damascus' => 'Damascus Boards',
-            'other_governorates' => 'Other Governorates Boards',
-            'empty' => 'No bookings for this period',
-            'note' => 'Unconfirmed bookings are shown separately and remain in the available balance until confirmed.',
+            'booked' => 'Booked Billboards',
+            'remaining' => 'Remaining After Confirmed',
+            'empty' => 'No bookings exist for this period.',
         ];
 
-    $purple = '#32185F';
-    $brightPurple = '#8000FF';
-    $lightPurple = '#F2E7F8';
-    $softPurple = '#E9D8F3';
-    $borderColor = '#DCCBE8';
+    // All counts and statuses are provided by Laravel. Grouping changes only
+    // the display order to keep the same customer's status rows together.
+    $customerGroups = collect($items)->groupBy(fn ($item) => $item['customer']['id']);
 
-    $baseStyle =
-        'font-family:Arial,sans-serif;'
-        . 'text-align:center;'
-        . 'vertical-align:middle;'
-        . 'word-wrap:break-word;';
-
-    $headerStyle = $baseStyle
-        . 'background-color:' . $purple . ';'
-        . 'color:#FFFFFF;'
-        . 'font-size:12pt;'
-        . 'font-weight:bold;'
-        . 'border:1px solid ' . $borderColor . ';';
-
-    $kpiStyle = $baseStyle
-        . 'background-color:' . $softPurple . ';'
-        . 'color:' . $purple . ';'
-        . 'font-size:12pt;'
-        . 'font-weight:bold;'
-        . 'border:1px solid ' . $borderColor . ';';
-
-    $summaryCellStyle = $baseStyle
-        . 'background-color:#F9F5FC;'
-        . 'color:' . $purple . ';'
-        . 'font-size:11pt;'
-        . 'font-weight:bold;'
-        . 'border:1px solid ' . $borderColor . ';';
-
-    $remainingStyle = $baseStyle
-        . 'background-color:' . $softPurple . ';'
-        . 'color:' . $purple . ';'
-        . 'font-size:11pt;'
-        . 'font-weight:bold;'
-        . 'border:1px solid ' . $borderColor . ';';
-
-    $periodText = $t['period']
-        . ' ' . $period['number']
-        . ' (' . $period['start_date']
-        . ' — ' . $period['end_date'] . ')';
-
-    $groupedItems = collect($items)->groupBy(
-        fn (array $item) => $item['customer']->id
-    );
-
-    $summaryRows = [
-        'inventory_boards_count' => $t['inventory'],
-        'confirmed_boards_count' => $t['confirmed'],
-        'unconfirmed_boards_count' => $t['unconfirmed'],
-        'remaining_boards_count' => $t['remaining'],
+    $statistics = [
+        ['label' => $labels['statisticsBooked'], 'value' => $summary['total']['booked_boards_count']],
+        ['label' => $labels['statisticsConfirmed'], 'value' => $summary['total']['confirmed_boards_count']],
+        ['label' => $labels['statisticsUnconfirmed'], 'value' => $summary['total']['unconfirmed_boards_count']],
+        ['label' => $labels['statisticsRemaining'], 'value' => $summary['total']['remaining_boards_count']],
     ];
+
+    $geographicRows = [
+        ['label' => $labels['inventory'], 'key' => 'inventory_boards_count'],
+        ['label' => $labels['booked'], 'key' => 'booked_boards_count'],
+        ['label' => $labels['statisticsConfirmed'], 'key' => 'confirmed_boards_count'],
+        ['label' => $labels['statisticsUnconfirmed'], 'key' => 'unconfirmed_boards_count'],
+        ['label' => $labels['remaining'], 'key' => 'remaining_boards_count'],
+    ];
+
+    $textAlign = $isArabic ? 'right' : 'left';
+    $font = 'font-family:Arial,sans-serif;';
+    $border = 'border:1px solid #E8E1EB;';
+    $headerStyle = $font . 'background-color:#2F1660;color:#FFFFFF;border:1px solid #49347A;font-size:12pt;font-weight:bold;text-align:center;vertical-align:middle;';
+    $bodyStyle = $font . $border . 'font-size:11pt;vertical-align:middle;';
+    $numberStyle = $bodyStyle . 'text-align:center;';
 @endphp
 
-<table
-    dir="{{ $isArabic ? 'rtl' : 'ltr' }}"
-    style="border-collapse:collapse;font-family:Arial,sans-serif;"
->
+{{-- One HTML table: necessary for reliable placement with FromView.
+     Twelve underlying columns form four KPI blocks, five visible main-table
+     columns, and two side-by-side geographic summary tables. --}}
+<table>
+    {{-- Row 1: top breathing room --}}
+    <tr><td colspan="12">&nbsp;</td></tr>
 
-    {{-- Row 1: Spacing --}}
+    {{-- Row 2: title --}}
     <tr>
-        <td colspan="5" height="18">&nbsp;</td>
-    </tr>
-
-    {{-- Row 2: Report title --}}
-    <tr>
-        <td
-            colspan="5"
-            height="50"
-            align="center"
-            style="{{ $baseStyle }}
-                color:{{ $purple }};
-                font-size:24pt;
-                font-weight:bold;"
-        >
-            {{ $t['title'] }}
-        </td>
-    </tr>
-
-    {{-- Row 3: Spacing --}}
-    <tr>
-        <td colspan="5" height="18">&nbsp;</td>
-    </tr>
-
-    {{-- Row 4: Current period --}}
-    <tr>
-        <td
-            colspan="5"
-            height="34"
-            align="center"
-            style="{{ $baseStyle }}
-                background-color:{{ $lightPurple }};
-                color:{{ $purple }};
-                font-size:12pt;
-                font-weight:bold;
-                border:1px solid {{ $borderColor }};"
-        >
-            {{ $periodText }}
-        </td>
-    </tr>
-
-    {{-- Row 5: Spacing --}}
-    <tr>
-        <td colspan="5" height="20">&nbsp;</td>
-    </tr>
-
-    {{-- Row 6: KPI Summary --}}
-    <tr>
-        <td
-            colspan="2"
-            height="42"
-            align="center"
-            style="{{ $kpiStyle }}"
-        >
-            {{ $t['booked_boards'] }}:
-            {{ $summary['total']['booked_boards_count'] }}
-        </td>
-
-        <td
-            align="center"
-            style="{{ $kpiStyle }}"
-        >
-            {{ $t['confirmed'] }}:
-            {{ $summary['total']['confirmed_boards_count'] }}
-        </td>
-
-        <td
-            align="center"
-            style="{{ $kpiStyle }}"
-        >
-            {{ $t['unconfirmed'] }}:
-            {{ $summary['total']['unconfirmed_boards_count'] }}
-        </td>
-
-        <td
-            align="center"
-            style="{{ $kpiStyle }}"
-        >
-            {{ $t['remaining'] }}:
-            {{ $summary['total']['remaining_boards_count'] }}
-        </td>
-    </tr>
-
-    {{-- Row 7: Spacing --}}
-    <tr>
-        <td colspan="5" height="20">&nbsp;</td>
-    </tr>
-
-    {{-- Row 8: Main table header --}}
-    <tr>
-        <th height="44" style="{{ $headerStyle }}">
-            {{ $t['customer'] }}
-        </th>
-
-        <th style="{{ $headerStyle }}">
-            {{ $t['damascus_boards'] }}
-        </th>
-
-        <th style="{{ $headerStyle }}">
-            {{ $t['other_boards'] }}
-        </th>
-
-        <th style="{{ $headerStyle }}">
-            {{ $t['booked_boards'] }}
-        </th>
-
-        <th style="{{ $headerStyle }}">
-            {{ $t['booking_status'] }}
+        <th colspan="12" style="{{ $font }}background-color:#FFFFFF;color:#2F1660;font-size:22pt;font-weight:bold;text-align:center;vertical-align:middle;">
+            {{ $labels['title'] }}
         </th>
     </tr>
 
-    {{-- Row 9 onwards: Customer bookings --}}
-    @forelse ($groupedItems as $customerRows)
+    {{-- Row 3: space --}}
+    <tr><td colspan="12">&nbsp;</td></tr>
 
+    {{-- Row 4: period panel (right) and dates (left) in RTL --}}
+    <tr>
+        <th colspan="6" style="{{ $font }}background-color:#FAF5FE;color:#2F1660;border:1px solid #E9DCED;font-size:13pt;font-weight:bold;text-align:{{ $textAlign }};vertical-align:middle;">
+            {{ $labels['period'] }} {{ $period['number'] }} · {{ $period['year'] }}
+        </th>
+        <td colspan="6" data-type="s" style="{{ $font }}background-color:#FAF5FE;color:#2F1660;border:1px solid #E9DCED;font-size:11pt;font-weight:bold;text-align:center;vertical-align:middle;">
+            {{ $period['start_date'] }} — {{ $period['end_date'] }}
+        </td>
+    </tr>
+
+    {{-- Row 5: space --}}
+    <tr><td colspan="12">&nbsp;</td></tr>
+
+    {{-- Rows 6–7: four backend statistics, in preview order --}}
+    <tr>
+        @foreach ($statistics as $statistic)
+            <th colspan="3" style="{{ $font }}background-color:#FAF6FD;color:#2F1660;border:1px solid #E6E0E9;font-size:11pt;font-weight:bold;text-align:center;vertical-align:middle;">
+                {{ $statistic['label'] }}
+            </th>
+        @endforeach
+    </tr>
+    <tr>
+        @foreach ($statistics as $statistic)
+            <td colspan="3" data-type="n" style="{{ $font }}background-color:#FFFFFF;color:#2F1660;border:1px solid #E6E0E9;font-size:23pt;font-weight:bold;text-align:center;vertical-align:middle;">
+                {{ $statistic['value'] }}
+            </td>
+        @endforeach
+    </tr>
+
+    {{-- Row 8: space --}}
+    <tr><td colspan="12">&nbsp;</td></tr>
+
+    {{-- Row 9: modest space before the table (no separate section title) --}}
+    <tr><td colspan="12" style="background-color:#FFFFFF;border:none;">&nbsp;</td></tr>
+
+    {{-- Row 10: five visual columns, matching the current frontend preview --}}
+    <tr>
+        <th colspan="4" style="{{ $headerStyle }}text-align:{{ $textAlign }};">{{ $labels['customer'] }}</th>
+        <th style="{{ $headerStyle }}">{{ $labels['status'] }}</th>
+        <th colspan="2" style="{{ $headerStyle }}">{{ $labels['damascus'] }}</th>
+        <th colspan="3" style="{{ $headerStyle }}">{{ $labels['otherGovernorates'] }}</th>
+        <th colspan="2" style="{{ $headerStyle }}background-color:#49267B;">{{ $labels['total'] }}</th>
+    </tr>
+
+    {{-- Rows 11+: one row per backend customer+status entry, grouped for rowspan --}}
+    @forelse ($customerGroups as $customerRows)
         @php
-            $groupBackground = $loop->even
-                ? '#F9F5FC'
-                : '#FFFFFF';
-
-            $cellStyle = $baseStyle
-                . 'background-color:' . $groupBackground . ';'
-                . 'color:#30223E;'
-                . 'font-size:11pt;'
-                . 'border:1px solid ' . $borderColor . ';';
-
-            $customerStyle = $cellStyle
-                . 'font-weight:bold;';
-
-            $statusStyle = $baseStyle
-                . 'background-color:' . $lightPurple . ';'
-                . 'color:' . $purple . ';'
-                . 'font-size:11pt;'
-                . 'font-weight:bold;'
-                . 'border:1px solid ' . $borderColor . ';';
+            $groupBackground = $loop->odd ? '#FFFFFF' : '#FCFAFF';
         @endphp
-
         @foreach ($customerRows as $item)
-
+            @php
+                $status = $item['booking_status'];
+                $statusBackground = $status === 'confirmed' ? '#F0E4FB' : '#F5F2F7';
+                $statusColor = $status === 'confirmed' ? '#59227E' : '#75697D';
+            @endphp
             <tr>
-
-                {{-- Merge customer name when it has
-                     confirmed and unconfirmed rows --}}
                 @if ($loop->first)
-                    <td
-                        rowspan="{{ $customerRows->count() }}"
-                        height="34"
-                        data-type="s"
-                        align="center"
-                        style="{{ $customerStyle }}"
-                    >
-                        {{ $item['customer']->name }}
+                    <td colspan="4" rowspan="{{ $customerRows->count() }}" data-type="s" style="{{ $bodyStyle }}background-color:{{ $groupBackground }};color:#3E304B;font-weight:bold;text-align:{{ $textAlign }};vertical-align:middle;">
+                        {{ $item['customer']['name'] }}
                     </td>
                 @endif
-
-                {{-- Damascus boards --}}
-                <td
-                    data-type="n"
-                    align="center"
-                    style="{{ $cellStyle }}"
-                >
+                <td data-type="s" style="{{ $bodyStyle }}background-color:{{ $statusBackground }};color:{{ $statusColor }};font-weight:bold;text-align:center;">
+                    {{ $labels[$status] }}
+                </td>
+                <td colspan="2" data-type="n" style="{{ $numberStyle }}background-color:{{ $groupBackground }};color:#574A60;">
                     {{ $item['damascus_boards_count'] }}
                 </td>
-
-                {{-- Other governorates boards --}}
-                <td
-                    data-type="n"
-                    align="center"
-                    style="{{ $cellStyle }}"
-                >
+                <td colspan="3" data-type="n" style="{{ $numberStyle }}background-color:{{ $groupBackground }};color:#574A60;">
                     {{ $item['other_governorates_boards_count'] }}
                 </td>
-
-                {{-- Total booked boards --}}
-                <td
-                    data-type="n"
-                    align="center"
-                    style="{{ $cellStyle }}
-                        font-weight:bold;"
-                >
+                <td colspan="2" data-type="n" style="{{ $numberStyle }}background-color:#F8F1FD;color:#2F1660;font-weight:bold;">
                     {{ $item['total_boards_count'] }}
                 </td>
-
-                {{-- Booking status --}}
-                <td
-                    data-type="s"
-                    align="center"
-                    style="{{ $statusStyle }}"
-                >
-                    {{
-                        $item['booking_status'] === 'confirmed'
-                            ? $t['confirmed']
-                            : $t['unconfirmed']
-                    }}
-                </td>
-
             </tr>
-
         @endforeach
-
     @empty
-
         <tr>
-            <td
-                colspan="5"
-                height="40"
-                align="center"
-                style="{{ $summaryCellStyle }}"
-            >
-                {{ $t['empty'] }}
+            <td colspan="12" style="{{ $bodyStyle }}background-color:#FFFFFF;color:#93899A;text-align:center;">
+                {{ $labels['empty'] }}
             </td>
         </tr>
-
     @endforelse
 
-    {{-- Main table totals --}}
+    {{-- Footer: no summation; only backend summary fields --}}
     <tr>
-        <td
-            height="36"
-            align="center"
-            style="{{ $headerStyle }}
-                background-color:{{ $brightPurple }};"
-        >
-            {{ $t['total'] }}
-        </td>
-
-        <td
-            data-type="n"
-            align="center"
-            style="{{ $remainingStyle }}"
-        >
-            {{ $summary['damascus']['booked_boards_count'] }}
-        </td>
-
-        <td
-            data-type="n"
-            align="center"
-            style="{{ $remainingStyle }}"
-        >
-            {{ $summary['other_governorates']['booked_boards_count'] }}
-        </td>
-
-        <td
-            data-type="n"
-            align="center"
-            style="{{ $remainingStyle }}"
-        >
-            {{ $summary['total']['booked_boards_count'] }}
-        </td>
-
-        <td>&nbsp;</td>
+        <th colspan="5" style="{{ $headerStyle }}text-align:{{ $textAlign }};">{{ $labels['total'] }}</th>
+        <td colspan="2" data-type="n" style="{{ $headerStyle }}">{{ $summary['damascus']['booked_boards_count'] }}</td>
+        <td colspan="3" data-type="n" style="{{ $headerStyle }}">{{ $summary['other_governorates']['booked_boards_count'] }}</td>
+        <td colspan="2" data-type="n" style="{{ $headerStyle }}background-color:#49267B;">{{ $summary['total']['booked_boards_count'] }}</td>
     </tr>
 
-    {{-- Spacing before summaries --}}
+    {{-- Clear vertical separation between the main table and the area summaries --}}
+    <tr><td colspan="12" style="background-color:#FFFFFF;border:none;">&nbsp;</td></tr>
+
+    {{-- Two independent summaries with an empty F-column gutter. --}}
     <tr>
-        <td colspan="5" height="18">&nbsp;</td>
+        <th colspan="5" style="{{ $headerStyle }}text-align:{{ $textAlign }};">{{ $labels['damascus'] }}</th>
+        <td style="background-color:#FFFFFF;border:none;">&nbsp;</td>
+        <th colspan="6" style="{{ $headerStyle }}text-align:{{ $textAlign }};">{{ $labels['otherGovernorates'] }}</th>
     </tr>
-
-    <tr>
-        <td colspan="5" height="18">&nbsp;</td>
-    </tr>
-
-    {{-- Summary section headers --}}
-    <tr>
-        <th
-            colspan="2"
-            height="36"
-            style="{{ $headerStyle }}"
-        >
-            {{ $t['damascus'] }}
-        </th>
-
-        <td>&nbsp;</td>
-
-        <th
-            colspan="2"
-            style="{{ $headerStyle }}"
-        >
-            {{ $t['other_governorates'] }}
-        </th>
-    </tr>
-
-    {{-- Inventory / Confirmed / Unconfirmed / Remaining --}}
-    @foreach ($summaryRows as $key => $label)
-
+    @foreach ($geographicRows as $detail)
         @php
-            $rowStyle = $key === 'remaining_boards_count'
-                ? $remainingStyle
-                : $summaryCellStyle;
+            $isRemaining = $detail['key'] === 'remaining_boards_count';
+            $background = $isRemaining ? '#2F1660' : ($loop->odd ? '#FFFFFF' : '#FCFAFF');
+            $color = $isRemaining ? '#FFFFFF' : '#574A60';
+            $numberColor = $isRemaining ? '#FFFFFF' : '#2F1660';
         @endphp
-
         <tr>
-
-            {{-- Damascus label --}}
-            <td
-                height="31"
-                align="center"
-                style="{{ $rowStyle }}"
-            >
-                {{ $label }}
+            <th colspan="4" style="{{ $bodyStyle }}background-color:{{ $background }};color:{{ $color }};font-weight:{{ $isRemaining ? 'bold' : 'normal' }};text-align:{{ $textAlign }};">
+                {{ $detail['label'] }}
+            </th>
+            <td data-type="n" style="{{ $numberStyle }}background-color:{{ $background }};color:{{ $numberColor }};font-weight:bold;">
+                {{ $summary['damascus'][$detail['key']] }}
             </td>
-
-            {{-- Damascus value --}}
-            <td
-                data-type="n"
-                align="center"
-                style="{{ $rowStyle }}"
-            >
-                {{ $summary['damascus'][$key] }}
+            <td style="background-color:#FFFFFF;border:none;">&nbsp;</td>
+            <th colspan="4" style="{{ $bodyStyle }}background-color:{{ $background }};color:{{ $color }};font-weight:{{ $isRemaining ? 'bold' : 'normal' }};text-align:{{ $textAlign }};">
+                {{ $detail['label'] }}
+            </th>
+            <td colspan="2" data-type="n" style="{{ $numberStyle }}background-color:{{ $background }};color:{{ $numberColor }};font-weight:bold;">
+                {{ $summary['other_governorates'][$detail['key']] }}
             </td>
-
-            {{-- Separator --}}
-            <td>&nbsp;</td>
-
-            {{-- Other governorates label --}}
-            <td
-                align="center"
-                style="{{ $rowStyle }}"
-            >
-                {{ $label }}
-            </td>
-
-            {{-- Other governorates value --}}
-            <td
-                data-type="n"
-                align="center"
-                style="{{ $rowStyle }}"
-            >
-                {{ $summary['other_governorates'][$key] }}
-            </td>
-
         </tr>
-
     @endforeach
-
-    {{-- Spacing --}}
-    <tr>
-        <td colspan="5" height="18">&nbsp;</td>
-    </tr>
-
-    {{-- Footer note --}}
-    <tr>
-        <td
-            colspan="5"
-            height="40"
-            align="center"
-            style="{{ $baseStyle }}
-                background-color:{{ $lightPurple }};
-                color:{{ $purple }};
-                font-size:11pt;
-                font-weight:bold;
-                border:1px solid {{ $borderColor }};"
-        >
-            {{ $t['note'] }}
-        </td>
-    </tr>
-
 </table>

@@ -1,385 +1,186 @@
-
 @php
     $isArabic = app()->getLocale() === 'ar';
 
-    $t = $isArabic
+    $labels = $isArabic
         ? [
             'title' => 'تقرير مسار الحملة',
-            'previous' => 'الفترة السابقة',
-            'current' => 'الفترة الحالية',
-            'total_boards' => 'اللوحات إجمالي',
+            'period' => 'الفترة',
+            'currentPeriod' => 'الفترة الحالية',
+            'previousPeriod' => 'الفترة السابقة',
+            'boards' => 'إجمالي اللوحات',
             'installation' => 'تركيب',
             'extension' => 'تمديد',
-            'no_order' => 'لا يوجد أمر',
-            'no_booking' => '—',
-            'no_design' => 'بدون تصميم',
-            'number' => 'الرقم',
+            'customers' => 'الشركات',
             'governorate' => 'المحافظة',
             'board' => 'اللوحة',
-            'status' => 'الحالة',
-            'total' => 'إجمالي',
-            'customers' => 'الشركات',
-            'empty' => 'لا توجد حجوزات ضمن المحافظات المحددة',
+            'action' => 'الإجراء المطلوب',
+            'noDesign' => 'لا يوجد تصميم',
+            'empty' => 'لا توجد لوحات ضمن المحافظات المختارة في الفترتين.',
         ]
         : [
             'title' => 'Campaign Route Report',
-            'previous' => 'Previous period',
-            'current' => 'Current period',
-            'total_boards' => 'Total boards',
+            'period' => 'Period',
+            'currentPeriod' => 'Current Period',
+            'previousPeriod' => 'Previous Period',
+            'boards' => 'Total Billboards',
             'installation' => 'Installation',
             'extension' => 'Extension',
-            'no_order' => 'No order',
-            'no_booking' => '—',
-            'no_design' => 'No design',
-            'number' => 'No.',
+            'customers' => 'Companies',
             'governorate' => 'Governorate',
             'board' => 'Billboard',
-            'status' => 'Status',
-            'total' => 'Total',
-            'customers' => 'Customers',
-            'empty' => 'No bookings for the selected governorates',
+            'action' => 'Required Action',
+            'noDesign' => 'No design',
+            'empty' => 'No billboards found in the selected governorates for either period.',
         ];
 
-    $purple = '#32185F';
-    $lightPurple = '#F2E7F8';
-    $softPurple = '#E9D8F3';
-    $borderColor = '#DCCBE8';
-    $white = '#FFFFFF';
+    // Business counts and action types come from Laravel; nothing is recalculated here.
+    $statistics = [
+        ['label' => $labels['boards'], 'value' => $summary['boards_count']],
+        ['label' => $labels['installation'], 'value' => $summary['installation_count']],
+        ['label' => $labels['extension'], 'value' => $summary['extension_count']],
+        ['label' => $labels['customers'], 'value' => $summary['customers_count']],
+    ];
 
-    $baseStyle = 'font-family:Arial,sans-serif;'
-        . 'text-align:center;'
-        . 'vertical-align:middle;'
-        . 'word-wrap:break-word;';
+    $font = 'font-family:Arial,sans-serif;';
+    $border = 'border:1px solid #E8E1EB;';
+    $headerStyle = $font . 'background-color:#2F1660;color:#FFFFFF;border:1px solid #49347A;font-size:11pt;font-weight:bold;text-align:center;vertical-align:middle;';
+    $cellStyle = $font . $border . 'font-size:10pt;vertical-align:middle;word-wrap:break-word;';
+    $textAlign = $isArabic ? 'right' : 'left';
 
-    $headerStyle = $baseStyle
-        . 'background-color:' . $purple . ';'
-        . 'color:#FFFFFF;'
-        . 'font-size:13pt;'
-        . 'font-weight:bold;'
-        . 'border:1px solid ' . $borderColor . ';';
-
-    $previousText = $t['previous']
-        . ' ' . $previousPeriod['number']
-        . ' (' . $previousPeriod['start_date']
-        . ' — ' . $previousPeriod['end_date'] . ')';
-
-    $currentText = $t['current']
-        . ' ' . $currentPeriod['number']
-        . ' (' . $currentPeriod['start_date']
-        . ' — ' . $currentPeriod['end_date'] . ')';
+    $currentLabel = $labels['period'] . ' ' . $currentPeriod['number'] . ' · ' . $currentPeriod['year'];
+    $previousLabel = $labels['period'] . ' ' . $previousPeriod['number'] . ' · ' . $previousPeriod['year'];
 @endphp
 
-<table
-    dir="{{ $isArabic ? 'rtl' : 'ltr' }}"
-    style="border-collapse:collapse;font-family:Arial,sans-serif;"
->
-    {{-- Row 1: Space --}}
+{{-- One HTML table is required by maatwebsite/excel FromView.
+     Twelve underlying columns let the four equal statistics and the five
+     visible report columns share one properly aligned Excel worksheet. --}}
+<table>
+    {{-- Row 1: Top whitespace --}}
     <tr>
-        <td colspan="6" height="18">&nbsp;</td>
+        <td colspan="12">&nbsp;</td>
     </tr>
 
-    {{-- Row 2: Report title --}}
+    {{-- Row 2: Title --}}
     <tr>
-        <td
-            colspan="6"
-            height="50"
-            align="center"
-            valign="center"
-            style="{{ $baseStyle }}
-                color:{{ $purple }};
-                font-size:24pt;
-                font-weight:bold;"
-        >
-            {{ $t['title'] }}
+        <th colspan="12"
+            style="{{ $font }}background-color:#FFFFFF;color:#2F1660;font-size:20pt;font-weight:bold;text-align:center;vertical-align:middle;">
+            {{ $labels['title'] }}
+        </th>
+    </tr>
+
+    {{-- Row 3: Spacing --}}
+    <tr>
+        <td colspan="12">&nbsp;</td>
+    </tr>
+
+    {{-- Row 4: Current and previous periods. A:F / G:L are the two panels. --}}
+    <tr>
+        <th colspan="3" style="{{ $font }}background-color:#FAF6FD;color:#2F1660;border:1px solid #E6DCEA;font-size:12pt;font-weight:bold;text-align:{{ $textAlign }};vertical-align:middle;">
+            {{ $labels['currentPeriod'] }}<br>{{ $currentLabel }}
+        </th>
+        <td colspan="3" data-type="s" style="{{ $font }}background-color:#FAF6FD;color:#2F1660;border:1px solid #E6DCEA;font-size:11pt;font-weight:bold;text-align:center;vertical-align:middle;">
+            {{ $currentPeriod['start_date'] }} — {{ $currentPeriod['end_date'] }}
+        </td>
+        <th colspan="3" style="{{ $font }}background-color:#FAF6FD;color:#2F1660;border:1px solid #E6DCEA;font-size:12pt;font-weight:bold;text-align:{{ $textAlign }};vertical-align:middle;">
+            {{ $labels['previousPeriod'] }}<br>{{ $previousLabel }}
+        </th>
+        <td colspan="3" data-type="s" style="{{ $font }}background-color:#FAF6FD;color:#2F1660;border:1px solid #E6DCEA;font-size:11pt;font-weight:bold;text-align:center;vertical-align:middle;">
+            {{ $previousPeriod['start_date'] }} — {{ $previousPeriod['end_date'] }}
         </td>
     </tr>
 
-    {{-- Row 3: Space --}}
+    {{-- Rows 5–6: Compact spacing between the periods and statistics.
+         Preserve row positions used by the Excel AfterSheet formatter. --}}
+    <tr><td colspan="12">&nbsp;</td></tr>
+    <tr><td colspan="12">&nbsp;</td></tr>
+
+    {{-- Row 7: Statistic labels, equally sized like the Preview --}}
     <tr>
-        <td colspan="6" height="18">&nbsp;</td>
+        @foreach ($statistics as $statistic)
+            <th colspan="3"
+                style="{{ $font }}background-color:#FAF6FD;color:#2F1660;border:1px solid #E6E0E9;font-size:11pt;font-weight:bold;text-align:center;vertical-align:middle;">
+                {{ $statistic['label'] }}
+            </th>
+        @endforeach
     </tr>
 
-    {{-- Row 4: Periods --}}
+    {{-- Row 8: Statistic values --}}
     <tr>
-        <td
-            colspan="6"
-            height="34"
-            align="center"
-            style="{{ $baseStyle }}
-                background-color:{{ $lightPurple }};
-                color:{{ $purple }};
-                font-size:12pt;
-                font-weight:bold;
-                border:1px solid {{ $borderColor }};"
-        >
-            {{ $currentText }}
-            |
-            {{ $previousText }}
-        </td>
+        @foreach ($statistics as $statistic)
+            <td colspan="3" data-type="n"
+                style="{{ $font }}background-color:#FFFFFF;color:#2F1660;border:1px solid #E6E0E9;font-size:22pt;font-weight:bold;text-align:center;vertical-align:middle;">
+                {{ $statistic['value'] }}
+            </td>
+        @endforeach
     </tr>
 
-    {{-- Row 5: Space --}}
+    {{-- Row 9: Spacing --}}
     <tr>
-        <td colspan="6" height="20">&nbsp;</td>
+        <td colspan="12">&nbsp;</td>
     </tr>
 
-    {{-- Row 6: Summary --}}
+    {{-- Row 10: Five visual columns, with no serial-number column --}}
     <tr>
-        <td
-            colspan="2"
-            height="40"
-            align="center"
-            style="{{ $baseStyle }}
-                background-color:{{ $lightPurple }};
-                color:{{ $purple }};
-                font-size:13pt;
-                font-weight:bold;
-                border:1px solid {{ $borderColor }};"
-        >
-            {{ $t['total_boards'] }}:
-            {{ $summary['boards_count'] }}
-        </td>
-
-        <td
-            colspan="2"
-            height="40"
-            align="center"
-            style="{{ $baseStyle }}
-                background-color:{{ $lightPurple }};
-                color:{{ $purple }};
-                font-size:13pt;
-                font-weight:bold;
-                border:1px solid {{ $borderColor }};"
-        >
-            {{ $t['extension'] }}:
-            {{ $summary['extension_count'] }}
-        </td>
-
-        <td
-            colspan="2"
-            height="40"
-            align="center"
-            style="{{ $baseStyle }}
-                background-color:{{ $lightPurple }};
-                color:{{ $purple }};
-                font-size:13pt;
-                font-weight:bold;
-                border:1px solid {{ $borderColor }};"
-        >
-            {{ $t['installation'] }}:
-            {{ $summary['installation_count'] }}
-        </td>
+        <th colspan="2" style="{{ $headerStyle }}">{{ $labels['governorate'] }}</th>
+        <th colspan="3" style="{{ $headerStyle }}">{{ $labels['board'] }}</th>
+        <th colspan="3" style="{{ $headerStyle }}">{{ $labels['previousPeriod'] }} {{ $previousPeriod['number'] }}</th>
+        <th colspan="3" style="{{ $headerStyle }}">{{ $labels['currentPeriod'] }} {{ $currentPeriod['number'] }}</th>
+        <th style="{{ $headerStyle }}">{{ $labels['action'] }}</th>
     </tr>
 
-    {{-- Row 7: Space --}}
-    <tr>
-        <td colspan="6" height="20">&nbsp;</td>
-    </tr>
-
-    {{-- Row 8: Table header --}}
-    <tr>
-        <th width="65" height="44" style="{{ $headerStyle }}">
-            {{ $t['number'] }}
-        </th>
-
-        <th width="150" style="{{ $headerStyle }}">
-            {{ $t['governorate'] }}
-        </th>
-
-        <th width="320" style="{{ $headerStyle }}">
-            {{ $t['board'] }}
-        </th>
-
-        <th width="320" style="{{ $headerStyle }}">
-            {{ $t['previous'] }}
-            {{ $previousPeriod['number'] }}
-        </th>
-
-        <th width="320" style="{{ $headerStyle }}">
-            {{ $t['current'] }}
-            {{ $currentPeriod['number'] }}
-        </th>
-
-        <th width="150" style="{{ $headerStyle }}">
-            {{ $t['status'] }}
-        </th>
-    </tr>
-
-    {{-- Row 9 onwards: Report items --}}
+    {{-- Rows 11+: Booking fields have been normalized by the Export class. --}}
     @forelse ($items as $item)
         @php
-            $previous = $item['previous_item'];
-            $current = $item['current_item'];
-
-            $previousCustomer = $previous
-                ?->period
-                ?->flexBooking
-                ?->booking
-                ?->customer;
-
-            $currentCustomer = $current
-                ?->period
-                ?->flexBooking
-                ?->booking
-                ?->customer;
-
-            $previousDesign = $previous?->design?->name;
-            $currentDesign = $current?->design?->name;
-
-            $action = match ($item['required_action']) {
-                'installation' => $t['installation'],
-                'extension' => $t['extension'],
-                default => $t['no_order'],
-            };
-
-            $background = $loop->even
-                ? '#F9F5FC'
-                : '#FFFFFF';
-
-            $cellStyle = $baseStyle
-                . 'background-color:' . $background . ';'
-                . 'color:#30223E;'
-                . 'font-size:11pt;'
-                . 'border:1px solid ' . $borderColor . ';';
-
-            $highlightStyle = $baseStyle
-                . 'background-color:' . $lightPurple . ';'
-                . 'color:' . $purple . ';'
-                . 'font-size:11pt;'
-                . 'font-weight:bold;'
-                . 'border:1px solid ' . $borderColor . ';';
+            $background = $loop->even ? '#FCFAFF' : '#FFFFFF';
+            $action = $item['required_action'];
+            $actionBackground = $action === 'installation'
+                ? '#F0E4FB'
+                : ($action === 'extension' ? '#E9E2F3' : $background);
+            $actionColor = $action === 'installation' ? '#59227E' : '#47246A';
+            $previousBooking = $item['previous_booking'];
+            $currentBooking = $item['current_booking'];
         @endphp
-
         <tr>
-            {{-- Number --}}
-            <td
-                height="64"
-                align="center"
-                style="{{ $highlightStyle }}"
-            >
-                {{ $loop->iteration }}
+            <td colspan="2" data-type="s"
+                style="{{ $cellStyle }}background-color:{{ $background }};color:#574A60;text-align:{{ $textAlign }};font-weight:bold;">
+                {{ $item['governorate']['name'] }}
             </td>
 
-            {{-- Governorate --}}
-            <td
-                data-type="s"
-                align="center"
-                style="{{ $cellStyle }}"
-            >
-                {{ $item['governorate']?->name ?? '—' }}
+            <td colspan="3" data-type="s"
+                style="{{ $cellStyle }}background-color:{{ $background }};color:#2F1660;text-align:{{ $textAlign }};font-weight:bold;">
+                {{ $item['board']['name'] }}<br>{{ $item['board']['code'] }}
             </td>
 
-            {{-- Billboard --}}
-            <td
-                data-type="s"
-                align="center"
-                style="{{ $cellStyle }}"
-            >
-                {{ $item['board']->location_name }}
-            </td>
-
-            {{-- Previous period booking --}}
-            <td
-                data-type="s"
-                align="center"
-                style="{{ $cellStyle }}"
-            >
-                @if ($previous)
-                    <strong>
-                        {{ $previousCustomer?->name ?? '—' }}
-                    </strong>
-                    <br>
-                    {{ $previousDesign ?? $t['no_design'] }}
+            <td colspan="3" data-type="s"
+                style="{{ $cellStyle }}background-color:{{ $background }};color:#3F3347;text-align:{{ $textAlign }};">
+                @if ($previousBooking === null)
+                    —
                 @else
-                    {{ $t['no_booking'] }}
+                    {{ $previousBooking['customer']['name'] }}<br>{{ $previousBooking['design_name'] ?? $labels['noDesign'] }}
                 @endif
             </td>
 
-            {{-- Current period booking --}}
-            <td
-                data-type="s"
-                align="center"
-                style="{{ $cellStyle }}"
-            >
-                @if ($current)
-                    <strong>
-                        {{ $currentCustomer?->name ?? '—' }}
-                    </strong>
-                    <br>
-                    {{ $currentDesign ?? $t['no_design'] }}
+            <td colspan="3" data-type="s"
+                style="{{ $cellStyle }}background-color:{{ $background }};color:#3F3347;text-align:{{ $textAlign }};">
+                @if ($currentBooking === null)
+                    —
                 @else
-                    {{ $t['no_booking'] }}
+                    {{ $currentBooking['customer']['name'] }}<br>{{ $currentBooking['design_name'] ?? $labels['noDesign'] }}
                 @endif
             </td>
 
-            {{-- Required action --}}
-            <td
-                data-type="s"
-                align="center"
-                style="{{ $highlightStyle }}"
-            >
-                {{ $action }}
+            <td data-type="s"
+                style="{{ $cellStyle }}background-color:{{ $actionBackground }};color:{{ $actionColor }};font-weight:bold;text-align:center;">
+                @if ($action === 'installation' || $action === 'extension')
+                    {{ $labels[$action] }}
+                @endif
             </td>
         </tr>
     @empty
         <tr>
-            <td
-                colspan="6"
-                height="50"
-                align="center"
-                style="{{ $baseStyle }}
-                    background-color:#F9F5FC;
-                    color:{{ $purple }};
-                    border:1px solid {{ $borderColor }};"
-            >
-                {{ $t['empty'] }}
+            <td colspan="12" style="{{ $cellStyle }}background-color:#FFFFFF;color:#93899A;text-align:center;">
+                {{ $labels['empty'] }}
             </td>
         </tr>
     @endforelse
-
-    {{-- Footer: Totals --}}
-    <tr>
-        <td
-            height="36"
-            align="center"
-            style="{{ $headerStyle }}
-                background-color:#8000FF;"
-        >
-            {{ $t['total'] }}
-        </td>
-
-        <td
-            align="center"
-            style="{{ $highlightStyle }}"
-        >
-            {{ $summary['boards_count'] }}
-        </td>
-
-        <td
-            style="{{ $cellStyle ?? $baseStyle }}"
-        >
-            &nbsp;
-        </td>
-
-        <td
-            align="center"
-            style="{{ $headerStyle }}
-                background-color:#8000FF;"
-        >
-            {{ $t['customers'] }}
-        </td>
-
-        <td
-            align="center"
-            style="{{ $highlightStyle }}"
-        >
-            {{ $summary['customers_count'] }}
-        </td>
-
-        <td
-            style="{{ $cellStyle ?? $baseStyle }}"
-        >
-            &nbsp;
-        </td>
-    </tr>
 </table>
