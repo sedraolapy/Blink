@@ -48,6 +48,31 @@ class NotificationContentResolver
             $context['name_customer'] = $customerName;
         }
 
+        if (in_array($type, [
+            'contract_start_reminder',
+            'contract_started',
+            'contract_end_reminder',
+            'contract_ended',
+            'electronic_orders_reminder',
+            'electronic_period_started',
+            'electronic_period_ended',
+        ], true)) {
+            $context['customer_name'] = $customerName;
+        }
+
+        if (in_array($type, [
+            'outdoor_orders_reminder',
+            'outdoor_period_started',
+            'outdoor_period_ended',
+        ], true)) {
+            $context['customer_name'] = $customerName;
+
+            $context['outdoor_type_name'] =
+                ExternalAssetTypeEnum::tryFrom($context['outdoor_type'] ?? '')
+                    ?->label()
+                ?? ($context['outdoor_type'] ?? '');
+        }
+
         return $context ?: (object) [];
     }
 
