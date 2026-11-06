@@ -17,4 +17,18 @@ return [
         'remaining_boards_count' => 'Remaining Billboards',
         'empty' => 'No eligible bookings for the selected period.',
     ],
+
+    'institution_electronic' => [
+        'report_title' => 'Institution Electronic Report',
+        'month' => 'Month',
+        'date_range' => 'Date Range',
+        'location' => 'Location',
+        'width_m' => 'Width (m)',
+        'width_px' => 'Width (px)',
+        'height_m' => 'Height (m)',
+        'height_px' => 'Height (px)',
+        'area' => 'Area (m²)',
+        'total_area' => 'Total Area (m²)',
+        'empty' => 'No electronic screens found.',
+    ],
 ];

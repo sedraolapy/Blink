@@ -2,6 +2,7 @@
 
 namespace App\Services\Booking\ElectronicBooking;
 
+use App\Enums\BookingItemStatusEnum;
 use App\Enums\BookingStatusEnum;
 use App\Models\Booking;
 use App\Models\LedBooking;
@@ -94,6 +95,8 @@ class ElectronicBookingService
                 }
             }
 
+            $this->markItemsAsBookedIfConfirmed($booking,$ledBooking);
+
             return $this->loadResult(
                 $booking,
                 $ledBooking
@@ -153,6 +156,7 @@ class ElectronicBookingService
                     $designSync['delete_ids']
                 );
 
+                $this->markItemsAsBookedIfConfirmed($booking,$ledBooking);
                 $this->refreshOperationOrderFlag($ledBooking);
 
                 return $this->loadResult(
@@ -843,21 +847,14 @@ class ElectronicBookingService
                 !== $screenIds->count()
             ) {
                 throw ValidationException::withMessages([
-                    "periods.{$periodIndex}" => __(
-                        'validation.electronic_booking.screens.duplicate'
-                    ),
+                    "periods.{$periodIndex}" => __('validation.electronic_booking.screens.duplicate'),
                 ]);
             }
 
             $prepared[] = [
-                'start_date' =>
-                    $period['start_date'],
-
-                'end_date' =>
-                    $period['end_date'],
-
-                'items' =>
-                    $items,
+                'start_date' => $period['start_date'],
+                'end_date' =>  $period['end_date'],
+                'items' => $items,
             ];
         }
 
@@ -876,9 +873,7 @@ class ElectronicBookingService
             !== $numbers->count()
         ) {
             throw ValidationException::withMessages([
-                $attribute => __(
-                    'validation.electronic_booking.slides.duplicate'
-                ),
+                $attribute => __('validation.electronic_booking.slides.duplicate'),
             ]);
         }
     }
@@ -887,18 +882,13 @@ class ElectronicBookingService
     {
         $screenIds = collect($periods)
             ->flatMap(
-                fn (array $period) =>
-                    collect($period['items'])
-                        ->pluck('screen_id')
+                fn (array $period) => collect($period['items'])->pluck('screen_id')
             )
             ->unique()
             ->values();
 
         return LedScreen::query()
-            ->whereIn(
-                'id',
-                $screenIds
-            )
+            ->whereIn('id',$screenIds)
             ->lockForUpdate()
             ->get()
             ->keyBy('id');
@@ -906,17 +896,11 @@ class ElectronicBookingService
 
     private function validateScreenTypes(array $periods,$screens)
     {
-        foreach (
-            $periods
-            as $periodIndex => $period
-        ) {
-            foreach (
-                $period['items']
-                as $itemIndex => $item
-            ) {
-                $screen = $screens->get(
-                    $item['screen_id']
-                );
+        foreach ($periods as $periodIndex => $period)
+        {
+            foreach ($period['items'] as $itemIndex => $item)
+            {
+                $screen = $screens->get($item['screen_id']);
 
                 if (! $screen) {
                     continue;
@@ -929,9 +913,7 @@ class ElectronicBookingService
                 ) {
                     throw ValidationException::withMessages([
                         "periods.{$periodIndex}.items.{$itemIndex}" =>
-                            __(
-                                'validation.electronic_booking.screens.not_independent'
-                            ),
+                            __('validation.electronic_booking.screens.not_independent'),
                     ]);
                 }
 
@@ -942,9 +924,7 @@ class ElectronicBookingService
                 ) {
                     throw ValidationException::withMessages([
                         "periods.{$periodIndex}.items.{$itemIndex}" =>
-                            __(
-                                'validation.electronic_booking.networks.screen_mismatch'
-                            ),
+                            __('validation.electronic_booking.networks.screen_mismatch'),
                     ]);
                 }
             }
@@ -957,22 +937,34 @@ class ElectronicBookingService
 
         return LedBooking::query()
             ->where('booking_id',$bookingId)
-            ->whereHas(
-                'booking',
-                fn ($query) =>
-                    $query->where('year',$year)
+            ->whereHas('booking',
+                fn ($query) =>  $query->where('year',$year)
             )
             ->with([
                 'designs' => fn ($query) => $query->orderBy('id'),
                 'periods' => fn ($query) => $query->orderBy('id'),
                 'periods.items' => fn ($query) => $query->orderBy('id'),
-                'periods.items.slides' => fn ($query) =>
-                    $query->orderBy('slide_number'),
+                'periods.items.slides' => fn ($query) => $query->orderBy('slide_number'),
                 'periods.items.slides.design',
                 'periods.items.screen.area.governorate',
                 'periods.items.network.screens.area.governorate',
             ])
             ->firstOrFail();
+    }
+
+    private function markItemsAsBookedIfConfirmed(Booking $booking,LedBooking $ledBooking)
+    {
+        if ($booking->status !== BookingStatusEnum::CONFIRMED) {
+            return;
+        }
+
+        LedBookingItem::query()
+            ->whereHas('period',
+                fn ($query) => $query->where('led_booking_id',$ledBooking->id)
+            )
+            ->update([
+                'status' => BookingItemStatusEnum::BOOKED->value,
+            ]);
     }
 
 }

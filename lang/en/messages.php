@@ -137,4 +137,8 @@ return [
         'invalid_group_region' => 'The selected institution has no billboards in the chosen region.',
         'retrieved' => 'Flex institution report retrieved successfully.',
     ],
+
+    'institution_electronic_report' => [
+        'retrieved' => 'Institution electronic report retrieved successfully.',
+    ],
 ];

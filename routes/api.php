@@ -24,6 +24,7 @@ use App\Http\Controllers\API\Quotation\QuotationController;
 use App\Http\Controllers\API\Reports\CampaignRouteReportController;
 use App\Http\Controllers\API\Reports\CampaignSalesReportController;
 use App\Http\Controllers\API\Reports\CampaignStartReportController;
+use App\Http\Controllers\API\Reports\InstitutionElectronicReportController;
 use App\Http\Controllers\API\Reports\InstitutionFlexReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -120,6 +121,10 @@ Route::middleware('localization')->group(function () {
             Route::get('/reports/institution/flex/groups',[InstitutionFlexReportController::class, 'groups']);
             Route::get('/reports/institution/flex',[InstitutionFlexReportController::class, 'index']);
             Route::get('/reports/institution/flex/export',[InstitutionFlexReportController::class, 'export']);
+
+            // Institution Electronic Report
+            Route::get('/reports/institution/electronic',[InstitutionElectronicReportController::class, 'index']);
+            Route::get('/reports/institution/electronic/export',[InstitutionElectronicReportController::class, 'export']);
 
             Route::prefix('reports')->middleware('campaign.report.period')->group(function ()
             {

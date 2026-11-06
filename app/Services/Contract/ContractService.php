@@ -7,7 +7,9 @@ use App\Enums\BookingStatusEnum;
 use App\Enums\ContractStatusEnum;
 use App\Models\Booking;
 use App\Models\Contract;
+use App\Models\ExternalBookingItem;
 use App\Models\FlexBookingItem;
+use App\Models\LedBookingItem;
 use App\Services\Booking\FlexBooking\FlexBookingService;
 use App\Services\WorkingYear\WorkingYearContext;
 use Carbon\Carbon;
@@ -76,6 +78,25 @@ class ContractService
                 ->whereHas('period.flexBooking', function ($query) use ($booking) {
                     $query->where('booking_id', $booking->id);
                 })
+                ->update([
+                    'status' => BookingItemStatusEnum::BOOKED->value,
+                ]);
+
+            LedBookingItem::query()
+                ->whereHas('period.ledBooking', function ($query) use ($booking) {
+                    $query->where('booking_id', $booking->id);
+                })
+                ->update([
+                    'status' => BookingItemStatusEnum::BOOKED->value,
+                ]);
+
+            ExternalBookingItem::query()
+                ->whereHas(
+                    'period.externalBookingType.externalBooking',
+                    function ($query) use ($booking) {
+                        $query->where('booking_id', $booking->id);
+                    }
+                )
                 ->update([
                     'status' => BookingItemStatusEnum::BOOKED->value,
                 ]);

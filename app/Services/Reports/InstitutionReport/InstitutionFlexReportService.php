@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Reports;
+namespace App\Services\Reports\InstitutionReport;
 
 use App\Enums\BookingItemStatusEnum;
 use App\Enums\BookingStatusEnum;

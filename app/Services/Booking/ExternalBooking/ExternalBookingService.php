@@ -279,7 +279,9 @@ class ExternalBookingService
                                 'external_asset_id' => $itemData['asset_id'],
                                 'design_id' => $design?->id,
                                 'is_gift' => $itemData['is_gift'],
-                                'status' => BookingItemStatusEnum::UNCONFIRMED->value,
+                                'status' => $booking->status === BookingStatusEnum::CONFIRMED
+                                    ? BookingItemStatusEnum::BOOKED->value
+                                    : BookingItemStatusEnum::UNCONFIRMED->value,
                             ]);
                     }
                 }

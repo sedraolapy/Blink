@@ -7,10 +7,10 @@ use App\Http\Requests\Reports\InstitutionFlexGroupsRequest;
 use App\Http\Requests\Reports\InstitutionFlexReportRequest;
 use App\Http\Resources\Reports\InstitutionFlexGroupsResource;
 use App\Http\Resources\Reports\InstitutionFlexReportResource;
-use App\Services\Reports\InstitutionFlexReportService;
 use App\Services\WorkingYear\WorkingYearContext;
 use App\Exports\Reports\InstitutionFlexReportExport;
 use App\Http\Requests\Reports\InstitutionFlexExportRequest;
+use App\Services\Reports\InstitutionReport\InstitutionFlexReportService;
 use Maatwebsite\Excel\Facades\Excel;
 
 class InstitutionFlexReportController extends Controller
