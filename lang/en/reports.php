@@ -9,7 +9,7 @@ return [
         'report_title' => 'Flex Institution Report',
         'period' => 'Advertising Period',
         'date_range' => 'Date Range',
-        'customer' => 'Customer Name',
+        'customer' => 'Product',
         'dimensions' => 'Dimensions',
         'boards_count' => 'Billboards Count',
         'total_area' => 'Total Area (m²)',

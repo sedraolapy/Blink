@@ -9,7 +9,7 @@ return [
         'report_title' => 'تقرير مؤسسات الفليكس',
         'period' => 'الفترة الإعلانية',
         'date_range' => 'المدة من / إلى',
-        'customer' => 'اسم الزبون',
+        'customer' => 'المنتج',
         'dimensions' => 'القياسات',
         'boards_count' => 'عدد اللوحات',
         'total_area' => 'المساحة الإجمالية (م²)',
