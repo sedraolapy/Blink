@@ -66,12 +66,12 @@ return [
         // Institution reports
         'flex_institution_report_reminder' => [
             'title' => 'تقرير المؤسسة - الفليكس',
-            'message' => 'تذكير بإصدار تقرير المؤسسة لفترة الفليكس رقم :period.',
+            'message' => 'يرجى إصدار تقرير المؤسسة الخاص بالفليكس للفترة {period_number}.',
         ],
 
         'monthly_institution_report_reminder' => [
             'title' => 'تقرير المؤسسة الشهري',
-            'message' => 'تذكير بإصدار تقرير المؤسسة الشهري للإلكتروني والخارجي لشهر :month.',
+            'message' => 'يرجى إصدار تقرير المؤسسة الشهري للحجوزات الإلكترونية والخارجية لشهر {month_name}.',
         ],
     ],
 ];

@@ -66,12 +66,12 @@ return [
         // Institution reports
         'flex_institution_report_reminder' => [
             'title' => 'Institution Report - Flex',
-            'message' => 'Reminder to issue the institution report for Flex period :period.',
+            'message' => 'Please issue the Flex institution report for period {period_number}.',
         ],
 
         'monthly_institution_report_reminder' => [
             'title' => 'Monthly Institution Report',
-            'message' => 'Reminder to issue the monthly institution report for electronic and outdoor bookings for :month.',
+            'message' => 'Please issue the monthly institution report for electronic and outdoor bookings for {month_name}.',
         ],
     ],
 ];

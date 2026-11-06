@@ -2,7 +2,9 @@
 
 use App\Services\Notification\Generator\ContractNotificationGenerator;
 use App\Services\Notification\Generator\ElectronicNotificationGenerator;
+use App\Services\Notification\Generator\FlexInstitutionReportNotificationGenerator;
 use App\Services\Notification\Generator\FlexNotificationGenerator;
+use App\Services\Notification\Generator\MonthlyInstitutionReportNotificationGenerator;
 use App\Services\Notification\Generator\OutdoorNotificationGenerator;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -61,6 +63,24 @@ Artisan::command('inspire', function () {
         app(OutdoorNotificationGenerator::class)->generate();
     })
         ->name('notifications:outdoor')
+        // ->dailyAt('08:00')
+        ->everyMinute()
+        ->timezone('Asia/Damascus')
+        ->withoutOverlapping();
+
+    Schedule::call(function () {
+        app(FlexInstitutionReportNotificationGenerator::class)->generate();
+    })
+        ->name('notifications:institution-flex')
+        // ->dailyAt('08:00')
+        ->everyMinute()
+        ->timezone('Asia/Damascus')
+        ->withoutOverlapping();
+
+    Schedule::call(function () {
+        app(MonthlyInstitutionReportNotificationGenerator::class)->generate();
+    })
+        ->name('notifications:institution-monthly')
         // ->dailyAt('08:00')
         ->everyMinute()
         ->timezone('Asia/Damascus')

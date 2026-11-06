@@ -73,6 +73,10 @@ class NotificationContentResolver
                 ?? ($context['outdoor_type'] ?? '');
         }
 
+        if ($type === 'monthly_institution_report_reminder') {
+            $context['month_name'] = $this->monthName($context);
+        }
+
         return $context ?: (object) [];
     }
 
