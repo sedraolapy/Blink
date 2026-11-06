@@ -11,6 +11,13 @@ return [
     'image' => 'The :attribute must be an image.',
     'mimes' => 'The :attribute must be a file of type: :values.',
     'date_format' => 'The :attribute does not match the format :format.',
+    'in' => 'The selected :attribute is invalid.',
+    'exists' => 'The selected :attribute is invalid.',
+    'after_or_equal' => 'The :attribute must be after or equal to the start date.',
+    'prohibited' => 'The :attribute field is prohibited.',
+    'min' => [
+        'numeric' => 'The :attribute must be at least :min.',
+    ],
 
     'attributes' => [
         'email' => 'email',
@@ -85,6 +92,12 @@ return [
         'notification_id' => 'notification ID',
         'notification_all' => 'all notifications option',
         'is_read' => 'read status',
+        'region' => 'geographical region',
+        'group_id' => 'institution group',
+        'from' => 'start date',
+        'to' => 'end date',
+        'booked_label' => 'booked boards label',
+        'remaining_label' => 'remaining boards label',
     ],
 
     'custom' => [

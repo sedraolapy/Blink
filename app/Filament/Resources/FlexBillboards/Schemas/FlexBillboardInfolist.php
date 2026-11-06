@@ -15,7 +15,7 @@ class FlexBillboardInfolist
                     ->label(__('filament/admin/flex_billboard_resource.code'))
                     ->badge(),
 
-                TextEntry::make('institution_name')
+                TextEntry::make('institutionFlexGroup.name')
                     ->label(__('filament/admin/flex_billboard_resource.institution_name'))
                     ->placeholder('-'),
 

@@ -27,5 +27,7 @@ return [
     'view_video' => 'عرض الفيديو',
     'width' => 'العرض',
     'institution_name' => 'اسم المؤسسة',
-    'institution_name_placeholder' => 'أدخل اسم المؤسسة (اختياري)',
+    'institution_name_ar' => 'اسم المؤسسة بالعربي',
+    'institution_name_en' => 'اسم المؤسسة بالإنجليزي',
+    'institution_name_placeholder' => 'اختر مؤسسة أو اترك الحقل فارغاً',
 ];

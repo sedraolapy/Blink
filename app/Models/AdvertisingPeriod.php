@@ -15,7 +15,6 @@ class AdvertisingPeriod extends Model
         'number',
     ];
 
-
     public function ranges(): HasMany
     {
         return $this->hasMany(AdvertisingPeriodRange::class);

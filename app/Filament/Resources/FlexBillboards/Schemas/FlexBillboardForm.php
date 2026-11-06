@@ -39,11 +39,37 @@ class FlexBillboardForm
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(100),
-                TextInput::make('institution_name')
+
+                Select::make('institution_flex_group_id')
                     ->label(__('filament/admin/flex_billboard_resource.institution_name'))
-                    ->maxLength(255)
-                    ->default(null)
-                    ->placeholder(__('filament/admin/flex_billboard_resource.institution_name_placeholder')),
+                    ->relationship(
+                        name: 'institutionFlexGroup',
+                        titleAttribute: 'name'
+                    )
+                    ->getOptionLabelFromRecordUsing(
+                        fn ($record): string =>
+                            $record->getTranslation(
+                                'name',
+                                app()->getLocale()
+                            )
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->nullable()
+                    ->placeholder(
+                        __('filament/admin/flex_billboard_resource.institution_name_placeholder')
+                    )
+                    ->createOptionForm([
+                        TextInput::make('name.ar')
+                            ->label(__('filament/admin/flex_billboard_resource.institution_name_ar'))
+                            ->required()
+                            ->maxLength(255),
+
+                        TextInput::make('name.en')
+                            ->label(__('filament/admin/flex_billboard_resource.institution_name_en'))
+                            ->required()
+                            ->maxLength(255),
+                    ]),
 
                 Select::make('area_id')
                     ->label(__('filament/admin/flex_billboard_resource.area_id'))

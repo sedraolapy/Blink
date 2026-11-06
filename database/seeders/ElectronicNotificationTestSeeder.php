@@ -138,13 +138,6 @@ class ElectronicNotificationTestSeeder extends Seeder
                         BookingItemStatusEnum::BOOKED->value,
                 ])->save();
 
-                $this->command?->info(
-                    "{$key}: "
-                    . "Booking #{$booking->id} | "
-                    . "Period #{$period->id} | "
-                    . "{$period->start_date->toDateString()} -> "
-                    . $period->end_date->toDateString()
-                );
             }
         });
     }

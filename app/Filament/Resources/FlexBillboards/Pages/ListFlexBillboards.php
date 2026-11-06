@@ -4,6 +4,7 @@ namespace App\Filament\Resources\FlexBillboards\Pages;
 
 use App\Filament\Resources\FlexBillboards\FlexBillboardResource;
 use App\Filament\Resources\FlexPriceGroups\FlexPriceGroupResource;
+use App\Filament\Resources\InstitutionFlexGroups\InstitutionFlexGroupResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Actions\Action;
@@ -24,6 +25,15 @@ class ListFlexBillboards extends ListRecords
                 ->icon('heroicon-o-banknotes')
                 ->url(
                     FlexPriceGroupResource::getUrl('index')
+                ),
+
+            Action::make('manage_institutions')
+                ->label(
+                    __('filament/admin/institution_flex_group_resource.navigation_label')
+                )
+                ->icon('heroicon-o-building-office-2')
+                ->url(
+                    InstitutionFlexGroupResource::getUrl('index')
                 ),
         ];
     }

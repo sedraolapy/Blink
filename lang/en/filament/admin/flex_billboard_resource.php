@@ -27,5 +27,7 @@ return [
     'view_video' => 'View Video',
     'width' => 'Width',
     'institution_name' => 'Institution Name',
-    'institution_name_placeholder' => 'Enter institution name (optional)',
+    'institution_name_ar' => 'Institution Name in Arabic',
+    'institution_name_en' => 'Institution Name in English',
+    'institution_name_placeholder' => 'Select an institution or leave it empty',
 ];

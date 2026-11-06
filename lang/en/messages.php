@@ -131,4 +131,10 @@ return [
         'read_status_updated' => 'Notification read status updated successfully.',
         'deleted' => 'Notifications deleted successfully.',
     ],
+
+    'institution_flex_report' => [
+        'groups_retrieved' => 'Flex institution groups retrieved successfully.',
+        'invalid_group_region' => 'The selected institution has no billboards in the chosen region.',
+        'retrieved' => 'Flex institution report retrieved successfully.',
+    ],
 ];

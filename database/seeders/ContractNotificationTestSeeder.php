@@ -123,12 +123,6 @@ class ContractNotificationTestSeeder extends Seeder
                         'status' => $status,
                     ]
                 );
-
-                $this->command?->info(
-                    "{$index}: Contract #{$contract->id} | "
-                    . "{$contract->start_date->toDateString()} -> "
-                    . $contract->end_date->toDateString()
-                );
             }
         });
     }

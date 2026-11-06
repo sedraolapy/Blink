@@ -17,7 +17,7 @@ class FlexBillboard extends Model implements HasMedia
 
     protected $fillable = [
         'code',
-        'institution_name',
+        'institution_flex_group_id',
         'area_id',
         'location_name',
         'latitude',
@@ -33,6 +33,11 @@ class FlexBillboard extends Model implements HasMedia
     public function area()
     {
         return $this->belongsTo(Area::class);
+    }
+
+    public function institutionFlexGroup()
+    {
+        return $this->belongsTo(InstitutionFlexGroup::class,'institution_flex_group_id');
     }
 
     public function registerMediaCollections(): void

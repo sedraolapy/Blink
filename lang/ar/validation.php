@@ -12,6 +12,7 @@ return [
     'string' => 'يجب أن يكون :attribute نصًا.',
     'min' => [
         'string' => 'يجب ألا يقل :attribute عن :min أحرف.',
+        'numeric' => 'يجب ألا يقل :attribute عن :min.',
     ],
     'max' => [
         'string' => 'يجب ألا يزيد :attribute عن :max أحرف.',
@@ -23,7 +24,8 @@ return [
     'image' => 'يجب أن يكون :attribute صورة.',
     'mimes' => 'يجب أن يكون :attribute ملفًا من النوع: :values.',
     'date_format' => 'لا يتطابق :attribute مع التنسيق :format.',
-
+    'after_or_equal' => 'يجب أن يكون :attribute بعد أو مساوياً لتاريخ البداية.',
+    'prohibited' => 'حقل :attribute غير مسموح به في هذا الطلب.',
 
     'attributes' => [
         'name' => 'الاسم',
@@ -100,6 +102,12 @@ return [
         'notification_id' => 'معرّف الإشعار',
         'notification_all' => 'خيار جميع الإشعارات',
         'is_read' => 'حالة القراءة',
+        'region' => 'المنطقة الجغرافية',
+        'group_id' => 'مجموعة المؤسسة',
+        'from' => 'تاريخ البداية',
+        'to' => 'تاريخ النهاية',
+        'booked_label' => 'عنوان اللوحات المحجوزة',
+        'remaining_label' => 'عنوان اللوحات المتبقية',
     ],
 
         'custom' => [

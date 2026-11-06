@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('flex_billboards', function (Blueprint $table) {
-            $table->string('institution_name', 255)
-                ->nullable()
-                ->default(null);
+        Schema::create('institution_flex_groups', function (Blueprint $table) {
+            $table->id();
+            
+            $table->json('name');
+
+            $table->timestamps();
         });
     }
 
@@ -23,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('flex_billboards', function (Blueprint $table) {
-            $table->dropColumn('institution_name');
-        });
+        Schema::dropIfExists('institution_flex_groups');
     }
 };

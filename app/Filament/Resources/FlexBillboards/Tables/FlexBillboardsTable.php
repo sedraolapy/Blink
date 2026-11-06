@@ -22,11 +22,10 @@ class FlexBillboardsTable
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('institution_name')
+                TextColumn::make('institutionFlexGroup.name')
                     ->label(__('filament/admin/flex_billboard_resource.institution_name'))
                     ->placeholder('-')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(),
 
                 TextColumn::make('location_name')
                     ->label(__('filament/admin/flex_billboard_resource.location_name'))

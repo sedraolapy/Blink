@@ -139,14 +139,6 @@ class OutdoorNotificationTestSeeder extends Seeder
                         'is_gift' => false,
                     ]
                 );
-
-                $this->command?->info(
-                    "{$key} ({$outdoorType->value}): "
-                    . "Booking #{$booking->id} | "
-                    . "Period #{$period->id} | "
-                    . "{$period->start_date->toDateString()} -> "
-                    . $period->end_date->toDateString()
-                );
             }
         });
     }

@@ -19,6 +19,12 @@ return new class extends Migration
                 ->constrained('areas')
                 ->restrictOnDelete();
 
+
+            $table->foreignId('institution_flex_group_id')
+            ->nullable()
+            ->constrained('institution_flex_groups')
+            ->nullOnDelete();
+
             $table->json('location_name')->nullable();
 
             $table->decimal('latitude', 10, 7)->nullable();
