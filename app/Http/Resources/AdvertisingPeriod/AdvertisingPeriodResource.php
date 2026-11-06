@@ -18,6 +18,8 @@ class AdvertisingPeriodResource extends JsonResource
             'id' => $this->id,
             'number' => $this->number,
             'is_current' => (bool) $this->is_current,
+            'damascus_start_date' => $this->damascus_start_date,
+            'damascus_end_date' => $this->damascus_end_date,
         ];
     }
 }
