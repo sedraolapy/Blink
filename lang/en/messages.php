@@ -141,4 +141,8 @@ return [
     'institution_electronic_report' => [
         'retrieved' => 'Institution electronic report retrieved successfully.',
     ],
+
+    'institution_outdoor_report' => [
+        'retrieved' => 'Institution outdoor report retrieved successfully.',
+    ],
 ];

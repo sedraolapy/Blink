@@ -139,4 +139,8 @@ return [
     'institution_electronic_report' => [
         'retrieved' => 'تم جلب تقرير المؤسسة الإلكتروني بنجاح.',
     ],
+
+    'institution_outdoor_report' => [
+        'retrieved' => 'تم جلب تقرير المؤسسة للخارجي بنجاح.',
+    ],
 ];

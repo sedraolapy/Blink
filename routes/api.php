@@ -26,6 +26,7 @@ use App\Http\Controllers\API\Reports\CampaignSalesReportController;
 use App\Http\Controllers\API\Reports\CampaignStartReportController;
 use App\Http\Controllers\API\Reports\InstitutionElectronicReportController;
 use App\Http\Controllers\API\Reports\InstitutionFlexReportController;
+use App\Http\Controllers\API\Reports\InstitutionOutdoorReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -125,6 +126,10 @@ Route::middleware('localization')->group(function () {
             // Institution Electronic Report
             Route::get('/reports/institution/electronic',[InstitutionElectronicReportController::class, 'index']);
             Route::get('/reports/institution/electronic/export',[InstitutionElectronicReportController::class, 'export']);
+
+            // Institution Outdoor Report
+            Route::get('/reports/institution/outdoor',[InstitutionOutdoorReportController::class, 'index']);
+            Route::get('/reports/institution/outdoor/export',[InstitutionOutdoorReportController::class, 'export']);
 
             Route::prefix('reports')->middleware('campaign.report.period')->group(function ()
             {

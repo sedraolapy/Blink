@@ -31,4 +31,21 @@ return [
         'total_area' => 'Total Area (m²)',
         'empty' => 'No electronic screens found.',
     ],
+
+    'institution_outdoor' => [
+        'report_title' => 'Institution Outdoor Report',
+        'outdoor_type' => 'Outdoor Advertising Type',
+        'month' => 'Month',
+        'date_range' => 'Date Range',
+        'city' => 'City',
+        'connecting_road' => 'Connecting Road',
+        'location' => 'Location',
+        'customer' => 'Advertising Material',
+        'width_m' => 'Width (m)',
+        'height_m' => 'Height (m)',
+        'dimensions' => 'Dimensions',
+        'total_area' => 'Total Area (m²)',
+        'empty' => 'No outdoor bookings found for the selected month.',
+    ],
+
 ];
