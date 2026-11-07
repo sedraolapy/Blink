@@ -44,6 +44,7 @@ return [
     'booking' => [
         'updated' => 'Booking updated successfully.',
         'show' => 'Booking retrieved successfully.',
+        'orders_updated' => 'Order status updated successfully.',
     ],
 
     'electronic_booking_options' => [

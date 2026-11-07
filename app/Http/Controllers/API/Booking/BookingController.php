@@ -4,11 +4,11 @@ namespace App\Http\Controllers\API\Booking;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Booking\UpdateBookingAdvertiserTypeRequest;
+use App\Http\Requests\Booking\UpdateBookingOrdersRequest;
 use App\Http\Resources\Booking\ShowBookingResource;
 use App\Http\Resources\Booking\UpdateBookingAdvertiserTypeResource;
 use App\Models\Booking;
 use App\Services\Booking\BookingService;
-use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
@@ -36,4 +36,28 @@ class BookingController extends Controller
             new UpdateBookingAdvertiserTypeResource($booking)
         );
     }
+
+    
+    public function updateOrders(int $bookingId,UpdateBookingOrdersRequest $request) 
+    {
+        $data = $request->validated();
+
+        $booking = $this->bookingService->updateOrders(
+            $bookingId,
+            $data['order'],
+            $data['checked']
+        );
+
+        return sendResponse(
+            __('messages.booking.orders_updated'),
+            [
+                'orders' => [
+                    'installation' => (bool) $booking->installation_order,
+                    'extension' => (bool) $booking->extension_order,
+                    'operation' => (bool) $booking->operation_order,
+                ],
+            ]
+        );
+    }
+
 }

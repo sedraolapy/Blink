@@ -99,6 +99,8 @@ return [
         'booked_label' => 'booked boards label',
         'remaining_label' => 'remaining boards label',
         'month' => 'report month',
+        'order' => 'order type',
+        'checked' => 'order status',
     ],
 
     'custom' => [

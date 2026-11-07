@@ -149,6 +149,7 @@ Route::middleware('localization')->group(function () {
             Route::middleware('working.year.writable')->group(function () {
                 // Bookings
                 Route::patch('/bookings/{booking}',[BookingController::class, 'updateAdvertiserType']);
+                Route::patch('/bookings/{bookingId}/orders',[BookingController::class, 'updateOrders']);
 
                 // Flex bookings
                 Route::post('/bookings/flex',[FlexBookingController::class, 'store']);

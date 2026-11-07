@@ -31,7 +31,8 @@ class CampaignStartReportResource extends JsonResource
 
             'summary' => $this->formatSummary(
                 $data['summary'],
-                $governorates
+                $governorates,
+                $data['items']
             ),
         ];
     }
@@ -72,9 +73,18 @@ class CampaignStartReportResource extends JsonResource
             ->all();
     }
 
-    private function formatSummary(array $summary,Collection $governorates): array
+
+    private function formatSummary(array $summary,Collection $governorates,array|Collection $items): array
     {
         $result = [];
+
+        $customerCounts = collect($items)
+            ->groupBy('classification')
+            ->map(fn ($rows) => $rows
+                ->map(fn ($row) => (int) $row['customer']->id)
+                ->unique()
+                ->count()
+            );
 
         foreach ([
             'extension',
@@ -93,10 +103,16 @@ class CampaignStartReportResource extends JsonResource
                 'governorates' => $counts,
                 'total' => $this->calculateTotal($counts),
             ];
+
+            if (in_array($type, ['extension', 'installation'], true)) {
+                $result[$type]['customers_count'] =
+                    (int) $customerCounts->get($type, 0);
+            }
         }
 
         return $result;
     }
+
 
     private function formatGovernorateCounts(array|Collection $counts,Collection $governorates): array
     {

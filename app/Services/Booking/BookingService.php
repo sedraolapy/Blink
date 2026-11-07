@@ -42,4 +42,27 @@ class BookingService
 
         return $booking->refresh();
     }
+
+    
+    public function updateOrders(int $bookingId,string $order,bool $checked): Booking 
+    {
+        $year = $this->workingYearContext->get();
+
+        $booking = Booking::query()
+            ->where('year', $year)
+            ->findOrFail($bookingId);
+
+        $field = match ($order) {
+            'installation' => 'installation_order',
+            'extension' => 'extension_order',
+            'operation' => 'operation_order',
+        };
+
+        $booking->update([
+            $field => $checked,
+        ]);
+
+        return $booking->refresh();
+    }
+
 }

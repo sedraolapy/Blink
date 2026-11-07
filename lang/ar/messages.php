@@ -45,6 +45,7 @@ return [
     'booking' => [
         'updated' => 'تم تعديل الحجز بنجاح.',
         'show' => 'تم جلب الحجز بنجاح.',
+        'orders_updated' => 'تم تحديث حالة الأمر بنجاح.',
     ],
 
     'electronic_booking_options' => [
