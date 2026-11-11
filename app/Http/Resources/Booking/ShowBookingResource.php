@@ -51,26 +51,31 @@ class ShowBookingResource extends JsonResource
             }
         }
 
+
+        $orders = [];
+
+        if ($this->flexBooking || $this->externalBooking) {
+            $orders['installation'] = (bool) $this->installation_order;
+            $orders['extension'] = (bool) $this->extension_order;
+        }
+
+        if ($this->ledBooking) {
+            $orders['operation'] = (bool) $this->operation_order;
+        }
+
+
         return [
             'id' => $this->id,
             'year' => $this->year,
             'status' => $this->status->value,
             'advertiser_type' => $this->booking_type->value,
-
             'customer' => [
                 'id' => $this->customer->id,
                 'name' => $this->customer->name,
             ],
-
             'quotation' => $this->quotation !== null,
             'contract' => $this->contract !== null,
-
-            'orders' => [
-                'installation' => (bool) $this->installation_order,
-                'extension' => (bool) $this->extension_order,
-                'operation' => (bool) $this->operation_order,
-            ],
-
+            'orders' => $orders,
             'types' => $types,
         ];
     }

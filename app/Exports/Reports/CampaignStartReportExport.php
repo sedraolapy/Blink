@@ -47,7 +47,7 @@ class CampaignStartReportExport implements
 
                 $sheet->setRightToLeft(app()->getLocale() === 'ar');
                 $sheet->setShowGridLines(false);
-                $sheet->freezePane('C10');
+                $sheet->freezePane('C11');
                 $sheet->getSheetView()->setZoomScale(90);
                 $sheet->getParent()->getDefaultStyle()->getFont()->setName('Cairo');
 
@@ -60,23 +60,25 @@ class CampaignStartReportExport implements
                     )->setWidth(13);
                 }
 
+
                 $rowHeights = [
                     1 => 43,
                     2 => 31,
                     3 => 12,
-                    4 => 32,
-                    5 => 30,
-                    6 => 49,
-                    7 => 12,
-                    8 => 34,
-                    9 => 29,
+                    4 => 48,
+                    5 => 32,
+                    6 => 30,
+                    7 => 49,
+                    8 => 12,
+                    9 => 34,
+                    10 => 29,
                 ];
 
                 foreach ($rowHeights as $row => $height) {
                     $sheet->getRowDimension($row)->setRowHeight($height);
                 }
 
-                for ($row = 10; $row <= $lastRow; $row++) {
+                for ($row = 11; $row <= $lastRow; $row++) {
                     $sheet->getRowDimension($row)->setRowHeight(30);
                 }
 
@@ -87,7 +89,7 @@ class CampaignStartReportExport implements
                 $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
                 $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A3);
                 $sheet->getPageSetup()->setPrintArea("A1:{$lastColumn}{$lastRow}");
-                $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(8, 9);
+                $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(9, 10);
             },
         ];
     }

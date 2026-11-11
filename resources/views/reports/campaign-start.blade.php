@@ -11,6 +11,8 @@
             'remainingBoards' => 'اللوحات المتبقية',
             'bookedNetworks' => 'الشبكات المحجوزة',
             'remainingNetworks' => 'الشبكات المتبقية',
+            'extensionBookings' => 'حجوزات التمديد',
+            'newPrintBookings' => 'حجوزات طباعة جديدة',
             'customer' => 'الشركة',
             'classification' => 'نوع العملية',
             'total' => 'المجموع',
@@ -32,6 +34,8 @@
             'remainingBoards' => 'Remaining Billboards',
             'bookedNetworks' => 'Booked Networks',
             'remainingNetworks' => 'Remaining Networks',
+            'extensionBookings' => 'Extension Bookings',
+            'newPrintBookings' => 'New Print Bookings',
             'customer' => 'Company',
             'classification' => 'Operation',
             'total' => 'Total',
@@ -102,6 +106,29 @@
 
     {{-- Row 3: Space --}}
     <tr><td colspan="{{ $columnCount }}">&nbsp;</td></tr>
+
+{{-- Row 4: Company counts by operation --}}
+<tr>
+    <th colspan="{{ $firstMetricSpan }}"
+        style="{{ $font }}background-color:#FAF6FD;color:#2F1660;border:1px solid #E6DDEA;font-size:11pt;font-weight:bold;text-align:center;vertical-align:middle;">
+        {{ $labels['extensionBookings'] }}
+    </th>
+
+    <td colspan="{{ $secondMetricSpan }}" data-type="n"
+        style="{{ $font }}background-color:#FAF6FD;color:#2F1660;border:1px solid #E6DDEA;font-size:19pt;font-weight:bold;text-align:center;vertical-align:middle;">
+        {{ $summary['extension']['customers_count'] }}
+    </td>
+
+    <th colspan="{{ $firstMetricSpan }}"
+        style="{{ $font }}background-color:#FAF6FD;color:#2F1660;border:1px solid #E6DDEA;font-size:11pt;font-weight:bold;text-align:center;vertical-align:middle;">
+        {{ $labels['newPrintBookings'] }}
+    </th>
+
+    <td colspan="{{ $secondMetricSpan }}" data-type="n"
+        style="{{ $font }}background-color:#FAF6FD;color:#2F1660;border:1px solid #E6DDEA;font-size:19pt;font-weight:bold;text-align:center;vertical-align:middle;">
+        {{ $summary['installation']['customers_count'] }}
+    </td>
+</tr>
 
     {{-- Row 4: Statistic group headings --}}
     <tr>

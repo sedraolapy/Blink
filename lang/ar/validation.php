@@ -179,6 +179,7 @@ return [
             'external_asset_already_booked' => 'إحدى اللوحات الخارجية المحددة محجوزة مسبقًا خلال الفترة المحددة.',
             'external_type_periods_overlap' => 'لا يمكن أن تتداخل فترات نفس نوع الحجز الخارجي مع بعضها.',
             'external_periods_outside_working_year' => 'يجب أن تكون تواريخ جميع فترات الحجز الخارجي ضمن سنة العمل المحددة (:year).',
+            'external_duplicate_asset_in_period' => 'لا يمكن تكرار نفس اللوحة الخارجية ضمن الفترة الواحدة.',
         ],
 
         'electronic' => [

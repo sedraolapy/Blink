@@ -12,6 +12,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -115,6 +116,22 @@ return Application::configure(basePath: dirname(__DIR__))
                     422,
                     $exception->errors()
                 );
+            }
+        );
+
+        $exceptions->render(
+            function (
+                ThrottleRequestsException $exception,
+                Request $request
+            ) {
+                if (! $request->is('api/login')) {
+                    return null;
+                }
+
+                return sendError(
+                    __('messages.too_many_attempts'),
+                    429
+                )->withHeaders($exception->getHeaders());
             }
         );
     })

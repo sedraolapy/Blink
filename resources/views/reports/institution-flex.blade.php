@@ -1,212 +1,142 @@
-
 @php
     $isArabic = app()->getLocale() === 'ar';
+    $isDamascus = request()->query('region') === 'damascus';
+
+    $labels = $isArabic
+        ? [
+            'intro' => 'مقدمة : شركة بلينك ميديا للخدمات الإعلامية / 011-9070 / سورية - دمشق',
+            'recipient' => 'السادة المؤسسة العربية للإعلان',
+            'greeting' => 'تحية وبعد',
+            'sentenceStart' => 'نرفق لكم جدول تركيب اللوحات خلال الفترة من تاريخ',
+            'sentenceUntil' => 'حتى',
+            'governorate' => 'المحافظة',
+            'customer' => 'المنتج',
+            'count' => 'العدد',
+            'dimensions' => 'القياس',
+            'area' => 'إجمالي المساحة',
+            'booked' => 'إجمالي عدد اللوحات المحجوزة',
+            'remaining' => 'إجمالي عدد اللوحات الشاغرة',
+            'empty' => 'لا توجد حجوزات مؤهلة للعرض ضمن هذه المجموعة والفترة.',
+        ]
+        : [
+            'intro' => 'Submitted by: Blink Media Services Company / 011-9070 / Syria - Damascus',
+            'recipient' => 'To the Arab Advertising Foundation',
+            'greeting' => 'Greetings,',
+            'sentenceStart' => 'Attached is the billboard installation schedule for the period from',
+            'sentenceUntil' => 'to',
+            'governorate' => 'Governorate',
+            'customer' => 'Client',
+            'count' => 'Count',
+            'dimensions' => 'Dimensions',
+            'area' => 'Total Area',
+            'booked' => 'Total Booked Billboards',
+            'remaining' => 'Total Available Billboards',
+            'empty' => 'No qualifying bookings found for this group and period.',
+        ];
+
+    $formatDocDate = static function (string $value): string {
+        [$year, $month, $day] = explode('-', $value);
+
+        return $year . ' / ' . (int) $month . ' / ' . (int) $day;
+    };
+
     $textAlign = $isArabic ? 'right' : 'left';
+    $font = 'font-family:Calibri,sans-serif;';
+    $border = 'border:1px solid #4A4A4A;';
+    $headerText = $font . 'font-size:16pt;font-weight:bold;color:#161117;background-color:#FFFFFF;text-align:' . $textAlign . ';vertical-align:middle;word-wrap:break-word;';
+    $columnHeader = $font . $border . 'font-size:14pt;font-weight:bold;color:#161117;background-color:#EFEFEF;text-align:center;vertical-align:middle;word-wrap:break-word;';
+    $cell = $font . $border . 'font-size:16pt;color:#161117;background-color:#FFFFFF;text-align:center;vertical-align:middle;word-wrap:break-word;';
+    $summary = $font . $border . 'font-size:16pt;font-weight:bold;color:#161117;background-color:#BFBFBF;vertical-align:middle;word-wrap:break-word;';
+    $blank = $font . $border . 'background-color:#FFFFFF;';
 
-    $labels = [
-        'title' => __('reports.institution_flex.report_title'),
-        'period' => __('reports.institution_flex.period'),
-        'dateRange' => __('reports.institution_flex.date_range'),
-        'customer' => __('reports.institution_flex.customer'),
-        'dimensions' => __('reports.institution_flex.dimensions'),
-        'boardsCount' => __('reports.institution_flex.boards_count'),
-        'totalArea' => __('reports.institution_flex.total_area'),
-        'booked' => $bookedLabel
-            ?: __('reports.institution_flex.booked_boards_count'),
-        'remaining' => $remainingLabel
-            ?: __('reports.institution_flex.remaining_boards_count'),
-        'empty' => __('reports.institution_flex.empty'),
-    ];
-
-    $font = 'font-family:Arial,sans-serif;';
-    $border = 'border:1px solid #E8E1EB;';
-
-    $headerStyle = $font
-        . 'background-color:#2F1660;'
-        . 'color:#FFFFFF;'
-        . 'border:1px solid #49347A;'
-        . 'font-size:11pt;'
-        . 'font-weight:bold;'
-        . 'text-align:center;'
-        . 'vertical-align:middle;';
-
-    $bodyStyle = $font
-        . $border
-        . 'font-size:10pt;'
-        . 'color:#403548;'
-        . 'vertical-align:middle;';
-
-    $summaryStyle = $font
-        . $border
-        . 'background-color:#F3ECF8;'
-        . 'color:#2F1660;'
-        . 'font-size:11pt;'
-        . 'font-weight:bold;'
-        . 'vertical-align:middle;';
+    $bookedText = $bookedLabel !== null && trim($bookedLabel) !== ''
+        ? $bookedLabel
+        : $labels['booked'];
+    $remainingText = $remainingLabel !== null && trim($remainingLabel) !== ''
+        ? $remainingLabel
+        : $labels['remaining'];
 @endphp
 
 <table>
-    {{-- Report title --}}
     <tr>
-        <td colspan="4">&nbsp;</td>
+        <td colspan="4" data-type="s" style="{{ $headerText }}">{{ $labels['intro'] }}</td>
+        <td>&nbsp;</td>
     </tr>
-
     <tr>
-        <th colspan="4"
-            style="{{ $font }}color:#2F1660;font-size:20pt;font-weight:bold;text-align:center;">
-            {{ $labels['title'] }}
-        </th>
+        <td colspan="4" data-type="s" style="{{ $headerText }}">{{ $labels['recipient'] }}</td>
+        <td>&nbsp;</td>
     </tr>
-
     <tr>
-        <th colspan="4"
-            style="{{ $font }}background-color:#FAF6FD;color:#2F1660;font-size:12pt;text-align:center;border:1px solid #E6E0E9;">
-            {{ $labels['period'] }}
-            {{ $period['number'] }}
-            -
-            {{ $period['year'] }}
-        </th>
+        <td colspan="4" data-type="s" style="{{ $headerText }}">{{ $labels['greeting'] }}</td>
+        <td>&nbsp;</td>
     </tr>
-
+    <tr><td colspan="5">&nbsp;</td></tr>
+    <tr><td colspan="5">&nbsp;</td></tr>
     <tr>
-        <td colspan="4"
-            style="{{ $font }}background-color:#FAF6FD;color:#574A60;font-size:11pt;text-align:center;border:1px solid #E6E0E9;">
-            {{ $labels['dateRange'] }}:
-            {{ $from }}
-            -
-            {{ $to }}
+        <td colspan="5" data-type="s" style="{{ $headerText }}">
+            {{ $labels['sentenceStart'] }} {{ $formatDocDate($from) }} {{ $labels['sentenceUntil'] }} {{ $formatDocDate($to) }}{{ $isArabic ? ' :' : ':' }}
         </td>
     </tr>
+    <tr><td colspan="5">&nbsp;</td></tr>
 
     <tr>
-        <td colspan="4">&nbsp;</td>
+        <th style="{{ $columnHeader }}">{{ $labels['governorate'] }}</th>
+        <th style="{{ $columnHeader }}">{{ $labels['customer'] }}</th>
+        <th style="{{ $columnHeader }}">{{ $labels['count'] }}</th>
+        <th style="{{ $columnHeader }}">{{ $labels['dimensions'] }}</th>
+        <th style="{{ $columnHeader }}">{{ $labels['area'] }}</th>
     </tr>
 
-    {{-- Governorate sections --}}
-    @forelse ($sections as $section)
-
-        {{-- Governorate and institution heading --}}
+    @if (count($sections) === 0)
         <tr>
-            <th colspan="4"
-                style="{{ $font }}background-color:#40246B;color:#FFFFFF;font-size:13pt;font-weight:bold;text-align:{{ $textAlign }};border:1px solid #58427A;">
-                {{ $section['governorate']['name'] }}
-                -
-                {{ $section['label'] }}
-            </th>
+            <td colspan="5" data-type="s" style="{{ $cell }}">{{ $labels['empty'] }}</td>
         </tr>
+    @endif
 
-        {{-- Table headers --}}
-        <tr>
-            <th style="{{ $headerStyle }}">
-                {{ $labels['customer'] }}
-            </th>
+    @foreach ($sections as $section)
+        @php
+            $rowCount = array_sum(array_map(
+                static fn (array $entry): int => count($entry['items']),
+                $section['customers']
+            ));
+            $renderedRows = 0;
+            $sectionLabel = $isDamascus
+                ? $section['label']
+                : $section['governorate']['name'];
+        @endphp
 
-            <th style="{{ $headerStyle }}">
-                {{ $labels['dimensions'] }}
-            </th>
+        @if (!$loop->first)
+            <tr><td colspan="5">&nbsp;</td></tr>
+        @endif
 
-            <th style="{{ $headerStyle }}">
-                {{ $labels['boardsCount'] }}
-            </th>
-
-            <th style="{{ $headerStyle }}">
-                {{ $labels['totalArea'] }}
-            </th>
-        </tr>
-
-        {{-- Customers and dimensions --}}
-        @foreach ($section['customers'] as $customerRow)
-
-            @foreach ($customerRow['items'] as $item)
-
-                @php
-                    $background = $loop->parent->even
-                        ? '#FCFAFF'
-                        : '#FFFFFF';
-                @endphp
-
+        @foreach ($section['customers'] as $entry)
+            @foreach ($entry['items'] as $item)
                 <tr>
-                    @if ($loop->first)
-                        <td
-                            rowspan="{{ count($customerRow['items']) }}"
-                            data-type="s"
-                            style="{{ $bodyStyle }}background-color:{{ $background }};font-weight:bold;text-align:{{ $textAlign }};">
-                            {{ $customerRow['customer']['name'] }}
+                    @if ($renderedRows === 0)
+                        <td rowspan="{{ $rowCount }}" data-type="s" style="{{ $cell }}font-weight:bold;">
+                            {{ $sectionLabel }}
                         </td>
                     @endif
-
-                    <td data-type="s"
-                        style="{{ $bodyStyle }}background-color:{{ $background }};text-align:center;">
-                        {{ $item['dimensions'] }}
+                    <td data-type="s" style="{{ $cell }}font-weight:bold;text-align:{{ $textAlign }};">
+                        {{ $entry['customer']['name'] }}
                     </td>
-
-                    <td data-type="n"
-                        style="{{ $bodyStyle }}background-color:{{ $background }};text-align:center;">
-                        {{ $item['boards_count'] }}
-                    </td>
-
-                    <td data-type="n"
-                        style="{{ $bodyStyle }}background-color:{{ $background }};text-align:center;">
-                        {{ $item['total_area'] }}
-                    </td>
+                    <td data-type="n" style="{{ $cell }}">{{ $item['boards_count'] }}</td>
+                    <td data-type="s" style="{{ $cell }}">{{ $item['dimensions'] }}</td>
+                    <td data-type="n" style="{{ $cell }}font-weight:bold;">{{ $item['total_area'] }}</td>
                 </tr>
-
+                @php $renderedRows++; @endphp
             @endforeach
-
         @endforeach
 
-        {{-- Booked summary --}}
         <tr>
-            <th colspan="3"
-                style="{{ $summaryStyle }}text-align:{{ $textAlign }};">
-                {{ $labels['booked'] }}
-            </th>
-
-            <td data-type="n"
-                style="{{ $summaryStyle }}text-align:center;">
-                {{ $section['summary']['booked_boards_count'] }}
-            </td>
+            <td colspan="2" data-type="s" style="{{ $summary }}text-align:{{ $textAlign }};">{{ $bookedText }}</td>
+            <td colspan="2" data-type="n" style="{{ $summary }}text-align:center;">{{ $section['summary']['booked_boards_count'] }}</td>
+            <td data-type="n" style="{{ $summary }}text-align:center;">{{ $section['summary']['total_area'] }}</td>
         </tr>
-
-        {{-- Remaining summary --}}
         <tr>
-            <th colspan="3"
-                style="{{ $summaryStyle }}text-align:{{ $textAlign }};">
-                {{ $labels['remaining'] }}
-            </th>
-
-            <td data-type="n"
-                style="{{ $summaryStyle }}text-align:center;">
-                {{ $section['summary']['remaining_boards_count'] }}
-            </td>
+            <td colspan="2" data-type="s" style="{{ $summary }}text-align:{{ $textAlign }};">{{ $remainingText }}</td>
+            <td colspan="2" data-type="n" style="{{ $summary }}text-align:center;">{{ $section['summary']['remaining_boards_count'] }}</td>
+            <td style="{{ $blank }}">&nbsp;</td>
         </tr>
-
-        {{-- Total area --}}
-        <tr>
-            <th colspan="3"
-                style="{{ $headerStyle }}text-align:{{ $textAlign }};">
-                {{ $labels['totalArea'] }}
-            </th>
-
-            <td data-type="n"
-                style="{{ $headerStyle }}">
-                {{ $section['summary']['total_area'] }}
-            </td>
-        </tr>
-
-        {{-- Space between governorates --}}
-        <tr>
-            <td colspan="4">&nbsp;</td>
-        </tr>
-
-    @empty
-
-        <tr>
-            <td colspan="4"
-                style="{{ $bodyStyle }}text-align:center;color:#93899A;">
-                {{ $labels['empty'] }}
-            </td>
-        </tr>
-
-    @endforelse
+    @endforeach
 </table>

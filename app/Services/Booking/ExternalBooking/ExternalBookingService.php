@@ -57,12 +57,29 @@ class ExternalBookingService
                 'height',
             ]);
 
+            $selectedItems = collect();
+
+            if ($bookingId !== null) {
+                $selectedItems = ExternalBookingItem::query()
+                    ->whereHas(
+                        'period.externalBookingType',
+                        fn ($query) => $query->where('type', $type->value)
+                    )
+                    ->whereHas(
+                        'period.externalBookingType.externalBooking',
+                        fn ($query) => $query->where('booking_id', $bookingId)
+                    )
+                    ->with('period:id,external_booking_type_id,start_date,end_date')
+                    ->get(['id', 'external_booking_period_id', 'external_asset_id']);
+            }
+
         $resultPeriods = $periods->map(
             function ($period) use (
                 $assets,
                 $bookingId,
                 $type,
-                $year
+                $year,
+                $selectedItems
             ) {
                 $occupied = ExternalBookingItem::query()
                     ->whereIn('status', [
@@ -113,7 +130,7 @@ class ExternalBookingService
                             function ($asset) use (
                                 $bookingId,
                                 $period,
-                                $type
+                                $selectedItems
                             ) {
                                 $item = [
                                     'id' => $asset->id,
@@ -125,27 +142,13 @@ class ExternalBookingService
                                 ];
 
                                 if ($bookingId) {
-
-                                    $item['was_selected'] =
-                                        ExternalBookingItem::query()
-                                            ->where('external_asset_id',$asset->id)
-                                            ->whereHas(
-                                                'period',
-                                                function ($query) use ($period) {
-                                                    $query
-                                                        ->whereDate('start_date','<=',$period['end_date'])
-                                                        ->whereDate('end_date','>=',$period['start_date']);
-                                                }
-                                            )
-                                            ->whereHas(
-                                                'period.externalBookingType',
-                                                fn ($query) => $query->where('type',$type->value)
-                                            )
-                                            ->whereHas(
-                                                'period.externalBookingType.externalBooking',
-                                                fn ($query) => $query->where('booking_id',$bookingId)
-                                            )
-                                            ->exists();
+                                    $item['was_selected'] = $selectedItems->contains(
+                                        function ($selectedItem) use ($asset, $period) {
+                                            return (int) $selectedItem->external_asset_id === (int) $asset->id
+                                                && $selectedItem->period->start_date <= $period['end_date']
+                                                && $selectedItem->period->end_date >= $period['start_date'];
+                                        }
+                                    );
                                 }
 
                                 return $item;
@@ -155,7 +158,6 @@ class ExternalBookingService
                 ];
             }
         );
-
         return [
             'type' => $type->value,
             'governorate' => $governorate,
@@ -202,11 +204,10 @@ class ExternalBookingService
 
                 if (! empty($data['booking_id'])) {
                     $booking = Booking::query()
-                        ->where('year',$year)
-                        ->findOrFail(
-                            $data['booking_id']
-                        );
-                } else {
+                        ->where('year', $year)
+                        ->lockForUpdate()
+                        ->findOrFail($data['booking_id']);
+                }else {
                     $booking = Booking::query()
                         ->create([
                             'customer_id' => $data['customer_id'],

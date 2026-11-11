@@ -88,7 +88,7 @@ class StoreExternalBookingRequest extends FormRequest
             'periods.*.items.*.asset_id' => [
                 'required',
                 'integer',
-                Rule::exists('external_assets','id')
+                Rule::exists('external_assets', 'id')
                     ->where(
                         fn ($query) =>
                             $query->where(
@@ -115,16 +115,62 @@ class StoreExternalBookingRequest extends FormRequest
     {
         return [
             function ($validator) {
-                $designs = collect($this->input('designs', []));
+                $periods = $this->input('periods', []);
 
-                foreach ($this->input('periods', []) as $periodIndex => $period) {
-                    foreach ($period['items'] ?? [] as $itemIndex => $item) {
+                if (! is_array($periods)) {
+                    return;
+                }
 
+                $designs = collect(
+                    is_array($this->input('designs'))
+                        ? $this->input('designs')
+                        : []
+                );
+
+                foreach ($periods as $periodIndex => $period) {
+                    if (! is_array($period)) {
+                        continue;
+                    }
+
+                    $items = $period['items'] ?? [];
+
+                    if (! is_array($items)) {
+                        continue;
+                    }
+
+                    $assetIds = [];
+
+                    foreach ($items as $itemIndex => $item) {
+                        if (! is_array($item)) {
+                            continue;
+                        }
+                        $assetId = $item['asset_id'] ?? null;
+
+                        if ($assetId === null || ! is_numeric($assetId)) {
+                            continue;
+                        }
+
+                        $assetId = (int) $assetId;
+
+                        if (in_array($assetId, $assetIds, true)) {
+                            $validator->errors()->add(
+                                "periods.{$periodIndex}.items.{$itemIndex}.asset_id",
+                                __('validation.custom.external_duplicate_asset_in_period')
+                            );
+                        }
+
+                        $assetIds[] = $assetId;
+                    }
+
+                    foreach ($items as $itemIndex => $item) {
+                        if (! is_array($item)) {
+                            continue;
+                        }
                         $designName = $item['design_name'] ?? null;
 
                         if (
                             $designName !== null
-                            && !$designs->contains($designName)
+                            && ! $designs->contains($designName)
                         ) {
                             $validator->errors()->add(
                                 "periods.{$periodIndex}.items.{$itemIndex}.design_name",

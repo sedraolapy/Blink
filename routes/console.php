@@ -35,8 +35,7 @@ Artisan::command('inspire', function () {
         app(ContractNotificationGenerator::class)->generate();
     })
         ->name('notifications:contracts')
-        // ->dailyAt('08:00')
-        ->everyMinute()
+        ->dailyAt('08:00')
         ->timezone('Asia/Damascus')
         ->withoutOverlapping();
 
@@ -44,8 +43,7 @@ Artisan::command('inspire', function () {
         app(FlexNotificationGenerator::class)->generate();
     })
         ->name('notifications:flex')
-        // ->dailyAt('08:00')
-        ->everyMinute()
+        ->dailyAt('08:00')
         ->timezone('Asia/Damascus')
         ->withoutOverlapping();
 
@@ -54,8 +52,7 @@ Artisan::command('inspire', function () {
         app(ElectronicNotificationGenerator::class)->generate();
     })
         ->name('notifications:electronic')
-        // ->dailyAt('08:00')
-        ->everyMinute()
+        ->dailyAt('08:00')
         ->timezone('Asia/Damascus')
         ->withoutOverlapping();
 
@@ -63,8 +60,7 @@ Artisan::command('inspire', function () {
         app(OutdoorNotificationGenerator::class)->generate();
     })
         ->name('notifications:outdoor')
-        // ->dailyAt('08:00')
-        ->everyMinute()
+        ->dailyAt('08:00')
         ->timezone('Asia/Damascus')
         ->withoutOverlapping();
 
@@ -72,8 +68,7 @@ Artisan::command('inspire', function () {
         app(FlexInstitutionReportNotificationGenerator::class)->generate();
     })
         ->name('notifications:institution-flex')
-        // ->dailyAt('08:00')
-        ->everyMinute()
+        ->dailyAt('08:00')
         ->timezone('Asia/Damascus')
         ->withoutOverlapping();
 
@@ -81,8 +76,7 @@ Artisan::command('inspire', function () {
         app(MonthlyInstitutionReportNotificationGenerator::class)->generate();
     })
         ->name('notifications:institution-monthly')
-        // ->dailyAt('08:00')
-        ->everyMinute()
+        ->dailyAt('08:00')
         ->timezone('Asia/Damascus')
         ->withoutOverlapping();
 

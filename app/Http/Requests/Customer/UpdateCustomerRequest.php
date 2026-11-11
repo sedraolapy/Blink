@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Customer;
 
+use App\Enums\PermissionEnum;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -11,7 +12,9 @@ class UpdateCustomerRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can(
+            PermissionEnum::UPDATE_CUSTOMER->value
+        ) ?? false;
     }
 
     public function rules(): array

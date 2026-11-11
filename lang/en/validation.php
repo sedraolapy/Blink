@@ -156,6 +156,7 @@ return [
         'external_asset_already_booked' => 'One or more selected external assets are already booked for the selected period.',
         'external_type_periods_overlap' => 'Periods for the same external booking type must not overlap.',
         'external_periods_outside_working_year' => 'All outdoor booking period dates must be within the selected working year (:year).',
+        'external_duplicate_asset_in_period' => 'The same outdoor asset cannot be selected more than once within the same period.',
     ],
 
     'electronic' => [

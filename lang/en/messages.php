@@ -3,6 +3,7 @@
 return [
     'validation_failed' => 'Validation failed.',
     'invalid_credentials' => 'Invalid email or password.',
+    'too_many_attempts' => 'Too many login attempts. Please try again later.',
     'login_success' => 'Logged in successfully.',
     'logout_success' => 'Logged out successfully.',
     'customers_retrieved' => 'Customers retrieved successfully.',
