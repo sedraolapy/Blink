@@ -43,11 +43,11 @@ class CampaignStartReportExport implements
                 $columnCount = count($this->visibleGovernorates()) * 2 + 4;
                 $lastColumn = Coordinate::stringFromColumnIndex($columnCount);
                 $dataRows = max(1, count($this->data['items']));
-                $lastRow = 9 + $dataRows + 5;
+                $lastRow = 10 + $dataRows + 5;
 
                 $sheet->setRightToLeft(app()->getLocale() === 'ar');
                 $sheet->setShowGridLines(false);
-                $sheet->freezePane('C11');
+                $sheet->freezePane('C10');
                 $sheet->getSheetView()->setZoomScale(90);
                 $sheet->getParent()->getDefaultStyle()->getFont()->setName('Cairo');
 
@@ -60,25 +60,23 @@ class CampaignStartReportExport implements
                     )->setWidth(13);
                 }
 
-
                 $rowHeights = [
                     1 => 43,
                     2 => 31,
                     3 => 12,
-                    4 => 48,
-                    5 => 32,
-                    6 => 30,
-                    7 => 49,
-                    8 => 12,
-                    9 => 34,
-                    10 => 29,
+                    4 => 32,
+                    5 => 30,
+                    6 => 49,
+                    7 => 12,
+                    8 => 34,
+                    9 => 29,
                 ];
 
                 foreach ($rowHeights as $row => $height) {
                     $sheet->getRowDimension($row)->setRowHeight($height);
                 }
 
-                for ($row = 11; $row <= $lastRow; $row++) {
+                for ($row = 10; $row <= $lastRow; $row++) {
                     $sheet->getRowDimension($row)->setRowHeight(30);
                 }
 
@@ -89,7 +87,7 @@ class CampaignStartReportExport implements
                 $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
                 $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A3);
                 $sheet->getPageSetup()->setPrintArea("A1:{$lastColumn}{$lastRow}");
-                $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(9, 10);
+                $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(8, 9);
             },
         ];
     }

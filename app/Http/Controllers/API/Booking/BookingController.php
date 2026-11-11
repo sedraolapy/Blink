@@ -23,7 +23,7 @@ class BookingController extends Controller
             new ShowBookingResource($booking)
         );
     }
-    
+
     public function updateAdvertiserType(Booking $booking,UpdateBookingAdvertiserTypeRequest $request)
     {
         $booking = $this->bookingService->updateAdvertiserType(
@@ -37,8 +37,8 @@ class BookingController extends Controller
         );
     }
 
-    
-    public function updateOrders(int $bookingId,UpdateBookingOrdersRequest $request) 
+
+    public function updateOrders(int $bookingId,UpdateBookingOrdersRequest $request)
     {
         $data = $request->validated();
 
@@ -48,16 +48,21 @@ class BookingController extends Controller
             $data['checked']
         );
 
-        return sendResponse(
-            __('messages.booking.orders_updated'),
-            [
-                'orders' => [
-                    'installation' => (bool) $booking->installation_order,
-                    'extension' => (bool) $booking->extension_order,
-                    'operation' => (bool) $booking->operation_order,
-                ],
-            ]
-        );
+        $orders = [];
+
+        if ($booking->flexBooking || $booking->externalBooking) {
+            $orders['installation'] = (bool) $booking->installation_order;
+            $orders['extension'] = (bool) $booking->extension_order;
+        }
+
+        if ($booking->ledBooking) {
+            $orders['operation'] = (bool) $booking->operation_order;
+        }
+
+        return sendResponse(__('messages.booking.orders_updated'), [
+            'orders' => (object) $orders,
+        ]);
+
     }
 
 }

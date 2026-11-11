@@ -216,20 +216,14 @@ class DashboardService
         $occurrences = LedBookingItem::query()
             ->confirmedForYear($year)
             ->whereNotNull('led_network_id')
-            ->get([
-                'led_network_id',
-                'led_booking_period_id',
-            ])
+            ->select('led_network_id')
+            ->selectRaw('COUNT(DISTINCT led_booking_period_id) as booking_occurrences_count')
             ->groupBy('led_network_id')
-            ->map(
-                fn (Collection $items) =>
-                    $items
-                        ->pluck('led_booking_period_id')
-                        ->unique()
-                        ->count()
-            )
-            ->sortDesc()
-            ->take($limit);
+            ->orderByDesc('booking_occurrences_count')
+            ->orderBy('led_network_id')
+            ->limit($limit)
+            ->get()
+            ->pluck('booking_occurrences_count', 'led_network_id');
 
         if ($occurrences->isEmpty()) {
             return collect();

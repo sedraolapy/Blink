@@ -144,18 +144,37 @@ class InstitutionFlexReportExport implements FromView, WithTitle, WithEvents
                         $row++;
                     }
 
-                    if ($rowCount > 0) {
-                        $sheet->getStyle("A{$startRow}")->getAlignment()
-                            ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                            ->setVertical(Alignment::VERTICAL_CENTER)
-                            ->setWrapText(false);
-                        $sheet->getStyle("A{$startRow}")->getFont()->setBold(true);
 
-                        if ($isDamascus) {
-                            $sheet->getStyle("A{$startRow}")->getAlignment()
-                                ->setTextRotation(-90);
-                        }
-                    }
+if ($rowCount > 0) {
+    $cell = "A{$startRow}";
+
+    $label = trim((string) $sheet->getCell($cell)->getValue());
+
+    $availableHeight = $rowCount * 38;
+    $requiredHeight = mb_strlen($label, 'UTF-8') * 13 + 16;
+
+    $canRotate =
+        $isDamascus &&
+        $rowCount >= 3 &&
+        $availableHeight >= $requiredHeight;
+
+    $alignment = $sheet->getStyle($cell)->getAlignment();
+
+    $alignment
+        ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+        ->setVertical(Alignment::VERTICAL_CENTER)
+        ->setWrapText(!$canRotate)
+        ->setTextRotation($canRotate ? -90 : 0);
+
+    $sheet->getStyle($cell)
+        ->getFont()
+        ->setBold(true);
+
+    if (!$canRotate && $rowCount === 1) {
+        $sheet->getRowDimension($startRow)
+            ->setRowHeight(58);
+    }
+}
 
                     foreach ([$row, $row + 1] as $summaryRow) {
                         $sheet->getRowDimension($summaryRow)->setRowHeight(39);
@@ -174,7 +193,7 @@ class InstitutionFlexReportExport implements FromView, WithTitle, WithEvents
                     $row += 2;
                 }
 
-                $logoPath = resource_path('images/blink-logo.svg');
+                $logoPath = public_path('images/blink-logo.png');
 
                 if (is_file($logoPath)) {
                     $logo = new Drawing();

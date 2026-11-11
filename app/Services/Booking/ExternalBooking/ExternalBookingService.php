@@ -240,15 +240,15 @@ class ExternalBookingService
                         'type' => $data['type'],
                     ]);
 
-                foreach (
-                    $data['designs'] ?? []
-                    as $designName
-                ) {
-                    $type->designs()->create([
+                $designs = collect();
+
+                foreach ($data['designs'] ?? [] as $designName) {
+                    $design = $type->designs()->create([
                         'name' => $designName,
                     ]);
-                }
 
+                    $designs->put($designName, $design);
+                }
                 foreach (
                     $data['periods']
                     as $periodData
@@ -264,15 +264,9 @@ class ExternalBookingService
                         $periodData['items']
                         as $itemData
                     ) {
-                        $design = null;
-
-                        if (!empty($itemData['design_name']))
-                        {
-                            $design = $type
-                                ->designs()
-                                ->where('name',$itemData['design_name'])
-                                ->first();
-                        }
+                        $design = ! empty($itemData['design_name'])
+                            ? $designs->get($itemData['design_name'])
+                            : null;
 
                         $period
                             ->items()

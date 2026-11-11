@@ -140,7 +140,7 @@ foreach ([1, 2, 3, 5] as $row) {
                     $row++;
                 }
 
-                $logoPath = resource_path('images/blink-logo.svg');
+                $logoPath = public_path('images/blink-logo.png');
 
                 if (is_file($logoPath)) {
                     $logo = new Drawing();
