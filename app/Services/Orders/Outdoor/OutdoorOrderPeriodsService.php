@@ -73,8 +73,11 @@ class OutdoorOrderPeriodsService
                         'id' => (int) $period->id,
                         'start_date' => $period->start_date->toDateString(),
                         'end_date' => $period->end_date->toDateString(),
-                        'ready_assets_count' =>(int) $period->ready_assets_count,
+                        'ready_assets_count' => (int) $period->ready_assets_count,
                     ]
+                )
+                ->filter(
+                    fn (array $period) => $period['ready_assets_count'] > 0
                 )
                 ->values()
                 ->all(),

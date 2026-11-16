@@ -64,6 +64,9 @@ class ElectronicOrderPeriodsService
                     'end_date' => $period->end_date->toDateString(),
                     'pending_screens_count' => $this->eligibilityService->countEligibleScreens($period->items),
                 ])
+                ->filter(
+                    fn (array $period) => $period['pending_screens_count'] > 0
+                )
                 ->values()
                 ->all(),
         ];
